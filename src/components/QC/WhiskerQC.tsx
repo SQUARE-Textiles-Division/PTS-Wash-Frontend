@@ -331,7 +331,7 @@ export default function WhiskerQC() {
                             reason: item.reason,
                           }));
 
-                        setRows(tempRows);
+                         setRows(prevRows => [...tempRows, ...prevRows]);
                       }
                     );
                   },

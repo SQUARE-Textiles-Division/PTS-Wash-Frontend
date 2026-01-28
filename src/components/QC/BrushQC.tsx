@@ -332,7 +332,7 @@ export default function BrushQC() {
                             reason: item.reason,
                           }));
 
-                        setRows(tempRows);
+                        setRows(prevRows => [...tempRows, ...prevRows]);
                       }
                     );
                   },

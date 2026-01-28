@@ -340,7 +340,7 @@ const handleReplaceStage = (newStage: string) => {
 
                             patchData<Planning>(
                               // 'prod'
-                              `productions/plannings/${alreadyInPlan}`,
+                              `productions/plannings/${alreadyInPlan}/`,
                               "http://172.26.2.94:8000",
                               {stages:selectedStages},
                               (success:any)=>{

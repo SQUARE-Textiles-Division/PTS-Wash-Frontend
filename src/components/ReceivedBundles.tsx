@@ -43,19 +43,23 @@ export default function ReceivedBundles({ rows }: Props) {
       <TableContainer
         component={Paper}
         sx={{
-          maxHeight: 200,          // vertical scrollbar
+          maxHeight: 300,          // vertical scrollbar
           overflowX: "auto",       // horizontal scrollbar
           overflowY: "auto",
+          marginLeft:'100px',
+          maxWidth: 1000
         }}
       >
         <Table
           stickyHeader
-          sx={{ minWidth: 900 }}   // force horizontal scroll if screen is smaller
+          // force horizontal scroll if screen is smaller
           aria-label="customized table"
         >
         <TableHead>
           <TableRow>
             <StyledTableCell>MPO</StyledTableCell>
+            <StyledTableCell align="center">Buyer</StyledTableCell>
+            <StyledTableCell align="center">Style</StyledTableCell>
              <StyledTableCell align="center">Bundle Barcode</StyledTableCell>
             <StyledTableCell align="center">Bundle No</StyledTableCell>
             <StyledTableCell align="center">Marker No</StyledTableCell>
@@ -72,6 +76,8 @@ export default function ReceivedBundles({ rows }: Props) {
               <StyledTableCell component="th" scope="row">
                 {row.mpo}
               </StyledTableCell>
+              <StyledTableCell align="center">{row.buyer}</StyledTableCell>
+              <StyledTableCell align="center">{row.style}</StyledTableCell>
               <StyledTableCell align="center">{row.bundle_barcode}</StyledTableCell>
               <StyledTableCell align="center">{row.bundle_no}</StyledTableCell>
               

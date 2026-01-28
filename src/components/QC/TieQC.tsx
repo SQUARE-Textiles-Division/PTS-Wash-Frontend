@@ -331,7 +331,7 @@ export default function TieQC() {
                             reason: item.reason,
                           }));
 
-                        setRows(tempRows);
+                         setRows(prevRows => [...tempRows, ...prevRows]);
                       }
                     );
                   },

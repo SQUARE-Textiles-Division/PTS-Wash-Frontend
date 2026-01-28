@@ -331,7 +331,7 @@ export default function LaserBrushQC() {
                             reason: item.reason,
                           }));
 
-                        setRows(tempRows);
+                         setRows(prevRows => [...tempRows, ...prevRows]);
                       }
                     );
                   },

@@ -103,7 +103,6 @@ export default function QCEditDel() {
         {},
         {stage: stage},
         (data) => {
-          ;
           console.log("Rejection deleted:", data);
           const updatedRows = rows.filter((row) => row.id !== id);
           setRows(updatedRows);

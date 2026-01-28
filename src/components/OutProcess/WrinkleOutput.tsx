@@ -4,6 +4,14 @@ import Stepper from '@mui/material/Stepper';
 import Step from '@mui/material/Step';
 import StepLabel from '@mui/material/StepLabel';
 import { useState,useRef,useEffect } from 'react';
+import { styled } from '@mui/material/styles';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell, { tableCellClasses } from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import Paper from '@mui/material/Paper';
 // import Button from '@mui/material/Button';
 import {  Typography, Button} from "@mui/material";
 import { getData, postData } from '../genericApiService';
@@ -14,13 +22,34 @@ import type RouteSteps from '../../TypeAnnotations/BatchInstance';
 import type Rejection from '../../TypeAnnotations/Rejection';
 // import { postData } from './genericApiService';
 // import Typography from '@mui/material/Typography';
-export default function LaserWhiskerIn() {
+const StyledTableCell = styled(TableCell)(({ theme }) => ({
+  [`&.${tableCellClasses.head}`]: {
+    // backgroundColor: theme.palette.common.black,
+    backgroundColor: '#485e68',
+    color: theme.palette.common.white,
+  },
+  [`&.${tableCellClasses.body}`]: {
+    fontSize: 14,
+  },
+}));
+
+const StyledTableRow = styled(TableRow)(({ theme }) => ({
+  '&:nth-of-type(odd)': {
+    backgroundColor: theme.palette.action.hover,
+  },
+  // hide last border
+  '&:last-child td, &:last-child th': {
+    border: 0,
+  },
+}));
+export default function WrinkleOutput() {
   const [stages,setStages]=useState<string[]>([])
   const [activeStep, setActiveStep] = React.useState(0); // step that is currently clickable
   const [completed, setCompleted] = React.useState<boolean[]>(stages.map(() => false)); 
   const [errorLog,setErrorLog]=useState<string>('')
   const [rejCnt,setRejCnt]=useState<number>(-1)
   const [batchNum,setBatchNum]=useState<number>()
+  const [scanned,setScanned]=useState<any>()
   // console.log(c,ompleted)
   // cos
   // useEffect(() => {
@@ -56,6 +85,38 @@ export default function LaserWhiskerIn() {
                   }
                   console.log(batchIdNum)
                   setStages(newStages);
+                                    const proRes=result1
+                  const showRes={
+                    // "BatchQRCode":batchQRCode
+                    BatchQRCode:batchQRCode,
+                    MPO:proRes.mpo,
+                    Buyer:proRes.batch_bundles[0].received.buyer,
+                    Style:proRes.batch_bundles[0].received.style,
+                    Size:proRes.size,
+                    Color:proRes.color,
+                    Total_Quantity:proRes.total_quantity,
+                    Shades:""
+
+                  }
+                  let shadeStr=""
+                  let shadeStrSet=new Set();
+                  for(let i=0;i<proRes.batch_bundles.length;i++){
+                      const obj=proRes.batch_bundles[i]
+                      if(!shadeStrSet.has(obj.received.shade)){
+                        shadeStr+=obj.received.shade
+                        shadeStrSet.add(obj.received.shade)
+                      }
+                         
+                  }
+                  let tempStr=""
+                  for(let i=0;i<shadeStr.length;i++){
+                    tempStr+=shadeStr[i]
+                    if(i!=shadeStr.length-1){
+                        tempStr+=','
+                      }
+                  }
+                  showRes.Shades=tempStr
+                  setScanned(showRes)
                   const payload={
                       batch:batchIdNum,
                       current_stage:"Laser Whisker",
@@ -199,11 +260,18 @@ export default function LaserWhiskerIn() {
                             "http://172.26.2.94:8000",
                             {}, // ✅ data (GET ignores this, but required by signature)
                             {
-                              batch: batchIdNum,
+                              batch: batchNum,
                               stage: "Wrinkle",
                             },
                             (rejres: Rejection[]) => {
-                              setRejCnt(rejres.length==1?rejres[0].rejection_count:0);
+                                let total_rej=0
+                                for(let i=0;i<rejres.length;i++)
+                                {
+                                  total_rej+=rejres[i].rejection_count
+                                }
+                                // console.log(rejres)
+                                // console.log(total_rej)
+                                setRejCnt(total_rej);
                             },
                             (error: any) => {
                               console.log(error);
@@ -335,6 +403,49 @@ export default function LaserWhiskerIn() {
           <Typography sx={{ mt: 2, mb: 1, color: 'green' }}>
             ✅ All steps completed - you're finished
           </Typography>
+        )}
+                {scanned!=null&&(
+              <TableContainer
+                  component={Paper}
+                  sx={{
+                    maxHeight: 200,          // vertical scrollbar
+                    overflowX: "auto",       // horizontal scrollbar
+                    overflowY: "auto",
+                  }}
+               >
+                  <Table
+                    stickyHeader
+                    sx={{ minWidth: 900 }}   // force horizontal scroll if screen is smaller
+                    aria-label="customized table"
+                  >
+                  <TableHead>
+                    <TableRow>
+                      <StyledTableCell>BatchQRCode</StyledTableCell>
+                      <StyledTableCell align="center">MPO</StyledTableCell>
+                      <StyledTableCell align="center">Buyer</StyledTableCell>
+                      <StyledTableCell align="center">Style</StyledTableCell>
+                      <StyledTableCell align="center">Size</StyledTableCell>
+                      <StyledTableCell align="center">Shades</StyledTableCell>
+                      <StyledTableCell align="center">Color</StyledTableCell>
+                      <StyledTableCell align="center">Total Quantity</StyledTableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                      <StyledTableRow >
+                        <StyledTableCell component="th" scope="row">
+                          {scanned.BatchQRCode}
+                        </StyledTableCell>
+                       <StyledTableCell align="center">{scanned.MPO}</StyledTableCell>
+                       <StyledTableCell align="center">{scanned.Buyer}</StyledTableCell>
+                       <StyledTableCell align="center">{scanned.Style}</StyledTableCell>
+                       <StyledTableCell align="center">{scanned.Size}</StyledTableCell>
+                       <StyledTableCell align="center">{scanned.Shades}</StyledTableCell>
+                       <StyledTableCell align="center">{scanned.Color}</StyledTableCell>
+                       <StyledTableCell align="center">{scanned.Total_Quantity}</StyledTableCell>
+                      </StyledTableRow>
+                  </TableBody>
+                </Table>
+            </TableContainer>
         )}
     </Box>
   );

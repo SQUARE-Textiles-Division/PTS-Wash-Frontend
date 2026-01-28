@@ -333,7 +333,7 @@ export default function LaserWhiskerQC() {
                             reason: item.reason,
                           }));
 
-                        setRows(tempRows);
+                         setRows(prevRows => [...tempRows, ...prevRows]);
                       }
                     );
                   },

@@ -41,6 +41,8 @@ export default function WashReceive({items, setItems}: Props){
                 const payload = {
                     mpo: result1.mpo,
                     marker:result1.marker,
+                    buyer:result1.buyer,
+                    style:result1.style,
                     bundle_no: result1.bundle_no,
                     bundle_barcode: result1.bundle_barcode,
                     size: result1.size,

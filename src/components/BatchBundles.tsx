@@ -43,21 +43,26 @@ export default function ReceivedBundles({ rows }: Props) {
       <TableContainer
         component={Paper}
         sx={{
-          maxHeight: 200,          // vertical scrollbar
+          maxHeight: 300,          // vertical scrollbar
           overflowX: "auto",       // horizontal scrollbar
           overflowY: "auto",
+          maxWidth: 1000,
+          marginLeft:'100px',
         }}
       >
         <Table
           stickyHeader
-          sx={{ minWidth: 800 }}   // force horizontal scroll if screen is smaller
+          // sx={{ minWidth: 800 }}   // force horizontal scroll if screen is smaller
           aria-label="customized table"
         >
           <TableHead>
             <TableRow>
               <StyledTableCell>MPO</StyledTableCell>
+              <StyledTableCell align="center">Buyer</StyledTableCell>
+              <StyledTableCell align="center">Style</StyledTableCell>
               <StyledTableCell align="center">Bundle Barcode</StyledTableCell>
               <StyledTableCell align="center">Bundle No</StyledTableCell>
+              <StyledTableCell align="center">Marker No</StyledTableCell>
               <StyledTableCell align="center">Size</StyledTableCell>
               <StyledTableCell align="center">Shade</StyledTableCell>
               <StyledTableCell align="center">Color</StyledTableCell>
@@ -70,8 +75,11 @@ export default function ReceivedBundles({ rows }: Props) {
             {rows.map((row) => (
               <StyledTableRow key={`${row.mpo}-${row.bundle_no}`}>
                 <StyledTableCell>{row.mpo}</StyledTableCell>
+                <StyledTableCell align="center">{row.buyer}</StyledTableCell>
+                <StyledTableCell align="center">{row.style}</StyledTableCell>
                 <StyledTableCell align="center">{row.bundle_barcode}</StyledTableCell>
                 <StyledTableCell align="center">{row.bundle_no}</StyledTableCell>
+                <StyledTableCell align="center">{row.marker}</StyledTableCell>
                 <StyledTableCell align="center">{row.size}</StyledTableCell>
                 <StyledTableCell align="center">{row.shade}</StyledTableCell>
                 <StyledTableCell align="center">{row.color}</StyledTableCell>
