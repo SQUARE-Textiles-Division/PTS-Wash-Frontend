@@ -51,9 +51,28 @@ export default function TagIn() {
   // console.log(completed)
   // cos
   useEffect(() => {
-    setCompleted(stages.map(() => false));
-    setActiveStep(0);
-  }, [stages])
+      if (stages.length > 0) {
+        setCompleted(stages.map(() => false));
+        setActiveStep(0);
+      }
+    }, [stages]);
+  const normalizeStage = (s: string) =>
+  s.trim().toUpperCase().replace(/\s+/g, " ");
+
+  const markCompletedUntil = (currStage: string, stageList: string[]) => {
+    const normalized = normalizeStage(currStage);
+
+    const stageIndex = stageList.findIndex(
+      stage => normalizeStage(stage) === normalized
+    );
+
+    if (stageIndex === -1) return;
+
+    setCompleted(stageList.map((_, idx) => idx <= stageIndex));
+    setActiveStep(
+      stageIndex < stageList.length ? stageIndex + 1 : stageIndex
+    );
+  };
   const batchQRCoderef=useRef<HTMLInputElement>(null);
   const fetchPlan=(batchQRCode:string)=>{
       if (!batchQRCode) {
@@ -115,7 +134,7 @@ export default function TagIn() {
                   setScanned(showRes)
                   const payload={
                       batch:batchIdNum,
-                      current_stage:"Brush",
+                      current_stage:"Tag",
                       current_status:"in"
                     }
                   
@@ -124,38 +143,16 @@ export default function TagIn() {
                       "http://172.26.2.94:8000",
                       payload,
                       (postresult:BatchStage)=>{
-                          const currStage =
-                              `${postresult.current_stage} ${postresult.current_status}`.toUpperCase();
-
-                            const stageIndex = newStages.findIndex(
-                              stage => stage.toUpperCase() === currStage
-                            );
-
-                            if (stageIndex === -1) return;
-
-                            setCompleted(newStages.map((_, idx) => idx <= stageIndex));
-                            setActiveStep(
-                              stageIndex < newStages.length - 1 ? stageIndex + 1 : stageIndex
-                            );
+                            const currStage = `${postresult.current_stage} ${postresult.current_status}`;
+                            markCompletedUntil(currStage, newStages);
                             getData<BatchStage>(
                               `productions/batch-stages/${batchIdNum}/`,
                               "http://172.26.2.94:8000",
                               {},
                               {},
                               (subresult: BatchStage) => {
-                                const currStage =
-                                  `${subresult.current_stage} ${subresult.current_status}`.toUpperCase();
-
-                                const stageIndex = newStages.findIndex(
-                                  stage => stage.toUpperCase() === currStage
-                                );
-
-                                if (stageIndex === -1) return;
-
-                                setCompleted(newStages.map((_, idx) => idx <= stageIndex));
-                                setActiveStep(
-                                  stageIndex < newStages.length - 1 ? stageIndex + 1 : stageIndex
-                                );
+                                  const currStage = `${subresult.current_stage} ${subresult.current_status}`;
+                                  markCompletedUntil(currStage, newStages);
                                 
                               },
                               (error:any)=>{
@@ -172,19 +169,8 @@ export default function TagIn() {
                                 {},
                                 {},
                                 (subresult: BatchStage) => {
-                                    const currStage =
-                                    `${subresult.current_stage} ${subresult.current_status}`.toUpperCase();
-
-                                    const stageIndex = newStages.findIndex(
-                                    stage => stage.toUpperCase() === currStage
-                                    );
-
-                                    if (stageIndex === -1) return;
-
-                                    setCompleted(newStages.map((_, idx) => idx <= stageIndex));
-                                    setActiveStep(
-                                    stageIndex < newStages.length - 1 ? stageIndex + 1 : stageIndex
-                                    );
+                                  const currStage = `${subresult.current_stage} ${subresult.current_status}`;
+                                  markCompletedUntil(currStage, newStages);
                                 }
                             )
                             setErrorLog(error.response.data[0])

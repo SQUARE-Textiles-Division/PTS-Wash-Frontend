@@ -52,12 +52,29 @@ export default function LaserBrushOutput() {
   const [rejCnt,setRejCnt]=useState<number>(-1)
   const [batchNum,setBatchNum]=useState<number>()
   const [scanned,setScanned]=useState<any>()
-  // console.log(c,ompleted)
-  // cos
-  // useEffect(() => {
-  //   setCompleted(stages.map(() => false));
-  //   setActiveStep(0);
-  // }, [stages])
+  useEffect(() => {
+     if (stages.length > 0) {
+       setCompleted(stages.map(() => false));
+       setActiveStep(0);
+     }
+   }, [stages]);
+   const normalizeStage = (s: string) =>
+   s.trim().toUpperCase().replace(/\s+/g, " ");
+ 
+   const markCompletedUntil = (currStage: string, stageList: string[]) => {
+     const normalized = normalizeStage(currStage);
+ 
+     const stageIndex = stageList.findIndex(
+       stage => normalizeStage(stage) === normalized
+     );
+ 
+     if (stageIndex === -1) return;
+ 
+     setCompleted(stageList.map((_, idx) => idx <= stageIndex));
+     setActiveStep(
+       stageIndex < stageList.length ? stageIndex + 1 : stageIndex
+     );
+   };
   let batchIdNum=0
   const batchQRCoderef=useRef<HTMLInputElement>(null);
   const fetchPlan=(batchQRCode:string)=>{
@@ -130,22 +147,8 @@ export default function LaserBrushOutput() {
                               {},
                               {},
                               (subresult: BatchStage) => {
-                                
-                                const currStage =
-                                  `${subresult.current_stage} ${subresult.current_status}`.toUpperCase();
-
-                                const stageIndex = newStages.findIndex(
-                                  stage => stage.toUpperCase() === currStage
-                                );
-
-                                if (stageIndex === -1) return;
-
-                                console.log(currStage)
-
-                                setCompleted(newStages.map((_, idx) => idx <= stageIndex));
-                                setActiveStep(
-                                  stageIndex < newStages.length - 1 ? stageIndex + 1 : stageIndex
-                                );
+                                const currStage = `${subresult.current_stage} ${subresult.current_status}`;
+                                  markCompletedUntil(currStage, newStages);
                                 
                               },
                               (error:any)=>{
@@ -372,17 +375,8 @@ export default function LaserBrushOutput() {
                           },
                           (closeRes: BatchStage) => {
                             console.log(closeRes)
-                            const currStage = `${closeRes.current_stage} ${closeRes.current_status}`.toUpperCase();
-                            const stageIndex = stages.findIndex(
-                              stage => stage.toUpperCase() === currStage
-                            );
-
-                            if (stageIndex === -1) return;
-
-                            setCompleted(stages.map((_, idx) => idx <= stageIndex));
-                            setActiveStep(
-                              stageIndex < stages.length - 1 ? stageIndex + 1 : stageIndex
-                            );
+                            const currStage = `${closeRes.current_stage} ${closeRes.current_status}`;
+                              markCompletedUntil(currStage, stages);
                             setRejCnt(-1);
                           },
                           (error: any) => {
