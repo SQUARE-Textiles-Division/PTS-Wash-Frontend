@@ -1,6 +1,8 @@
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
+import 'bootstrap/dist/css/bootstrap.css'
 import './App.css'
+// import '@fontsource/inter'
 
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import WashReceivePass from './components/WashReceivePass'
@@ -32,9 +34,9 @@ import QCEditDel from './components/QCEditDel'
 function App() {
   // const [count, setCount] = useState(0)
   return (
-    <Router>
+    <Router >
       <Navbar />
-      <Routes>
+      <Routes >
         {/* <Route path="/" /> */}
         <Route path="/planning" element={<Planning />} />
         <Route path="/washreceive" element={<WashReceivePass />} />

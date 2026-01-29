@@ -19,14 +19,15 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
+import { tbCellColor, tbRowColor } from '../Colors/Colors';
 // import { postData } from './genericApiService';
 // import Typography from '@mui/material/Typography';
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
     // backgroundColor: theme.palette.common.black,
-    backgroundColor: '#485e68',
-    color: theme.palette.common.white,
+    backgroundColor: tbCellColor,
+    color: tbRowColor
   },
   [`&.${tableCellClasses.body}`]: {
     fontSize: 14,
@@ -320,16 +321,23 @@ export default function TagIn() {
         {scanned!=null&&(
               <TableContainer
                   component={Paper}
+                  elevation={0}
                   sx={{
-                    maxHeight: 200,          // vertical scrollbar
+                    // maxHeight: 200,          // vertical scrollbar
                     overflowX: "auto",       // horizontal scrollbar
                     overflowY: "auto",
+                    border:'none',
+                    maxWidth:1100,
+                    // marginLeft:"200px"
                   }}
                >
                   <Table
                     stickyHeader
-                    sx={{ minWidth: 900 }}   // force horizontal scroll if screen is smaller
+                    sx={{ '& .MuiTableCell-root':{
+                borderBottom:'none'
+            }}}   // force horizontal scroll if screen is smaller
                     aria-label="customized table"
+                    
                   >
                   <TableHead>
                     <TableRow>

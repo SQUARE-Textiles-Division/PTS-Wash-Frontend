@@ -14,14 +14,15 @@ import type RejectionReason from "../TypeAnnotations/RejectionReason";
 import type BatchBundle from "../TypeAnnotations/BatchBundle";
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import { WhiskerRejectReasons } from "./RejectionReasons/WhiskerRejectReasons"
+import { tbCellColor, tbRowColor } from "./Colors/Colors";
 
 
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
     // backgroundColor: theme.palette.common.black,
-    backgroundColor: '#485e68',
-    color: theme.palette.common.white,
+    backgroundColor: tbCellColor,
+    color: tbRowColor,
   },
   [`&.${tableCellClasses.body}`]: {
     fontSize: 14,
@@ -181,17 +182,21 @@ export default function QCEditDel() {
 
             <TableContainer
                 component={Paper}
+                elevation={0}
                 sx={{
-                  maxHeight: 200,          // vertical scrollbar
+                  // maxHeight: 200,          // vertical scrollbar
                   overflowX: "auto",       // horizontal scrollbar
                   overflowY: "auto",
+                  border:'none'
                   // marginLeft:"50px"
                   
                 }}
               >
                     <Table
                       stickyHeader
-                      sx={{ minWidth: 900 }}   // force horizontal scroll if screen is smaller
+                      sx={{ '& .MuiTableCell-root':{
+                borderBottom:'none'
+            } }}   // force horizontal scroll if screen is smaller
                       aria-label="customized table"
                     >
                         <TableHead>

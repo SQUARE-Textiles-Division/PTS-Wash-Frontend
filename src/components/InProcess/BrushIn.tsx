@@ -19,6 +19,7 @@ import { getData, postData } from '../genericApiService';
 import type BatchStage from '../../TypeAnnotations/BatchStage';
 import type BatchInstance from '../../TypeAnnotations/BatchInstance';
 import type RouteSteps from '../../TypeAnnotations/BatchInstance';
+import { tbCellColor, tbRowColor } from '../Colors/Colors';
 // import { postData } from './genericApiService';
 // import Typography from '@mui/material/Typography';
 
@@ -26,7 +27,7 @@ import type RouteSteps from '../../TypeAnnotations/BatchInstance';
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
     // backgroundColor: theme.palette.common.black,
-    backgroundColor: '#485e68',
+    backgroundColor: tbCellColor,
     color: theme.palette.common.white,
   },
   [`&.${tableCellClasses.body}`]: {
@@ -36,7 +37,7 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
 
 const StyledTableRow = styled(TableRow)(({ theme }) => ({
   '&:nth-of-type(odd)': {
-    backgroundColor: theme.palette.action.hover,
+    backgroundColor: tbRowColor,
   },
   // hide last border
   '&:last-child td, &:last-child th': {
@@ -335,15 +336,22 @@ useEffect(() => {
         {scanned!=null&&(
               <TableContainer
                   component={Paper}
+                  elevation={0}
                   sx={{
-                    maxHeight: 200,          // vertical scrollbar
+                    // maxHeight: 200,          // vertical scrollbar
                     overflowX: "auto",       // horizontal scrollbar
                     overflowY: "auto",
+                    border:'none',
+                    maxWidth:1100,
+                    // marginLeft:'200px'
+
                   }}
                >
                   <Table
                     stickyHeader
-                    sx={{ minWidth: 900 }}   // force horizontal scroll if screen is smaller
+                    sx={{ '& .MuiTableCell-root':{
+                borderBottom:'none'
+            } }}   // force horizontal scroll if screen is smaller
                     aria-label="customized table"
                   >
                   <TableHead>

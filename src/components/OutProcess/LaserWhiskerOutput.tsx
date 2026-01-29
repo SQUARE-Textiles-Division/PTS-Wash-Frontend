@@ -20,14 +20,15 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
+import { tbCellColor, tbRowColor } from '../Colors/Colors';
 // import { postData } from './genericApiService';
 // import Typography from '@mui/material/Typography';
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
     // backgroundColor: theme.palette.common.black,
-    backgroundColor: '#485e68',
-    color: theme.palette.common.white,
+    backgroundColor: tbCellColor,
+    color: tbRowColor
   },
   [`&.${tableCellClasses.body}`]: {
     fontSize: 14,
@@ -304,7 +305,7 @@ export default function LaserWhiskerOutput() {
         ) }
 
         
-        <Modal open={errorLog!=''} onClose={() => setErrorLog('')}>
+        <Modal open={errorLog!=''} onClose={() => setErrorLog('')} BackdropProps={{sx: {backgroundColor: "rgba(0,0,0,0.05)"}}}>
           <Box
               sx={{
                 position: "fixed", // ← changed from absolute
@@ -315,12 +316,12 @@ export default function LaserWhiskerOutput() {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                bgcolor: "rgba(0,0,0,0.5)", // dark overlay
+                // bgcolor: "rgba(0,0,0,0.5)", // dark overlay
               }}
           >
               <Box
               sx={{
-                  bgcolor: "rgba(180, 11, 11, 0.92)", // light red background for error
+                  bgcolor: "#d9534f", // light red background for error
                   p: 4,
                   borderRadius: 2,
                   color: "white", // red text for error
@@ -336,7 +337,7 @@ export default function LaserWhiskerOutput() {
               </Box>
           </Box>
       </Modal>
-      <Modal open={rejCnt!=-1} onClose={()=>setRejCnt(-1)}>
+      <Modal open={rejCnt!=-1} onClose={()=>setRejCnt(-1)} hideBackdrop>
           <Box
               sx={{
                 position: "fixed",
@@ -347,15 +348,17 @@ export default function LaserWhiskerOutput() {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                bgcolor: "rgba(148, 131, 131, 0.5)", // dark overlay
+                // bgcolor: "rgba(148, 131, 131, 0.5)", // dark overlay
               }}
           >
                 <Box
                   sx={{
-                      bgcolor: "#fea116", // light red background for error
+                       bgcolor: "#ffffe0", // light red background for error
+                      
+                      border:'3px solid #e6db55',// light red background for error
                       p: 4,
                       borderRadius: 2,
-                      color: "black", // red text for error
+                      color: "#9c9999", // red text for error
                       width: 400,
                   }}
                 >
@@ -370,7 +373,7 @@ export default function LaserWhiskerOutput() {
                   gap:'40px'
                 }}>
                     <Button
-                      sx={{ mt: 2 ,background:'blue',color:'white'}}
+                      sx={{ mt: 2 ,background:tbCellColor,color:'white'}}
                       onClick={() =>{
                           
                         postData<BatchStage>(
@@ -397,7 +400,7 @@ export default function LaserWhiskerOutput() {
                     >
                       Yes
                     </Button>
-                  <Button sx={{ mt: 2 ,background:'red',color:'white'}} onClick={() => setRejCnt(-1)}>No</Button>
+                  <Button sx={{ mt: 2 ,background:'#d9534f',color:'white'}} onClick={() => setRejCnt(-1)}>No</Button>
                 </div>
                 </Box>
           </Box>
@@ -411,15 +414,20 @@ export default function LaserWhiskerOutput() {
                 {scanned!=null&&(
               <TableContainer
                   component={Paper}
+                  elevation={0}
                   sx={{
-                    maxHeight: 200,          // vertical scrollbar
+                    // maxHeight: 200,          // vertical scrollbar
                     overflowX: "auto",       // horizontal scrollbar
                     overflowY: "auto",
+                    // marginLeft:'200px',
+                    maxWidth:1100
                   }}
                >
                   <Table
                     stickyHeader
-                    sx={{ minWidth: 900 }}   // force horizontal scroll if screen is smaller
+                    sx={{ '& .MuiTableCell-root':{
+                borderBottom:'none'
+            }  }}   // force horizontal scroll if screen is smaller
                     aria-label="customized table"
                   >
                   <TableHead>

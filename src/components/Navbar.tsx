@@ -3,6 +3,8 @@ import React, { useState, useEffect } from "react";
 import Typography from "@mui/material/Typography";
 import { Box, CssBaseline, AppBar, Toolbar, Drawer, List, ListItem, ListItemButton, ListItemText } from "@mui/material";
 import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
+import { tbCellColor } from "./Colors/Colors";
+import logo from '../assets/PTS Wash Logo.png'
 
 type MenuItem = {
   primary: string;
@@ -120,38 +122,50 @@ export default function Navbar() {
   };
 
   return (
-    <Box sx={{ display: "flex" }}>
+    <Box sx={{ 
+      // display:'flex',
+      // alignItems:'center',
+      // justifyContent:'space-between'
+      // fontFamily:"'Inter', system-ui, sans-serif"
+
+    }}>
       <CssBaseline />
 
       {/* Top Navbar */}
       <AppBar
         position="fixed"
-        sx={{ zIndex: (theme) => theme.zIndex.drawer + 1, background: "#485e68" }}
+        sx={{ zIndex: (theme) => theme.zIndex.drawer + 1, background: "white",height:"65px", boxShadow: "0px 1px 3px rgba(0,0,0,0.12)" }}
       >
-        <Toolbar>
-          <Typography
-            variant="h4"
-            noWrap
-            sx={{ flexGrow: 1, alignContent: "center", alignItems: "center" }}
-          >
-            PTS Wash Module
-          </Typography>
+        <Toolbar sx={{display:"flex",justifyContent:"space-between",paddingY:"5px"}}>
+          {/* <Box sx={{
+          display:'flex',
+          alignItems:'center',
+          justifyContent:'space-between',
+          height:'80px'
+        }}> */}
+            <Box component='img' src={logo} sx={{
+              // width:'100%',
+              height:'100%',
+              objectFit:'contain',
+            }}>
+            </Box>
 
-          <Box sx={{ display: "flex", gap: 2 }}>
+          <Box sx={{ display: "flex", gap: 2, alignItems: "center",fontWeight:600 }}>
             <p
               onClick={() => handleProcessClick(true)}
-              style={{ textDecoration: "none", color: "inherit", cursor: "pointer" }}
+              style={{ textDecoration: "none", color: "#485e68", cursor: "pointer",  }}
             >
               Dry Process
             </p>
 
             <p
               onClick={() => handleProcessClick(false)}
-              style={{ textDecoration: "none", color: "inherit", cursor: "pointer" }}
+              style={{ textDecoration: "none", color: "#485e68", cursor: "pointer" }}
             >
               Wet Process
             </p>
           </Box>
+          {/* </Box> */}
         </Toolbar>
       </AppBar>
 
@@ -159,16 +173,23 @@ export default function Navbar() {
       <Drawer
         variant="permanent"
         sx={{
+          // fontFamily:"'Inter', system-ui, sans-serif !important",
+
           width: 200,
+          bgcolor:'#485e68',
+          color:'white',
+          paddingLeft:'10px',
           flexShrink: 0,
           "& .MuiDrawer-paper": {
-            width: 200,
+            width: 230,
+            
             boxSizing: "border-box",
           },
+          
         }}
       >
         <Toolbar /> {/* empty toolbar to push content below AppBar */}
-        <Box sx={{ overflow: "auto" }}>
+        <Box sx={{ overflow: "auto"}}>
           <List>
             {ItemContent.map((item) => {
               const isActive = location.pathname === item.to;
@@ -178,13 +199,19 @@ export default function Navbar() {
                     component={RouterLink}
                     to={item.to}
                     sx={{
-                      bgcolor: isActive ? "action.selected" : "inherit",
+                      bgcolor: isActive ? tbCellColor : "#485e68",
                       "&:hover": {
-                        bgcolor: "action.selected",
+                        bgcolor: tbCellColor,
+                        color:'white'
                       },
+                      color:'white',
+                      paddingLeft:4,
+                      
                     }}
                   >
-                    <ListItemText primary={item.primary} />
+                   
+                      <ListItemText primaryTypographyProps={{sx: { fontWeight: 600 }}} primary={item.primary} />
+                      
                   </ListItemButton>
                 </ListItem>
               );

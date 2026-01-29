@@ -20,13 +20,14 @@ import type BatchStage from '../../TypeAnnotations/BatchStage';
 import type BatchInstance from '../../TypeAnnotations/BatchInstance';
 import type RouteSteps from '../../TypeAnnotations/BatchInstance';
 import type Rejection from '../../TypeAnnotations/Rejection';
+import { tbCellColor, tbRowColor } from '../Colors/Colors';
 // import { postData } from './genericApiService';
 // import Typography from '@mui/material/Typography';
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
     // backgroundColor: theme.palette.common.black,
-    backgroundColor: '#485e68',
-    color: theme.palette.common.white,
+    backgroundColor: tbCellColor,
+    color: tbRowColor
   },
   [`&.${tableCellClasses.body}`]: {
     fontSize: 14,
@@ -214,6 +215,8 @@ useEffect(() => {
             <Stepper activeStep={activeStep} orientation="horizontal"
               sx={{
                     maxWidth: 900,
+                   
+                    
                   }}
             >
             {stages.map((label, index) => {
@@ -296,7 +299,7 @@ useEffect(() => {
         ) }
 
         
-        <Modal open={errorLog!=''} onClose={() => setErrorLog('')}>
+        <Modal open={errorLog!=''} onClose={() => setErrorLog('')} BackdropProps={{sx: {backgroundColor: "rgba(0,0,0,0.05)"}}}>
           <Box
               sx={{
                 position: "fixed", // ← changed from absolute
@@ -307,12 +310,12 @@ useEffect(() => {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                bgcolor: "rgba(0,0,0,0.5)", // dark overlay
+                // bgcolor: "rgba(0,0,0,0.5)", // dark overlay
               }}
           >
               <Box
               sx={{
-                  bgcolor: "rgba(180, 11, 11, 0.92)", // light red background for error
+                  bgcolor: "#d9534f", // light red background for error
                   p: 4,
                   borderRadius: 2,
                   color: "white", // red text for error
@@ -322,13 +325,13 @@ useEffect(() => {
                 <Typography variant="h6">{errorLog}</Typography>
                 {/* <Typography>Already batches are allocated according to this plan */}
                 {/* </Typography> */}
-                <Button sx={{ mt: 2 }} onClick={() => {setErrorLog('')
+                <Button sx={{ mt: 2 ,bgcolor:tbCellColor,color:'white'}} onClick={() => {setErrorLog('')
                   setRejCnt(-1)
                 }}>Close</Button>
               </Box>
           </Box>
       </Modal>
-      <Modal open={rejCnt!=-1} onClose={()=>setRejCnt(-1)}>
+      <Modal open={rejCnt!=-1} onClose={()=>setRejCnt(-1)}   hideBackdrop>
           <Box
               sx={{
                 position: "fixed",
@@ -339,15 +342,17 @@ useEffect(() => {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                bgcolor: "rgba(148, 131, 131, 0.5)", // dark overlay
+                // bgcolor: "rgba(121, 104, 104, 0.5)", // dark overlay
               }}
           >
                 <Box
                   sx={{
-                      bgcolor: "#fea116", // light red background for error
+                      bgcolor: "#ffffe0", // light red background for error
+                      
+                      border:'3px solid #e6db55',
                       p: 4,
                       borderRadius: 2,
-                      color: "black", // red text for error
+                      color: "#9c9999", // red text for error
                       width: 400,
                   }}
                 >
@@ -362,7 +367,7 @@ useEffect(() => {
                   gap:'40px'
                 }}>
                     <Button
-                      sx={{ mt: 2 ,background:'blue',color:'white'}}
+                      sx={{ mt: 2 ,background:tbCellColor,color:'white'}}
                       onClick={() =>{
                           
                         postData<BatchStage>(
@@ -389,7 +394,7 @@ useEffect(() => {
                     >
                       Yes
                     </Button>
-                  <Button sx={{ mt: 2 ,background:'red',color:'white'}} onClick={() => setRejCnt(-1)}>No</Button>
+                  <Button sx={{ mt: 2 ,background:'#d9534f',color:'white'}} onClick={() => setRejCnt(-1)}>No</Button>
                 </div>
                 </Box>
           </Box>
@@ -403,15 +408,20 @@ useEffect(() => {
                 {scanned!=null&&(
               <TableContainer
                   component={Paper}
+                  elevation={0}
                   sx={{
-                    maxHeight: 200,          // vertical scrollbar
-                    overflowX: "auto",       // horizontal scrollbar
+                    // maxHeight: 200,          // vertical scrollbar
+                    overflowX: "auto",
+                    // marginLeft:'200px',
+                    maxWidth:1100,       // horizontal scrollbar
                     overflowY: "auto",
                   }}
                >
                   <Table
                     stickyHeader
-                    sx={{ minWidth: 900 }}   // force horizontal scroll if screen is smaller
+                    sx={{ '& .MuiTableCell-root':{
+                borderBottom:'none'
+            }  }}   // force horizontal scroll if screen is smaller
                     aria-label="customized table"
                   >
                   <TableHead>

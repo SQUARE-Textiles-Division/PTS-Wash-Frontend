@@ -7,6 +7,7 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import type BundleInfo from '../TypeAnnotations/BundleInfo';
+import { tbCellColor,tbRowColor } from './Colors/Colors';
 
 interface Props {
     rows: BundleInfo[];
@@ -16,7 +17,7 @@ interface Props {
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
     // backgroundColor: theme.palette.common.black,
-    backgroundColor: '#485e68',
+    backgroundColor: tbCellColor,
     color: theme.palette.common.white,
   },
   [`&.${tableCellClasses.body}`]: {
@@ -26,7 +27,7 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
 
 const StyledTableRow = styled(TableRow)(({ theme }) => ({
   '&:nth-of-type(odd)': {
-    backgroundColor: theme.palette.action.hover,
+    backgroundColor: tbRowColor
   },
   // hide last border
   '&:last-child td, &:last-child th': {
@@ -43,15 +44,23 @@ export default function ReceivedBundles({ rows }: Props) {
       <TableContainer
         component={Paper}
         sx={{
-          maxHeight: 300,          // vertical scrollbar
+          // maxHeight: 300,          // vertical scrollbar
           overflowX: "auto",       // horizontal scrollbar
           overflowY: "auto",
-          maxWidth: 1000,
-          marginLeft:'100px',
+          maxWidth: 1100,
+          border:'none',
+          marginLeft:'200px',
+          // marginLeft:'100px',
         }}
       >
         <Table
           stickyHeader
+          sx={{
+            '& .MuiTableCell-root':{
+                borderBottom:'none'
+            }
+            
+          }}
           // sx={{ minWidth: 800 }}   // force horizontal scroll if screen is smaller
           aria-label="customized table"
         >
