@@ -20,6 +20,7 @@ import type BatchStage from '../../TypeAnnotations/BatchStage';
 import type BatchInstance from '../../TypeAnnotations/BatchInstance';
 import type RouteSteps from '../../TypeAnnotations/BatchInstance';
 import { tbCellColor, tbRowColor } from '../Colors/Colors';
+import { ip } from '../../ip';
 // import { postData } from './genericApiService';
 // import Typography from '@mui/material/Typography';
 
@@ -88,7 +89,7 @@ useEffect(() => {
         
       getData<BatchInstance>(
               `productions/batches/${batchIdNum}/`,
-              "http://172.26.2.94:8000",
+              ip,
               {},
               {},
               (result1:BatchInstance) => {
@@ -142,7 +143,7 @@ useEffect(() => {
                   
                   postData<BatchStage>(
                       `productions/batch-stages/`,
-                      "http://172.26.2.94:8000",
+                      ip,
                       payload,
                       (postresult:BatchStage)=>{
                           
@@ -150,7 +151,7 @@ useEffect(() => {
                               markCompletedUntil(currStage, newStages);
                             getData<BatchStage>(
                               `productions/batch-stages/${batchIdNum}/`,
-                              "http://172.26.2.94:8000",
+                              ip,
                               {},
                               {},
                               (subresult: BatchStage) => {
@@ -169,7 +170,7 @@ useEffect(() => {
                             console.log('Error',error.response.data)
                             getData<BatchStage>(
                                     `productions/batch-stages/${batchIdNum}/`,
-                                    "http://172.26.2.94:8000",
+                                    ip,
                                     {},
                                     {},
                                     (subresult: BatchStage) => {

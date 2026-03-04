@@ -31,6 +31,17 @@ import WrinkleQC from './components/QC/WrinkleQC'
 import TagQC from './components/QC/TagQC'
 import TieQC from './components/QC/TieQC'
 import QCEditDel from './components/QCEditDel'
+import BatchCreateDry from './components/WetProcess/BatchCreateDry'
+import BatchCreateDirect from './components/WetProcess/BatchCreateDirect'
+import HydroIn from './components/WetProcess/HydroIn'
+import HydroOut from './components/WetProcess/HydroOut'
+import LoadStart from './components/WetProcess/LoadStart'
+import LoadFinish from './components/WetProcess/LoadFinish'
+import UnloadFinish from './components/WetProcess/UnloadFinish'
+import UnloadStart from './components/WetProcess/UnloadStart'
+import DryerConveyor from './components/WetProcess/DryerConveyor'
+import DryerTumble from './components/WetProcess/DryerTumble'
+import DryerOver from './components/WetProcess/DryerOver'
 function App() {
   // const [count, setCount] = useState(0)
   return (
@@ -39,6 +50,17 @@ function App() {
       <Routes >
         {/* <Route path="/" /> */}
         <Route path="/planning" element={<Planning />} />
+        <Route path='/hydroin' element={<HydroIn/>}/>
+        <Route path='/hydroout' element={<HydroOut/>}/>
+        <Route path='/loadstart' element={<LoadStart/>}/>
+        <Route path='/loadfinish' element={<LoadFinish/>}/>
+        <Route path='/unloadstart' element={<UnloadStart/>}/>
+        <Route path='/unloadfinish' element={<UnloadFinish/>}/>
+        <Route path="/dryerconveyor" element={<DryerConveyor/>}/>
+        <Route path='/dryertumble' element={<DryerTumble/>}/>
+        <Route path='/dryerover' element={<DryerOver/>}/>
+        <Route path='/batchwithdry' element={<BatchCreateDry/>}/>
+        <Route path='/batchdry' element={<BatchCreateDirect/>}/>
         <Route path="/washreceive" element={<WashReceivePass />} />
         <Route path="/createbatch" element={<CreateBatch />} />
         <Route path="/qceditdel" element={<QCEditDel />} />

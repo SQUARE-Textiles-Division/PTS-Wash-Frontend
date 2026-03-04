@@ -5,7 +5,8 @@ export default interface BundleInfo{
     'bundle_no':number,
     'bundle_barcode':string,
     'buyer':string,
-    'style':string
+    'style':string,
+    'so':string,
     'size':string
     'shade':string,
     'color':string,

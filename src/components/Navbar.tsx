@@ -9,15 +9,14 @@ import logo from '../assets/PTS Wash Logo.png'
 type MenuItem = {
   primary: string;
   to: string;
+  children?: MenuItem[]; // <-- optional for submenus
 };
-
 export default function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
 
   const DryProcessItemContent: MenuItem[] = [
     { primary: "Planning", to: "/planning" },
-    { primary: "Wash Receive", to: "/washreceive" },
     { primary: "Create Batch", to: "/createbatch" },
     { primary: "QC Update", to: "/qceditdel" },
 
@@ -51,10 +50,43 @@ export default function Navbar() {
     
   ];
 
-  const WetProcessItemContent: MenuItem[] = [
-    { primary: "Default", to: "/" },
+  const WetProcessItemContent: (MenuItem & { children?: MenuItem[] }) []= [
+    
+    { primary: "Create Batch (Without Dry)", to: "/batchdry" },
+    { primary: "Create Batch (With Dry)", to: "/batchwithdry" },
+    
+    { primary: "Load",
+      to: "",
+      children: [
+        { primary: "Load Start", to: "/loadstart" },
+        { primary: "Load Finish", to: "/loadfinish" },
+      ],
+    },
+    { primary: "Unload",
+      to: "",
+      children: [
+        { primary: "UnLoad Start", to: "/unloadstart" },
+        { primary: "UnLoad Finish", to: "/unloadfinish" },
+      ],
+    },
+    { primary: "Hydro",
+      to: "",
+      children: [
+        { primary: "Hydro In", to: "/hydroin" },
+        { primary: "Hydro Out", to: "/hydroout" },
+      ],
+    },
+     { primary: "Dryer",
+      to: "",
+      children: [
+        { primary: "Dryer Conveyor", to: "/dryerconveyor" },
+        { primary: "Dryer Over", to: "/dryerover" },
+        { primary: "Dryer Tumble", to: "/dryertumble" }
+      ],
+    },
+    
   ];
-
+  const [openSubmenus, setOpenSubmenus] = useState<{ [key: string]: boolean }>({});
   const [dryProcess, setDryProcess] = useState(false);
   const [ItemContent, setItemContent] = useState<MenuItem[]>([]);
 
@@ -62,7 +94,6 @@ export default function Navbar() {
   useEffect(() => {
     if (
       location.pathname.startsWith("/planning") ||
-      location.pathname.startsWith("/washreceive") ||
       location.pathname.startsWith("/createbatch") ||
       location.pathname.startsWith("/qceditdel") ||
 
@@ -98,29 +129,50 @@ export default function Navbar() {
     ) {
       setDryProcess(true);
       setItemContent(DryProcessItemContent);
-    } else {
+    } 
+    else if (
+      location.pathname.startsWith("/batchdry") ||
+      location.pathname.startsWith("/batchwithdry") ||
+      location.pathname.startsWith("/hydroin") ||
+      location.pathname.startsWith("/hydroout")||
+      location.pathname.startsWith("/loadstart")||
+      location.pathname.startsWith("/loadfinish")||
+      location.pathname.startsWith("/unloadstart")||
+      location.pathname.startsWith("/unloadfinish")||
+      location.pathname.startsWith("/dryerconveyor")||
+      location.pathname.startsWith("/dryerover")||
+      location.pathname.startsWith("/dryertumble")
+    ) {
       setDryProcess(false);
       setItemContent(WetProcessItemContent);
+    }
+    else {
+      setItemContent([{ primary: "Wash Receive", to: "/washreceive" }]); // <-- nothing by default
     }
   }, [location.pathname]);
 
   // Navigate back or fallback to default
-  const goBackOrFallback = (fallback: string) => {
-    if (window.history.state && window.history.state.idx > 0) {
-      navigate(-1);
-    } else {
-      navigate(fallback);
-    }
-  };
+  // const goBackOrFallback = (fallback: string) => {
+  //   if (window.history.state && window.history.state.idx > 0) {
+  //     navigate(-1);
+  //   } else {
+  //     navigate(fallback);
+  //   }
+  // };
 
   // Handle Dry/Wet Process button clicks
+  // const handleProcessClick = (isDry: boolean) => {
+  //   setDryProcess(isDry);
+  //   setItemContent(isDry ? DryProcessItemContent : WetProcessItemContent);
+  //   const fallback = isDry ? "/planning" : "/";
+  //   goBackOrFallback(fallback);
+  // };
   const handleProcessClick = (isDry: boolean) => {
     setDryProcess(isDry);
     setItemContent(isDry ? DryProcessItemContent : WetProcessItemContent);
-    const fallback = isDry ? "/planning" : "/";
-    goBackOrFallback(fallback);
-  };
 
+    navigate(isDry ? "/planning" : "/batchdry");
+  };
   return (
     <Box sx={{ 
       // display:'flex',
@@ -151,6 +203,12 @@ export default function Navbar() {
             </Box>
 
           <Box sx={{ display: "flex", gap: 2, alignItems: "center",fontWeight:600 }}>
+            <p
+              onClick={() => navigate("/washreceive")}
+              style={{ textDecoration: "none", color: "#485e68", cursor: "pointer",  }}
+            >
+              Wash Receive
+            </p>
             <p
               onClick={() => handleProcessClick(true)}
               style={{ textDecoration: "none", color: "#485e68", cursor: "pointer",  }}
@@ -191,32 +249,72 @@ export default function Navbar() {
         <Toolbar /> {/* empty toolbar to push content below AppBar */}
         <Box sx={{ overflow: "auto"}}>
           <List>
-            {ItemContent.map((item) => {
-              const isActive = location.pathname === item.to;
-              return (
-                <ListItem key={item.to} disablePadding>
-                  <ListItemButton
-                    component={RouterLink}
-                    to={item.to}
-                    sx={{
-                      bgcolor: isActive ? tbCellColor : "#485e68",
-                      "&:hover": {
-                        bgcolor: tbCellColor,
-                        color:'white'
-                      },
-                      color:'white',
-                      paddingLeft:4,
-                      
-                    }}
-                  >
-                   
-                      <ListItemText primaryTypographyProps={{sx: { fontWeight: 600 }}} primary={item.primary} />
-                      
-                  </ListItemButton>
-                </ListItem>
-              );
-            })}
-          </List>
+              {ItemContent.map((item) => {
+                const isActive = location.pathname === item.to;
+
+                // Parent item with children
+                if (item.children) {
+                  const isOpen = openSubmenus[item.primary] || false;
+
+                  return (
+                    <React.Fragment key={item.primary}>
+                      <ListItem disablePadding>
+                        <ListItemButton
+                          onClick={() => setOpenSubmenus({ ...openSubmenus, [item.primary]: !isOpen })}
+                          sx={{
+                            bgcolor: isActive ? tbCellColor : "#485e68",
+                            "&:hover": { bgcolor: tbCellColor, color: "white" },
+                            color: "white",
+                            paddingLeft: 4,
+                          }}
+                        >
+                          <ListItemText primaryTypographyProps={{ sx: { fontWeight: 600 } }} primary={item.primary} />
+                        </ListItemButton>
+                      </ListItem>
+
+                      {isOpen &&
+                        item.children.map((child) => {
+                          const isChildActive = location.pathname === child.to;
+                          return (
+                            <ListItem key={child.to} disablePadding>
+                              <ListItemButton
+                                component={RouterLink}
+                                to={child.to}
+                                sx={{
+                                  bgcolor: isChildActive ? tbCellColor : "#5a6d76",
+                                  "&:hover": { bgcolor: tbCellColor, color: "white" },
+                                  color: "white",
+                                  paddingLeft: 8,
+                                }}
+                              >
+                                <ListItemText primaryTypographyProps={{ sx: { fontWeight: 500 } }} primary={child.primary} />
+                              </ListItemButton>
+                            </ListItem>
+                          );
+                        })}
+                    </React.Fragment>
+                  );
+                }
+
+                // Regular item
+                return (
+                  <ListItem key={item.to} disablePadding>
+                    <ListItemButton
+                      component={RouterLink}
+                      to={item.to}
+                      sx={{
+                        bgcolor: isActive ? tbCellColor : "#485e68",
+                        "&:hover": { bgcolor: tbCellColor, color: "white" },
+                        color: "white",
+                        paddingLeft: 4,
+                      }}
+                    >
+                      <ListItemText primaryTypographyProps={{ sx: { fontWeight: 600 } }} primary={item.primary} />
+                    </ListItemButton>
+                  </ListItem>
+                );
+              })}
+            </List>
         </Box>
       </Drawer>
     </Box>

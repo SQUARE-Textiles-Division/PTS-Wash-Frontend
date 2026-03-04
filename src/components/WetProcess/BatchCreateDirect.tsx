@@ -1,26 +1,62 @@
 import {Box,TextField}   from "@mui/material";
 import { Modal, Typography, Button ,Paper} from "@mui/material";
-import type BundleInfo from "../TypeAnnotations/BundleInfo";
-import type BatchBundle from "../TypeAnnotations/BatchBundle";
-import { getData, postData} from "./genericApiService";
+import type BundleInfo from "../../TypeAnnotations/BundleInfo";
+import type BatchBundle from "../../TypeAnnotations/BatchBundle";
+import { getData, postData} from "../genericApiService";
 import { useEffect, useRef,useState } from "react";
 import DoneAllIcon from '@mui/icons-material/DoneAll';
-import alarmSound from "../assets/BatchCreationError.mp3";
-import { ip } from "../ip";
-import type BatchBundles from "../TypeAnnotations/BatchInstance";
+import alarmSound from "../../assets/alarm.mp3";
+import { ip } from "../../ip";
+import type BatchBundles from "../../TypeAnnotations/BatchInstance";
+import { styled } from '@mui/material/styles';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell, { tableCellClasses } from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+// import Paper from '@mui/material/Paper';
+// import type BundleInfo from '../TypeAnnotations/BundleInfo';
+import { tbCellColor,tbRowColor } from '../Colors/Colors';
+import { QRCodeCanvas } from "qrcode.react";
+import { useReactToPrint } from "react-to-print";
+import type FirstWashBatchDirectCreate from "../../TypeAnnotations/FirstWashBatchDirectCreate";
 
-interface Props {
-    items: BundleInfo[];
-    setItems: React.Dispatch<React.SetStateAction<BundleInfo[]>>;
-    qrData: any | null;
-    setQrData: React.Dispatch<React.SetStateAction<any | null>>;
-}
-export default function CheckReceive({items, setItems,qrData,setQrData}: Props){
+// interface Props {
+//     items: BundleInfo[];
+//     setItems: React.Dispatch<React.SetStateAction<BundleInfo[]>>;
+//     qrData: any | null;
+//     setQrData: React.Dispatch<React.SetStateAction<any | null>>;
+const StyledTableCell = styled(TableCell)(({ theme }) => ({
+  [`&.${tableCellClasses.head}`]: {
+    // backgroundColor: theme.palette.common.black,
+    backgroundColor: tbCellColor,
+    color: theme.palette.common.white,
+  },
+  [`&.${tableCellClasses.body}`]: {
+    fontSize: 14,
+  },
+}));
+
+const StyledTableRow = styled(TableRow)(({ theme }) => ({
+  '&:nth-of-type(odd)': {
+    backgroundColor: tbRowColor
+  },
+  // hide last border
+  '&:last-child td, &:last-child th': {
+    border: 0,
+  },
+}));
+// }
+export default function BatchCreateDirect(){
 
     const audioRef = useRef<HTMLAudioElement | null>(null);
 
     // const [qrData, setQrData] = useState<any | null>(null);
     const printRef = useRef<HTMLDivElement>(null);
+     const handlePrint = useReactToPrint({
+            contentRef: printRef,
+        });
     const [planningError,setPlanningError]=useState<string>("")
     const [invalideBundleError,setInvalideBundleError]=useState<string>("")
     const [showPopup, setShowPopup] = useState(false);
@@ -29,6 +65,8 @@ export default function CheckReceive({items, setItems,qrData,setQrData}: Props){
     const [errorMessage,setErrorMessage]=useState<string>("");  
     const barcodeRef=useRef<HTMLInputElement>(null);
     const [itemId,setItemId]=useState<number[]>([]);
+    const [items, setItems] = useState<BundleInfo[]>([]);
+    const [qrData, setQrData] = useState<any | null>(null);
 
     
     useEffect(() => {
@@ -83,7 +121,7 @@ export default function CheckReceive({items, setItems,qrData,setQrData}: Props){
                      },
                     (result2:BatchBundle) => {
                         let isDuplicate = false;
-                        let sameMpoSize=true;
+                        let sameShade=true;
                         // setSecondData(result2);
                         for(let i=0;i<items.length;i++){
                             console.log("Checking item:", items[i], "against", result2);
@@ -93,19 +131,19 @@ export default function CheckReceive({items, setItems,qrData,setQrData}: Props){
                                 isDuplicate=true;
                                 // break;
                             }
-                            if(items[i].mpo!=result2.mpo || items[i].size!=result2.size){
-                                sameMpoSize=false;
+                            if(items[i].shade!=result2.shade){
+                                sameShade=false;
                                 break;
                             }
                             // else{
                             //     setItemId([...itemId,result2.id]);
                             // }
                         }
-                        if(!sameMpoSize){
+                        if(!sameShade){
                             setAlarm(true);
                             return;
                         }
-                        if(!isDuplicate && sameMpoSize){
+                        if(!isDuplicate && sameShade){
                             // setItemId([...itemId,result2.id]);
                             setItems([
                                     result2,
@@ -138,18 +176,20 @@ export default function CheckReceive({items, setItems,qrData,setQrData}: Props){
             <Box
                 sx={{
                 minHeight: '15vh',
-                display: 'flex',
+                // display: 'flex',
                 alignItems: 'flex-start',
                 justifyContent: 'center',
                 pt: 5,
-                width: 500
+                width: 1100
                 }}
             >
                 <TextField
-                style={{outline:"red"}}
+                style={{outline:"red",
+                    marginLeft:'160px'
+                }}
                 inputRef={barcodeRef}
                 label="Scan Barcode Here"
-                fullWidth
+                
                 autoFocus
                 onChange={() => {
                     
@@ -173,11 +213,16 @@ export default function CheckReceive({items, setItems,qrData,setQrData}: Props){
                             color: "#485e68",               // Label/text color on focus
                         },
                         },
+                        width: 300,
                     }}
                 />
                 
-                
-                {showPopup && (
+                <div
+                    style={{
+                        display: "flex",
+                        alignItems: "center",
+                        marginLeft:'550px'}}>
+                                    {showPopup && (
                         <div
                             style={{
                                 display: "flex",
@@ -207,34 +252,54 @@ export default function CheckReceive({items, setItems,qrData,setQrData}: Props){
                             '&:hover': {
                                 backgroundColor: '#37474f',
                             },
+                            width: 100,
                         }}
                         onClick={()=>{
                             console.log("Creating batch with item IDs:", itemId);
-                            postData<any>(
-                                'productions/batches/',
+                            const payload={
+                                "shade":items[0].shade,
+                                "bundle_source":[] as any
+                            }
+                            for(let i=0;i<items.length;i++){
+                                payload.bundle_source.push({
+                                    "bundle":items[i].id,
+                                    "quantity":items[i].quantity
+                                })
+                            }
+                            postData<FirstWashBatchDirectCreate>(
+                                'wet-process/first-wash-batches/',
                                 ip,
-                                {
-                                    scanned_bundles: itemId, // number[]
-                                },
+                                payload,
                                 (data) => {
-                                    console.log("Create batch response:", data);
-                                    const batchBundles = data.batch_bundles as BatchBundles[];
-                                    const buyer=batchBundles[0].received.buyer
-                                    const style=batchBundles[0].received.style
-                                    const so=batchBundles[0].received.so
+                                    let date=data.created_at.slice(0, 10).replace(/-/g, "");
+                                    const sourceBundles=data.source_bundles
+                                    let mpoSet=new Set<string>();
+                                    let colorSet=new Set<string>();
+                                    let buyerSet=new Set<string>();
+                                    let styleSet=new Set<string>();
+                                    let soSet=new Set<string>();
+                                    let sizeSet=new Set<string>();
+                                    for(let i=0;i<sourceBundles.length;i++){
+                                        let bundle=sourceBundles[i].bundle;
+                                        mpoSet.add(bundle.mpo);
+                                        colorSet.add(bundle.color);
+                                        buyerSet.add(bundle.buyer);
+                                        styleSet.add(bundle.style);
+                                        soSet.add(bundle.so);
+                                        sizeSet.add(bundle.size);
+                                    }
                                     
                                     const qrPayload = {
-                                        batch_id: data.id,
-                                        mpo: data.mpo,
-                                        buyer:buyer,
-                                        style:style,
-                                        so:so,
-                                        size: data.size,
-                                        color: data.color,
-                                        bundles: data.batch_bundles,
-                                        routing: data.planning?.route_steps ?? [],
+                                        id: data.id,
+                                        shade:data.shade,
+                                        mpo: Array.from(mpoSet).join(", "),
+                                        color: Array.from(colorSet).join(", "),
+                                        size: Array.from(sizeSet).join(", "),
+                                        buyer: Array.from(buyerSet).join(", "),
+                                        style: Array.from(styleSet).join(", "),
+                                        so: Array.from(soSet).join(", "),
                                         total_items: data.total_quantity,
-                                        date: data.updated_at,
+                                        date: date
                                     };
                                     setQrData(qrPayload);
                                     setItems([]);
@@ -252,9 +317,136 @@ export default function CheckReceive({items, setItems,qrData,setQrData}: Props){
                         
 
                 )}
-                
+                </div>
 
                 
+                <TableContainer
+                    component={Paper}
+                    sx={{
+                    // maxHeight: 300,          // vertical scrollbar
+                    overflowX: "auto",       // horizontal scrollbar
+                    overflowY: "auto",
+                    maxWidth: 1100,
+                    border:'none',
+                    marginLeft:'115px',
+                    marginTop:'20px'
+                    // marginLeft:'100px',
+                    }}
+                >
+                    <Table
+                    stickyHeader
+                    sx={{
+                        '& .MuiTableCell-root':{
+                            borderBottom:'none'
+                        }
+                        
+                    }}
+                    // sx={{ minWidth: 800 }}   // force horizontal scroll if screen is smaller
+                    aria-label="customized table"
+                    >
+                    <TableHead>
+                        <TableRow>
+                        <StyledTableCell>MPO</StyledTableCell>
+                        <StyledTableCell align="center">Buyer</StyledTableCell>
+                        <StyledTableCell align="center">Style</StyledTableCell>
+                        <StyledTableCell align="center">Sales Order</StyledTableCell>
+                        <StyledTableCell align="center">Bundle Barcode</StyledTableCell>
+                        <StyledTableCell align="center">Bundle No</StyledTableCell>
+                        <StyledTableCell align="center">Marker No</StyledTableCell>
+                        <StyledTableCell align="center">Size</StyledTableCell>
+                        <StyledTableCell align="center">Shade</StyledTableCell>
+                        <StyledTableCell align="center">Color</StyledTableCell>
+                        <StyledTableCell align="center">Quantity</StyledTableCell>
+                        </TableRow>
+                    </TableHead>
+
+                    <TableBody>
+                        {items.map((row) => (
+                        <StyledTableRow key={`${row.mpo}-${row.bundle_no}`}>
+                            <StyledTableCell>{row.mpo}</StyledTableCell>
+                            <StyledTableCell align="center">{row.buyer}</StyledTableCell>
+                            <StyledTableCell align="center">{row.style}</StyledTableCell>
+                            <StyledTableCell align="center">{row.so}</StyledTableCell>
+                            <StyledTableCell align="center">{row.bundle_barcode}</StyledTableCell>
+                            <StyledTableCell align="center">{row.bundle_no}</StyledTableCell>
+                            <StyledTableCell align="center">{row.marker}</StyledTableCell>
+                            <StyledTableCell align="center">{row.size}</StyledTableCell>
+                            <StyledTableCell align="center">{row.shade}</StyledTableCell>
+                            <StyledTableCell align="center">{row.color}</StyledTableCell>
+                            <StyledTableCell align="center">{row.quantity}</StyledTableCell>
+                        </StyledTableRow>
+                        ))}
+                    </TableBody>
+                    </Table>
+                </TableContainer>
+                 <div style={{marginLeft:"500px"}}>
+                          {qrData && (
+                                    <Paper
+                                        ref={printRef}
+                                        elevation={5}
+                                        sx={{
+                                        alignContent: "right",
+                                        mt: 3,
+                                        px: 2,
+                                        pt:1,
+                                        pb:1,
+                                        // p: 3,
+                                        width: 280,
+                                        textAlign: "center",
+                                        }}
+                                    >
+                
+                                        <QRCodeCanvas
+                                        value={`W8220${qrData.date}W100000000${qrData.id}`}
+                                        size={200}
+                                        level="H"
+                                        />
+                
+                                        <Box sx={{ textAlign: "left" }}>
+                                        <Typography variant="body2" sx={{
+                                            textAlign: "center",
+                                            fontSize: 12,
+                                            mb: 2
+                                        }}>
+                                            {`W8220${qrData.date}W1${String(qrData.id).padStart(10, '0')}`}
+                                        </Typography>
+                                        <Typography variant="body2">
+                                            <b>Total Quantity:</b> {qrData.total_items}
+                                        </Typography>
+                                            <Typography variant="body2">
+                                            <b>MPO</b> {qrData.mpo}
+                                        </Typography>
+                                        <Typography variant="body2">
+                                            <b>Buyer</b> {qrData.buyer}
+                                        </Typography>
+                                        <Typography variant="body2">
+                                            <b>Style:</b> {qrData.style}
+                                        </Typography>
+                                        <Typography variant="body2">
+                                            <b>Sales Order:</b> {qrData.so}
+                                        </Typography>
+                                        <Typography variant="body2">
+                                            <b>Shade:</b> {qrData.shade}
+                                        </Typography>
+                                        <Typography variant="body2">
+                                            <b>Size:</b> {qrData.size}
+                                        </Typography>
+                                        <Typography variant="body2">
+                                            <b>Color:</b> {qrData.color}
+                                        </Typography>
+                                        
+                                        </Box>
+                                    </Paper>)}
+                            {qrData && (
+                                <Button
+                                    variant="outlined"
+                                    sx={{ mt: 2 ,marginRight:"450px"}}
+                                    // onClick={handlePrint}
+                                >
+                                    Print QR Code
+                                </Button>
+                            )}
+                    </div>
 
             <Modal open={alarm} onClose={() => setAlarm(false)}>
                     <Box
@@ -279,8 +471,8 @@ export default function CheckReceive({items, setItems,qrData,setQrData}: Props){
                             width: 400,
                         }}
                         >
-                        <Typography variant="h6">Same MPO & Size Must be Entered</Typography>
-                        <Typography>You must have to scan bundles with same MPO and Size.
+                        <Typography variant="h6">Same Shade Must be Entered</Typography>
+                        <Typography>You must have to scan bundles with same Shade.
                         </Typography>
                         <Button sx={{ mt: 2 }} onClick={() => setAlarm(false)}>Close</Button>
                         </Box>
@@ -342,9 +534,9 @@ export default function CheckReceive({items, setItems,qrData,setQrData}: Props){
                             width: 400,
                         }}
                         >
-                        <Typography variant="h6">Not Received Yet!!!</Typography>
-                        <Typography>You have to receive this bundle in Production before washing.
-                        </Typography>
+                        <Typography variant="h6">{errorMessage}</Typography>
+                        {/* <Typography>You have to receive this bundle in Production before washing. */}
+                        {/* </Typography> */}
                         <Button sx={{ mt: 2 }} onClick={() => setShowErrorPopup(false)}>Close</Button>
                         </Box>
                     </Box>
@@ -383,6 +575,6 @@ export default function CheckReceive({items, setItems,qrData,setQrData}: Props){
                     </Box>
                 </Modal>
             </Box>
-        
+
     );
 }

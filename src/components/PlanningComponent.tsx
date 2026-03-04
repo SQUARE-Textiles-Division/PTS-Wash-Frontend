@@ -16,6 +16,7 @@ import { getData,postData,patchData } from "./genericApiService";
 import type Planning from '../TypeAnnotations/BatchInstance'
 import type RouteSteps from "../TypeAnnotations/BatchInstance";
 import React from "react";
+import { ip } from "../ip";
 
 
 const ALL_STAGES = [
@@ -96,7 +97,7 @@ export default function PlanningComponent() {
       // 🔥 SECOND REQUEST (chained safely)
       getData<Planning>(
         `productions/plannings`,
-        "http://172.26.2.94:8000",
+        ip,
         {},
         { search: mpo },
         (planning:any) => {
@@ -264,7 +265,7 @@ const handleReplaceStage = (newStage: string) => {
 
           )} */}
          {selectedStages.length > 0 && (
-              <Stepper activeStep={activeStep} nonLinear={true} sx={{ mt: 3, width: 900 }}>
+              <Stepper activeStep={activeStep} nonLinear={true} sx={{ mt: 3, width: 1050 }}>
               {selectedStages.map((stage) => (
                 <Step key={stage} completed={false} disabled={false}>
                   <StepLabel
@@ -324,7 +325,7 @@ const handleReplaceStage = (newStage: string) => {
             onClick={()=>
                 postData<Planning>(
                     `productions/plannings/`,
-                    "http://172.26.2.94:8000",
+                    ip,
                     {
                         mpo:mpoNo,
                         stages:selectedStages
@@ -341,7 +342,7 @@ const handleReplaceStage = (newStage: string) => {
                             patchData<Planning>(
                               // 'prod'
                               `productions/plannings/${alreadyInPlan}/`,
-                              "http://172.26.2.94:8000",
+                              ip,
                               {stages:selectedStages},
                               (success:any)=>{
                                   console.log(success)
@@ -373,7 +374,7 @@ const handleReplaceStage = (newStage: string) => {
                 // console.log(alreadyInPlan),
                 patchData<Planning>(
                     `productions/plannings/${alreadyInPlan}/`,
-                    "http://172.26.2.94:8000",
+                    ip,
                     {
                         mpo:mpoNo,
                         stages:selectedStages

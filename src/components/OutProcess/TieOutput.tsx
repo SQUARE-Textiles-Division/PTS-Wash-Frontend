@@ -21,6 +21,7 @@ import type BatchInstance from '../../TypeAnnotations/BatchInstance';
 import type RouteSteps from '../../TypeAnnotations/BatchInstance';
 import type Rejection from '../../TypeAnnotations/Rejection';
 import { tbCellColor, tbRowColor } from '../Colors/Colors';
+import { ip } from '../../ip';
 // import { postData } from './genericApiService';
 // import Typography from '@mui/material/Typography';
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
@@ -90,7 +91,7 @@ useEffect(() => {
         
       getData<BatchInstance>(
               `productions/batches/${batchIdNum}/`,
-              "http://172.26.2.94:8000",
+              ip,
               {},
               {},
               (result1:BatchInstance) => {
@@ -143,7 +144,7 @@ useEffect(() => {
                     }
                   getData<BatchStage>(
                               `productions/batch-stages/${batchIdNum}/`,
-                              "http://172.26.2.94:8000",
+                              ip,
                               {},
                               {},
                               (subresult: BatchStage) => {
@@ -265,7 +266,7 @@ useEffect(() => {
                       onClick={() =>
                           getData<Rejection[]>(
                             "productions/qc-stage-summaries",
-                            "http://172.26.2.94:8000",
+                            ip,
                             {}, // ✅ data (GET ignores this, but required by signature)
                             {
                               batch: batchNum,
@@ -372,7 +373,7 @@ useEffect(() => {
                           
                         postData<BatchStage>(
                           'productions/batch-stages/',
-                          'http://172.26.2.94:8000',
+                          ip,
                           {
                             batch: batchNum,
                             current_stage: "Tie",

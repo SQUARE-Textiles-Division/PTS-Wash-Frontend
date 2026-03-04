@@ -19,6 +19,7 @@ import type RejectionReason from "../../TypeAnnotations/RejectionReason";
 import { delData, getData, postData } from "../genericApiService";
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import { tbCellColor, tbRowColor } from "../Colors/Colors";
+import { ip } from "../../ip";
 
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
@@ -58,7 +59,7 @@ export default function WrinkleQC() {
   const handleDelete=(id:number)=>{
     delData<RejectionReason>(
       `productions/rejections/${id}/`,
-      "http://172.26.2.94:8000",
+      ip,
       {},
       {stage: "Brush"},
       (data) => {
@@ -303,7 +304,7 @@ export default function WrinkleQC() {
               <Button sx={{ background: "blue", color: "white" }} onClick={() => {
                 postData<RejectionReason>(
                   "productions/rejections/",
-                  "http://172.26.2.94:8000",
+                  ip,
                   {
                     individual_barcode: invbarcode,
                     stage: "Wrinkle",
@@ -318,7 +319,7 @@ export default function WrinkleQC() {
 
                     getData<RejectionReason[]>(
                       "productions/rejections/",
-                      "http://172.26.2.94:8000",
+                      ip,
                       {},
                       { batch: data.batch },
                       (rejectedData: RejectionReason[]) => {

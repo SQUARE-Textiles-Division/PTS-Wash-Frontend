@@ -15,6 +15,7 @@ import type BatchBundle from "../TypeAnnotations/BatchBundle";
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import { WhiskerRejectReasons } from "./RejectionReasons/WhiskerRejectReasons"
 import { tbCellColor, tbRowColor } from "./Colors/Colors";
+import { ip } from "../ip";
 
 
 
@@ -68,7 +69,7 @@ export default function QCEditDel() {
     setBatchNum(batchIdNum)
     getData<RejectionReason[]>(
       "productions/rejections/",
-      "http://172.26.2.94:8000",
+      ip,
       {},
       { batch: batchIdNum },
       (rejectedData:RejectionReason[]) => {
@@ -100,7 +101,7 @@ export default function QCEditDel() {
    const handleDelete=(id:number,stage:string)=>{
       delData<RejectionReason>(
         `productions/rejections/${id}/`,
-        "http://172.26.2.94:8000",
+        ip,
         {},
         {stage: stage},
         (data) => {
@@ -119,7 +120,7 @@ export default function QCEditDel() {
     const handleEdit = (id: number, reason: string) => {
       patchData<RejectionReason>(
         `productions/rejections/${id}/`,
-        "http://172.26.2.94:8000",
+        ip,
         { reason },
         (data) => {
           setRows(prev =>
@@ -187,8 +188,8 @@ export default function QCEditDel() {
                   // maxHeight: 200,          // vertical scrollbar
                   overflowX: "auto",       // horizontal scrollbar
                   overflowY: "auto",
-                  border:'none'
-                  // marginLeft:"50px"
+                  border:'none',
+                  marginLeft:"50px"
                   
                 }}
               >
@@ -202,7 +203,7 @@ export default function QCEditDel() {
                         <TableHead>
                           <TableRow>
                             <StyledTableCell>MPO</StyledTableCell>
-                            <StyledTableCell align="center">Invidual Barcode</StyledTableCell>
+                            <StyledTableCell align="center">Individual Barcode</StyledTableCell>
                             <StyledTableCell align="center">Marker No</StyledTableCell>
                             <StyledTableCell align="center">Size</StyledTableCell>
                             <StyledTableCell align="center">Shade</StyledTableCell>

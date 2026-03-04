@@ -6,6 +6,7 @@ import { useRef,useState } from "react";
 import DoneAllIcon from '@mui/icons-material/DoneAll';
 import ReceivedBundles from "./ReceivedBundles";
 import { red } from "@mui/material/colors";
+import { ip } from "../ip";
 
 
 interface Props {
@@ -43,6 +44,7 @@ export default function WashReceive({items, setItems}: Props){
                     marker:result1.marker,
                     buyer:result1.buyer,
                     style:result1.style,
+                    so:result1.so,
                     bundle_no: result1.bundle_no,
                     bundle_barcode: result1.bundle_barcode,
                     size: result1.size,
@@ -55,7 +57,7 @@ export default function WashReceive({items, setItems}: Props){
                 // --- Second API call ---
                 postData(
                     `productions/received-bundles/`,
-                    "http://172.26.2.94:8000",
+                    ip,
                     payload,
                     (result2:BundleInfo) => {
                         // setSecondData(result2);

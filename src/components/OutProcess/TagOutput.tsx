@@ -21,6 +21,7 @@ import type BatchInstance from '../../TypeAnnotations/BatchInstance';
 import type RouteSteps from '../../TypeAnnotations/BatchInstance';
 import type Rejection from '../../TypeAnnotations/Rejection';
 import { tbCellColor, tbRowColor } from '../Colors/Colors';
+import { ip } from '../../ip';
 // import { postData } from './genericApiService';
 // import Typography from '@mui/material/Typography';
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
@@ -95,7 +96,7 @@ export default function TagOutput() {
         
       getData<BatchInstance>(
               `productions/batches/${batchIdNum}/`,
-              "http://172.26.2.94:8000",
+              ip,
               {},
               {},
               (result1:BatchInstance) => {
@@ -148,7 +149,7 @@ export default function TagOutput() {
                     }
                   getData<BatchStage>(
                               `productions/batch-stages/${batchIdNum}/`,
-                              "http://172.26.2.94:8000",
+                              ip,
                               {},
                               {},
                               (subresult: BatchStage) => {
@@ -268,7 +269,7 @@ export default function TagOutput() {
                       onClick={() =>
                           getData<Rejection[]>(
                             "productions/qc-stage-summaries",
-                            "http://172.26.2.94:8000",
+                            ip,
                             {}, // ✅ data (GET ignores this, but required by signature)
                             {
                               batch: batchNum,
@@ -313,12 +314,12 @@ export default function TagOutput() {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                bgcolor: "rgba(0,0,0,0.5)", // dark overlay
+                // bgcolor: "rgba(0,0,0,0.5)", // dark overlay
               }}
           >
               <Box
               sx={{
-                  bgcolor: "rgba(180, 11, 11, 0.92)", // light red background for error
+                  bgcolor: "#d9534f", // light red background for error
                   p: 4,
                   borderRadius: 2,
                   color: "white", // red text for error
@@ -344,15 +345,17 @@ export default function TagOutput() {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                bgcolor: "rgba(148, 131, 131, 0.5)", // dark overlay
+                // bgcolor: "rgba(148, 131, 131, 0.5)", // dark overlay
               }}
           >
                 <Box
                   sx={{
-                      bgcolor: "#fea116", // light red background for error
+                      bgcolor: "#ffffe0", // light red background for error
+                      
+                      border:'3px solid #e6db55',// light red background for error
                       p: 4,
                       borderRadius: 2,
-                      color: "black", // red text for error
+                      color: "#9c9999", // red text for error
                       width: 400,
                   }}
                 >
@@ -372,7 +375,7 @@ export default function TagOutput() {
                           
                         postData<BatchStage>(
                           'productions/batch-stages/',
-                          'http://172.26.2.94:8000',
+                          ip,
                           {
                             batch: batchNum,
                             current_stage: "Tag",

@@ -1,6 +1,6 @@
 import type BundleInfo from "./BundleInfo"
 
-interface BatchBundles{
+export default interface BatchBundles{
     "id": number,
     "batch_id": number,
     "received_id": number,

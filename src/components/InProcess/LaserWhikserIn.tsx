@@ -20,6 +20,7 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import { tbCellColor, tbRowColor } from '../Colors/Colors';
+import { ip } from '../../ip';
 // import { postData } from './genericApiService';
 // import Typography from '@mui/material/Typography';
 
@@ -91,7 +92,7 @@ export default function LaserWhiskerIn() {
         
       getData<BatchInstance>(
               `productions/batches/${batchIdNum}/`,
-              "http://172.26.2.94:8000",
+              ip,
               {},
               {},
               (result1:BatchInstance) => {
@@ -145,7 +146,7 @@ export default function LaserWhiskerIn() {
                   
                   postData<BatchStage>(
                       `productions/batch-stages/`,
-                      "http://172.26.2.94:8000",
+                      ip,
                       payload,
                       (postresult:BatchStage)=>{
                           
@@ -153,7 +154,7 @@ export default function LaserWhiskerIn() {
                             markCompletedUntil(currStage, newStages);
                             getData<BatchStage>(
                               `productions/batch-stages/${batchIdNum}/`,
-                              "http://172.26.2.94:8000",
+                              ip,
                               {},
                               {},
                               (subresult: BatchStage) => {
@@ -172,7 +173,7 @@ export default function LaserWhiskerIn() {
                             console.log('Error',error.response.data)
                             getData<BatchStage>(
                                     `productions/batch-stages/${batchIdNum}/`,
-                                    "http://172.26.2.94:8000",
+                                    ip,
                                     {},
                                     {},
                                     (subresult: BatchStage) => {

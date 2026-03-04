@@ -21,6 +21,7 @@ import type BatchInstance from '../../TypeAnnotations/BatchInstance';
 import type RouteSteps from '../../TypeAnnotations/BatchInstance';
 import type Rejection from '../../TypeAnnotations/Rejection';
 import { tbCellColor, tbRowColor } from '../Colors/Colors';
+import { ip } from '../../ip';
 // import { postData } from './genericApiService';
 // import Typography from '@mui/material/Typography';
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
@@ -89,7 +90,7 @@ export default function WrinkleOutput() {
         
       getData<BatchInstance>(
               `productions/batches/${batchIdNum}/`,
-              "http://172.26.2.94:8000",
+              ip,
               {},
               {},
               (result1:BatchInstance) => {
@@ -142,7 +143,7 @@ export default function WrinkleOutput() {
                     }
                   getData<BatchStage>(
                               `productions/batch-stages/${batchIdNum}/`,
-                              "http://172.26.2.94:8000",
+                              ip,
                               {},
                               {},
                               (subresult: BatchStage) => {
@@ -261,7 +262,7 @@ export default function WrinkleOutput() {
                       onClick={() =>
                           getData<Rejection[]>(
                             "productions/qc-stage-summaries",
-                            "http://172.26.2.94:8000",
+                            ip,
                             {}, // ✅ data (GET ignores this, but required by signature)
                             {
                               batch: batchNum,
@@ -372,7 +373,7 @@ export default function WrinkleOutput() {
                           
                         postData<BatchStage>(
                           'productions/batch-stages/',
-                          'http://172.26.2.94:8000',
+                          ip,
                           {
                             batch: batchNum,
                             current_stage: "Wrinkle",

@@ -69,6 +69,7 @@ export default function ReceivedBundles({ rows }: Props) {
               <StyledTableCell>MPO</StyledTableCell>
               <StyledTableCell align="center">Buyer</StyledTableCell>
               <StyledTableCell align="center">Style</StyledTableCell>
+              <StyledTableCell align="center">Sales Order</StyledTableCell>
               <StyledTableCell align="center">Bundle Barcode</StyledTableCell>
               <StyledTableCell align="center">Bundle No</StyledTableCell>
               <StyledTableCell align="center">Marker No</StyledTableCell>
@@ -86,6 +87,7 @@ export default function ReceivedBundles({ rows }: Props) {
                 <StyledTableCell>{row.mpo}</StyledTableCell>
                 <StyledTableCell align="center">{row.buyer}</StyledTableCell>
                 <StyledTableCell align="center">{row.style}</StyledTableCell>
+                <StyledTableCell align="center">{row.so}</StyledTableCell>
                 <StyledTableCell align="center">{row.bundle_barcode}</StyledTableCell>
                 <StyledTableCell align="center">{row.bundle_no}</StyledTableCell>
                 <StyledTableCell align="center">{row.marker}</StyledTableCell>

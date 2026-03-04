@@ -20,6 +20,7 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import { tbCellColor, tbRowColor } from '../Colors/Colors';
+import { ip } from '../../ip';
 // import { postData } from './genericApiService';
 // import Typography from '@mui/material/Typography';
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
@@ -140,14 +141,14 @@ useEffect(() => {
                   
                   postData<BatchStage>(
                       `productions/batch-stages/`,
-                      "http://172.26.2.94:8000",
+                      ip,
                       payload,
                       (postresult:BatchStage)=>{
                           const currStage = `${postresult.current_stage} ${postresult.current_status}`;
                                 markCompletedUntil(currStage, newStages);
                             getData<BatchStage>(
                               `productions/batch-stages/${batchIdNum}/`,
-                              "http://172.26.2.94:8000",
+                              ip,
                               {},
                               {},
                               (subresult: BatchStage) => {
@@ -165,7 +166,7 @@ useEffect(() => {
                             console.log('Error',error.response.data)
                             getData<BatchStage>(
                                     `productions/batch-stages/${batchIdNum}/`,
-                                    "http://172.26.2.94:8000",
+                                    ip,
                                     {},
                                     {},
                                     (subresult: BatchStage) => {

@@ -104,3 +104,21 @@ export const patchData = <T = any>(
             if (onError) onError(error);
         });
 };
+
+export const getDataAsync = async <T = any>(
+  endpoint: string,
+  hostAddress: string,
+  data: Object = {},
+  params?: Record<string, any>
+): Promise<T> => {
+  try {
+    const response: AxiosResponse<T> = await axios.get<T>(`${hostAddress}/${endpoint}`, {
+      data,
+      params,
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error(`Error fetching ${endpoint}:`, error);
+    throw error; // Caller can handle the error with try/catch
+  }
+};

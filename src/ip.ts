@@ -1,0 +1,1 @@
+export const ip="http://172.26.2.94:8000"

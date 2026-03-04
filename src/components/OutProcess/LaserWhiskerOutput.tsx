@@ -21,6 +21,7 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import { tbCellColor, tbRowColor } from '../Colors/Colors';
+import { ip } from '../../ip';
 // import { postData } from './genericApiService';
 // import Typography from '@mui/material/Typography';
 
@@ -98,7 +99,7 @@ export default function LaserWhiskerOutput() {
         
       getData<BatchInstance>(
               `productions/batches/${batchIdNum}/`,
-              "http://172.26.2.94:8000",
+              ip,
               {},
               {},
               (result1:BatchInstance) => {
@@ -151,7 +152,7 @@ export default function LaserWhiskerOutput() {
                     }
                   getData<BatchStage>(
                               `productions/batch-stages/${batchIdNum}/`,
-                              "http://172.26.2.94:8000",
+                              ip,
                               {},
                               {},
                               (subresult: BatchStage) => {
@@ -271,7 +272,7 @@ export default function LaserWhiskerOutput() {
                       onClick={() =>
                           getData<Rejection[]>(
                             "productions/qc-stage-summaries",
-                            "http://172.26.2.94:8000",
+                            ip,
                             {}, // ✅ data (GET ignores this, but required by signature)
                             {
                               batch: batchNum,
@@ -378,7 +379,7 @@ export default function LaserWhiskerOutput() {
                           
                         postData<BatchStage>(
                           'productions/batch-stages/',
-                          'http://172.26.2.94:8000',
+                          ip,
                           {
                             batch: batchNum,
                             current_stage: "Laser Whisker",
