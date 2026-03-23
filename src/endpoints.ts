@@ -1,0 +1,1 @@
+export let washlog=`wet-process/wash-logs/`

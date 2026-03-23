@@ -21,6 +21,7 @@ import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import { tbCellColor, tbRowColor } from '../Colors/Colors';
 import { ip } from '../../ip';
+import type RejectionReason from '../../TypeAnnotations/RejectionReason';
 // import { postData } from './genericApiService';
 // import Typography from '@mui/material/Typography';
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
@@ -49,6 +50,7 @@ export default function LaserWhiskerIn() {
   const [completed, setCompleted] = React.useState<boolean[]>(stages.map(() => false)); 
   const [errorLog,setErrorLog]=useState<string>('')
   const [scanned,setScanned]=useState<any>()
+  const [finalrejcnt,setFinalRejCnt]=useState<number>(0)
   // console.log(completed)
   // cos
 useEffect(() => {
@@ -194,6 +196,21 @@ useEffect(() => {
                   console.error("Error in second API:", error.response.data[0]);
               }
           );
+        getData<RejectionReason[]>(
+                      `productions/rejections/`,
+                      ip,
+                      {},
+                      {},
+                      (res:RejectionReason[])=>{
+                        let temp=0
+                        for(const obj of res){
+                          if(obj.batch==batchIdNum && obj.stage!='Whisker')
+                              temp++;
+                        }
+                        console.log('total_rej',temp)
+                        setFinalRejCnt(temp)
+                      }
+                    )
   }
   
 
@@ -372,7 +389,7 @@ useEffect(() => {
                        <StyledTableCell align="center">{scanned.Size}</StyledTableCell>
                        <StyledTableCell align="center">{scanned.Shades}</StyledTableCell>
                        <StyledTableCell align="center">{scanned.Color}</StyledTableCell>
-                       <StyledTableCell align="center">{scanned.Total_Quantity}</StyledTableCell>
+                       <StyledTableCell align="center">{scanned.Total_Quantity-finalrejcnt}</StyledTableCell>
                       </StyledTableRow>
                   </TableBody>
                 </Table>

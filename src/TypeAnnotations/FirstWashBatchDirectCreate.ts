@@ -29,3 +29,5 @@ export default interface FirstWashBatchDirectCreate
             quantity: number
         }[],
 }
+
+

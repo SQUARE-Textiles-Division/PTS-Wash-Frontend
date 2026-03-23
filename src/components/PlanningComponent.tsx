@@ -16,7 +16,7 @@ import { getData,postData,patchData } from "./genericApiService";
 import type Planning from '../TypeAnnotations/BatchInstance'
 import type RouteSteps from "../TypeAnnotations/BatchInstance";
 import React from "react";
-import { ip } from "../ip";
+import { ip, ptsip } from "../ip";
 
 
 const ALL_STAGES = [
@@ -79,7 +79,7 @@ export default function PlanningComponent() {
 
   getData<{ data_found: boolean ,buyer:string,style:string}>(
     `pp/${mpo}`,
-    "http://127.0.0.1:8000",
+    ptsip,
     {},
     {},
     (res) => {

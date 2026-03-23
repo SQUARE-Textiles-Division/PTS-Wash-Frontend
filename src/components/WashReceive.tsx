@@ -6,7 +6,7 @@ import { useRef,useState } from "react";
 import DoneAllIcon from '@mui/icons-material/DoneAll';
 import ReceivedBundles from "./ReceivedBundles";
 import { red } from "@mui/material/colors";
-import { ip } from "../ip";
+import { ip, ptsip } from "../ip";
 
 
 interface Props {
@@ -31,7 +31,7 @@ export default function WashReceive({items, setItems}: Props){
         // --- First API call (washing scan) ---
         getData<BundleInfo>(
             `washing/${barcode}/`,
-            "http://127.0.0.1:8000",
+            ptsip,
             {}, // body, if needed
             {},
             (result1:BundleInfo) => {

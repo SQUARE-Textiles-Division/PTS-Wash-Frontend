@@ -1,1 +1,3 @@
 export const ip="http://172.26.2.94:8000"
+// export const ip="http://127.0.0.1:8050"
+export const ptsip="http://172.26.2.88:8000"

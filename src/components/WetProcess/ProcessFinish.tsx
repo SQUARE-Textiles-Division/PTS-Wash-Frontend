@@ -1,8 +1,8 @@
 import {Box,FormControl,InputLabel,MenuItem,Paper,Select,Table,TableBody,TableContainer,TableHead,TableRow,TextField}   from "@mui/material";
 import { Modal, Typography, Button } from "@mui/material";
 
-import { getData,postData} from "../genericApiService";
-import { useEffect, useRef,useState } from "react";
+import { getData,patchData,postData} from "../genericApiService";
+import { useRef,useState } from "react";
 import DoneAllIcon from '@mui/icons-material/DoneAll';
 // import ReceivedBundles from "./ReceivedBundles";
 import TableCell, { tableCellClasses } from '@mui/material/TableCell';
@@ -10,9 +10,7 @@ import { red } from "@mui/material/colors";
 import { ip } from "../../ip";
 import { styled } from '@mui/material/styles';
 import { tbCellColor, tbRowColor } from "../Colors/Colors";
-import type { Machine } from "../../TypeAnnotations/Machine";
 import type { ProcessFirstWash } from "../../TypeAnnotations/ProcessFirstWash";
-import { all } from "axios";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -36,192 +34,125 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
   },
 }));
 
-
-// interface Machine {
-//   machine_number: number;
-//   SAP: string;
-//   added_at: string;
-// }
-
-
-
-export default function LoadStart(){    
+export default function UnloadFinish(){    
     const [showPopup, setShowPopup] = useState(false);
     const [processError,setProcessError]=useState("");
-
     const[showErrorPopup,setShowErrorPopup]=useState(false);
     const batchqrcoderef=useRef<HTMLInputElement>(null);
-    const [machine,setMachine]=useState(0);
-    const [machines, setMachines] = useState<number[]>([]);
     const [batchdetails,setBatchDetails]=useState<any[]>([])
     const [batchNumber,setBatchNumber]=useState(0)
     const [totQty,setTotQty]=useState(0)
 
-    useEffect(() => {
-        getData<Machine[]>(
-            `wet-process/machines`,
-            ip,
-            {},
-            {},
-            (res) => {
-                setMachines(res.map(m => m.machine_number));
-            }
-        );
-    }, []);
-//    console.log(machineList)
-    const fetchData = (batchcode: string,machine:number) => {
+    const fetchData = (batchcode: string) => {
         if (!batchcode) {
             console.warn("No Barcode entered");
             return;
         }
-        if(!machine){
-            console.warn("No Machine Selected")
-        }
-        // --- First API call (washing scan) ---
         const str=batchcode
         const index = str.indexOf("W1");      // find position of ":"
         let batchId = str.substring(index + 2);
         const batchIdNum = parseInt(batchId, 10);
-        console.log(batchIdNum)
+        // console.log(batchIdNum)
         const tempBatchDetail:any=[]
-        postData<ProcessFirstWash>(
+        // let getId=0
+        getData<ProcessFirstWash[]>(
             `wet-process/first-wash-processes/`,
             ip,
+            {},
             {
-                batch_for_first_wash:batchIdNum,
-                machine:machine
+                batch:batchIdNum
             },
-            (result:ProcessFirstWash)=>{
-                console.log(result)
-                const shade=result.batch_for_first_wash.shade
-                const sourceBatches=result.batch_for_first_wash.source_batches
-                const batchNumber=result.batch_for_first_wash.id
-                // let batchQR=`W8220${batchDry[i].updated_at}B${String(batchDry[i].id).padStart(10, '0')}`
-                for(const batchObj of sourceBatches){
-                    const allocquantity=batchObj.quantity
-                    for(const batchBundle of batchObj.batch.batch_bundles){
-                        if(batchBundle.received.shade==shade){
+            (res:ProcessFirstWash[])=>{
+                // getId=res[0].id
+                console.log(res)
+                console.log(res[0].id)
+                patchData<ProcessFirstWash>(
+                    `wet-process/first-wash-processes/${res[0].id}/`,
+                    ip,
+                    {
+                        state:'process_finish'
+                    },
+                    (result:ProcessFirstWash)=>{
+                        console.log(result)
+                        const shade=result.batch_for_first_wash.shade
+                        const sourceBatches=result.batch_for_first_wash.source_batches
+                        const batchNumber=result.batch_for_first_wash.id
+                        // let batchQR=`W8220${batchDry[i].updated_at}B${String(batchDry[i].id).padStart(10, '0')}`
+                        for(const batchObj of sourceBatches){
+                            const allocquantity=batchObj.quantity
+                            for(const batchBundle of batchObj.batch.batch_bundles){
+                                if(batchBundle.received.shade==shade){
+                                    tempBatchDetail.push({
+                                        'Shade':shade,
+                                        'MPO':batchBundle.received.mpo,
+                                        'SO':batchBundle.received.so,
+                                        'Style':batchBundle.received.style,
+                                        'Color':batchBundle.received.color,
+                                        'Size':batchBundle.received.size,
+                                        'Buyer':batchBundle.received.buyer,
+                                        'Quantity':allocquantity,
+                                        'Machine':result.machine.machine_number
+                                        // 'BatchNumber':batchNumber,
+                                        // 'BatchQRCode':
+                                        // {row.MPO}-${row.Buyer}-${row.Style}-${row.Color}-${row.Shade}-${row.Size}-${row.BatchQRCode}-${row.BatchNumber}-${row.Quantity}
+                                    })
+                                    break;
+                                }
+                            }
+                        }
+                        const sourceBundles=result.batch_for_first_wash.source_bundles
+
+                        const bundleMap = new Map();
+
+                        for (const bundleObj of sourceBundles) {
+                                const allocquantity = bundleObj.quantity;
+
+                                if (bundleObj.bundle.shade == shade) {
+
+                                    const key = `${shade}|${bundleObj.bundle.mpo}|${bundleObj.bundle.so}|${bundleObj.bundle.style}|${bundleObj.bundle.color}|${bundleObj.bundle.size}|${bundleObj.bundle.buyer}|${result.machine.machine_number}`;
+
+                                    if (!bundleMap.has(key)) {
+                                        bundleMap.set(key, allocquantity);
+                                    } else {
+                                        bundleMap.set(key, bundleMap.get(key) + allocquantity);
+                                    }
+                                }
+                            }
+                        for (const [key, value] of bundleMap) {
+
+                            const parts = key.split("|");
+                            console.log(parts)
                             tempBatchDetail.push({
-                                'Shade':shade,
-                                'MPO':batchBundle.received.mpo,
-                                'SO':batchBundle.received.so,
-                                'Style':batchBundle.received.style,
-                                'Color':batchBundle.received.color,
-                                'Size':batchBundle.received.size,
-                                'Buyer':batchBundle.received.buyer,
-                                'Quantity':allocquantity,
-                                'Machine':result.machine.machine_number
-                                // 'BatchNumber':batchNumber,
-                                // 'BatchQRCode':
-                                // {row.MPO}-${row.Buyer}-${row.Style}-${row.Color}-${row.Shade}-${row.Size}-${row.BatchQRCode}-${row.BatchNumber}-${row.Quantity}
-                            })
-                            break;
+                                Shade: parts[0],
+                                MPO: parts[1],
+                                SO: parts[2],
+                                Style: parts[3],
+                                Color: parts[4],
+                                Size: parts[5],
+                                Buyer: parts[6],
+                                Machine: parts[7],
+                                // BatchNumber: parts[7],
+                                Quantity: value
+                            });
                         }
+                        setBatchDetails(tempBatchDetail)
+                        setBatchNumber(batchNumber)
+                        setTotQty(result.batch_for_first_wash.total_quantity)
+                    },
+                    (error:any)=>{
+                        console.log(error.response.data)
+                        let msg=error.response.data[0]
+                        // if
+
+                        setProcessError(msg)   
                     }
-                }
-                const sourceBundles=result.batch_for_first_wash.source_bundles
-
-                const bundleMap = new Map();
-
-               for (const bundleObj of sourceBundles) {
-                    const allocquantity = bundleObj.quantity;
-
-                    if (bundleObj.bundle.shade == shade) {
-
-                        const key = `${shade}|${bundleObj.bundle.mpo}|${bundleObj.bundle.so}|${bundleObj.bundle.style}|${bundleObj.bundle.color}|${bundleObj.bundle.size}|${bundleObj.bundle.buyer}|${result.machine.machine_number}`;
-
-                        if (!bundleMap.has(key)) {
-                            bundleMap.set(key, allocquantity);
-                        } else {
-                            bundleMap.set(key, bundleMap.get(key) + allocquantity);
-                        }
-                    }
-                }
-                for (const [key, value] of bundleMap) {
-
-                    const parts = key.split("|");
-                    console.log(parts)
-                    tempBatchDetail.push({
-                        Shade: parts[0],
-                        MPO: parts[1],
-                        SO: parts[2],
-                        Style: parts[3],
-                        Color: parts[4],
-                        Size: parts[5],
-                        Buyer: parts[6],
-                        Machine:parts[7],
-                        // BatchNumber: parts[7],
-                        Quantity: value
-                    });
-                }
-                setBatchDetails(tempBatchDetail)
-                setBatchNumber(batchNumber)
-                setTotQty(result.batch_for_first_wash.total_quantity)
+                )
             },
             (error:any)=>{
-                console.log(error.response.data)
-                let msg=""
-                Object.entries(error.response.data).forEach(([key, value]:any) => {
-                    msg+=value[0]
-                });
-                // if
-
-                setProcessError(msg)   
+                    console.log(error.response.data)
             }
-        
+
         )
-        // getData<BundleInfo>(
-        //     `washing/${barcode}/`
-        //     "http://127.0.0.1:8000",
-        //     {}, // body, if needed
-        //     {},
-        //     (result1:BundleInfo) => {
-        //         // setData(result1);
-        //         // console.log("First API result:", result1);
-
-        //         // --- Build payload for second API ---
-        //         const payload = {
-        //             mpo: result1.mpo,
-        //             marker:result1.marker,
-        //             buyer:result1.buyer,
-        //             style:result1.style,
-        //             so:result1.so,
-        //             bundle_no: result1.bundle_no,
-        //             bundle_barcode: result1.bundle_barcode,
-        //             size: result1.size,
-        //             shade: result1.shade,
-        //             color: result1.color,
-        //             quantity: result1.quantity,
-        //         };
-                // console.log("Payload sent to second API:", payload);
-
-                // --- Second API call ---
-            //     postData(
-            //         `productions/received-bundles/`,
-            //         ip,
-            //         payload,
-            //         (result2:BundleInfo) => {
-            //             // setSecondData(result2);
-            //             setItems([
-            //                     result2,
-            //                     ...items,
-            //                 ]);
-            //             if (result2) {
-            //                 setShowPopup(true);
-            //             }
-            //             console.log("Second API result:", result2);
-            //         },
-            //         (error:any) => {
-            //             setShowErrorPopup(true);
-            //             console.error("Error in second API:", error.response.data);
-            //         }
-            //     );
-            // },
-            // (error) => {
-            //     setSewingError(true)
-            //     console.error("Error in first API:", error);
-            // }
-        // );
     };
 
 
@@ -239,7 +170,7 @@ export default function LoadStart(){
                 // width:250
                 }}
             >
-                <Box sx={{ width: 150}}>
+                {/* <Box sx={{ width: 150}}>
                         <FormControl fullWidth>
                             <InputLabel id="demo-simple-select-label">Machine</InputLabel>
                             <Select
@@ -247,15 +178,15 @@ export default function LoadStart(){
                             id="demo-simple-select"
                             // value={age}
                             label="Shade"
-                            onChange={(e) => setMachine(e.target.value as number)}
+                            onChange={(e) => setMachine(e.target.value as string)}
                             >
                            
-                            {machines.map((machine) => (
+                            {machineList.map((machine) => (
                                 <MenuItem key={machine} value={machine}>{machine}</MenuItem>
                             ))}
                             </Select>
                         </FormControl>
-                    </Box>
+                    </Box> */}
                 <TextField
                 style={{outline:"red",
                     width:250,
@@ -266,15 +197,10 @@ export default function LoadStart(){
                 
                 autoFocus
                 onChange={() => {
-                    if(machine==0)
-                    {
-                        setShowErrorPopup(true)
-                        batchqrcoderef.current!.value = "";
-                        return
-                    }
+                   
                     const batchcode = batchqrcoderef.current?.value.trim() || "";
                     if(batchcode.length==25){
-                        fetchData(batchcode,machine);
+                        fetchData(batchcode);
                         batchqrcoderef.current!.value = "";
                     }
                     else{
@@ -319,9 +245,8 @@ export default function LoadStart(){
                       maxHeight: 300,          // vertical scrollbar
                       overflowX: "auto",       // horizontal scrollbar
                       overflowY: "auto",
-                      marginLeft:'250px',
-                      marginRight:'10px',
-                      maxWidth: 1100,
+                      marginLeft:'200px',
+                      maxWidth: 1200,
                       border:"none",
                        mt:3,
                     }}
@@ -351,7 +276,7 @@ export default function LoadStart(){
                         <StyledTableCell align="center">Size</StyledTableCell>
                         {/* <StyledTableCell>BundleBarcode</StyledTableCell> */}
                         {/* <StyledTableCell>BatchQRCode</StyledTableCell> */}
-                        {/* <StyledTableCell align="center">BatchNumber(First Wash)</StyledTableCell> */}
+                        {/* <StyledTableCell align="center">BatchNumber</StyledTableCell> */}
                         <StyledTableCell align="center">Shade</StyledTableCell>
                         <StyledTableCell align="center">Machine No</StyledTableCell>
                         <StyledTableCell align="center">Total Quantity</StyledTableCell>
@@ -372,16 +297,16 @@ export default function LoadStart(){
                                 <StyledTableCell align="center">{row.Size}</StyledTableCell>
                                 {/* <StyledTableCell align="center">{row.BatchQRCode}</StyledTableCell> */}
                                 {/* <StyledTableCell align="center">{row.BatchNumber}</StyledTableCell> */}
-                                <StyledTableCell align="center">{row.Shade}</StyledTableCell>  
-                                 <StyledTableCell align="center">{row.Machine}</StyledTableCell>  
+                                <StyledTableCell align="center">{row.Shade}</StyledTableCell>   
+                                <StyledTableCell align="center">{row.Machine}</StyledTableCell> 
                                 <StyledTableCell align="center">{row.Quantity}</StyledTableCell>
                                 </StyledTableRow>
                             ))}
                         <TableRow>
-                                <TableCell colSpan={6} sx={{ textAlign: "end", fontWeight: "bold",color:tbCellColor }}>
-                                   Batch (First Wash) - {batchNumber}
-                                </TableCell>
-                                <TableCell colSpan={7} sx={{ textAlign: "end", fontWeight: "bold",color:tbCellColor  }}  >Grand Total  = {totQty}</TableCell>
+                            <TableCell colSpan={6} sx={{ textAlign: "end", fontWeight: "bold",color:tbCellColor }}>
+                                Batch (First Wash) - {batchNumber}
+                            </TableCell>
+                            <TableCell colSpan={7} sx={{ textAlign: "end", fontWeight: "bold",color:tbCellColor  }}  >Grand Total  = {totQty}</TableCell>
                         </TableRow>
                     </TableBody>
                   </Table>
@@ -420,6 +345,7 @@ export default function LoadStart(){
                     </Box>
                 </Modal>
 
+                
                 <Modal open={processError!=""} onClose={() => setProcessError("")}>
                     <Box
                         sx={{

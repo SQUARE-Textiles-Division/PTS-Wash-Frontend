@@ -6,7 +6,7 @@ import { getData, postData} from "../genericApiService";
 import { useEffect, useRef,useState } from "react";
 import DoneAllIcon from '@mui/icons-material/DoneAll';
 import alarmSound from "../../assets/alarm.mp3";
-import { ip } from "../../ip";
+import { ip, ptsip } from "../../ip";
 import type BatchBundles from "../../TypeAnnotations/BatchInstance";
 import { styled } from '@mui/material/styles';
 import Table from '@mui/material/Table';
@@ -21,6 +21,7 @@ import { tbCellColor,tbRowColor } from '../Colors/Colors';
 import { QRCodeCanvas } from "qrcode.react";
 import { useReactToPrint } from "react-to-print";
 import type FirstWashBatchDirectCreate from "../../TypeAnnotations/FirstWashBatchDirectCreate";
+import type FirstWashBatch from "../../TypeAnnotations/FirstWashBatch";
 
 // interface Props {
 //     items: BundleInfo[];
@@ -106,7 +107,7 @@ export default function BatchCreateDirect(){
         // --- First API call (washing scan) ---
         getData<BundleInfo>(
             `washing/${barcode}/`,
-            "http://127.0.0.1:8000",
+            ptsip,
             {}, // body, if needed
             {},
             (result1:BundleInfo) => {
@@ -131,7 +132,7 @@ export default function BatchCreateDirect(){
                                 isDuplicate=true;
                                 // break;
                             }
-                            if(items[i].shade!=result2.shade){
+                            if(items[i].shade!=result2.shade && items[i].buyer!=result2.buyer && items[i].color!=result2.color){
                                 sameShade=false;
                                 break;
                             }
@@ -258,15 +259,17 @@ export default function BatchCreateDirect(){
                             console.log("Creating batch with item IDs:", itemId);
                             const payload={
                                 "shade":items[0].shade,
-                                "bundle_source":[] as any
+                                "buyer":items[0].buyer,
+                                 "color":items[0].color,
+                                "source_bundles":[] as any
                             }
                             for(let i=0;i<items.length;i++){
-                                payload.bundle_source.push({
-                                    "bundle":items[i].id,
+                                payload.source_bundles.push({
+                                    "received":items[i].id,
                                     "quantity":items[i].quantity
                                 })
                             }
-                            postData<FirstWashBatchDirectCreate>(
+                            postData<FirstWashBatch>(
                                 'wet-process/first-wash-batches/',
                                 ip,
                                 payload,
@@ -280,7 +283,7 @@ export default function BatchCreateDirect(){
                                     let soSet=new Set<string>();
                                     let sizeSet=new Set<string>();
                                     for(let i=0;i<sourceBundles.length;i++){
-                                        let bundle=sourceBundles[i].bundle;
+                                        let bundle=sourceBundles[i].received;
                                         mpoSet.add(bundle.mpo);
                                         colorSet.add(bundle.color);
                                         buyerSet.add(bundle.buyer);
@@ -441,7 +444,7 @@ export default function BatchCreateDirect(){
                                 <Button
                                     variant="outlined"
                                     sx={{ mt: 2 ,marginRight:"450px"}}
-                                    // onClick={handlePrint}
+                                    onClick={handlePrint}
                                 >
                                     Print QR Code
                                 </Button>
@@ -471,7 +474,7 @@ export default function BatchCreateDirect(){
                             width: 400,
                         }}
                         >
-                        <Typography variant="h6">Same Shade Must be Entered</Typography>
+                        <Typography variant="h6">Same Shade,Buyer & Color Must be Entered</Typography>
                         <Typography>You must have to scan bundles with same Shade.
                         </Typography>
                         <Button sx={{ mt: 2 }} onClick={() => setAlarm(false)}>Close</Button>

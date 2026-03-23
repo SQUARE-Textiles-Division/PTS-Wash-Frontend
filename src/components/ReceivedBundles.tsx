@@ -46,7 +46,7 @@ export default function ReceivedBundles({ rows }: Props) {
         component={Paper}
         elevation={0}
         sx={{
-          // maxHeight: 300,          // vertical scrollbar
+          maxHeight: 300,          // vertical scrollbar
           overflowX: "auto",       // horizontal scrollbar
           overflowY: "auto",
           marginLeft:'200px',

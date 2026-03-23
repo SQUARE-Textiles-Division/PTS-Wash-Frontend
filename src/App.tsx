@@ -37,11 +37,18 @@ import HydroIn from './components/WetProcess/HydroIn'
 import HydroOut from './components/WetProcess/HydroOut'
 import LoadStart from './components/WetProcess/LoadStart'
 import LoadFinish from './components/WetProcess/LoadFinish'
+import ProcessFinish from './components/WetProcess/ProcessFinish'
+// import UnloadStart from './components/WetProcess/UnloadFinish'
+import DryerConveyorIn from './components/WetProcess/DryerConveyorIn'
+
+import DryerOvenIn from './components/WetProcess/DryerOvenIn'
 import UnloadFinish from './components/WetProcess/UnloadFinish'
-import UnloadStart from './components/WetProcess/UnloadStart'
-import DryerConveyor from './components/WetProcess/DryerConveyor'
-import DryerTumble from './components/WetProcess/DryerTumble'
-import DryerOver from './components/WetProcess/DryerOver'
+import DryerConveyorOut from './components/WetProcess/DryerConveyorOut'
+import DryerTumbleIn from './components/WetProcess/DryerTumbleIn'
+import DryerOvenOut from './components/WetProcess/DryerOvenOut'
+import DryerTumbleOut from './components/WetProcess/DryerTumbleOut'
+import FirstWashQC from './components/WetProcess/FirstWashQC'
+import Rewash from './components/WetProcess/Rewash'
 function App() {
   // const [count, setCount] = useState(0)
   return (
@@ -54,13 +61,23 @@ function App() {
         <Route path='/hydroout' element={<HydroOut/>}/>
         <Route path='/loadstart' element={<LoadStart/>}/>
         <Route path='/loadfinish' element={<LoadFinish/>}/>
-        <Route path='/unloadstart' element={<UnloadStart/>}/>
+        <Route path='/firstwashqc' element={<FirstWashQC/>}/>
+        <Route path='/rewashcreatebatch' element={<Rewash/>}/>
+        
+        <Route path='/processfinish' element={<ProcessFinish/>}/>
         <Route path='/unloadfinish' element={<UnloadFinish/>}/>
-        <Route path="/dryerconveyor" element={<DryerConveyor/>}/>
-        <Route path='/dryertumble' element={<DryerTumble/>}/>
-        <Route path='/dryerover' element={<DryerOver/>}/>
+        <Route path="/dryerconveyorin" element={<DryerConveyorIn/>}/>
+        <Route path="/dryerconveyorout" element={<DryerConveyorOut/>}/>
+        <Route path='/dryertumblein' element={<DryerTumbleIn/>}/>
+        <Route path='/dryerovenin' element={<DryerOvenIn/>}/>
+        <Route path='/dryerovenout' element={<DryerOvenOut/>}/>
+        <Route path='dryertumbleout' element={<DryerTumbleOut/>}/>
         <Route path='/batchwithdry' element={<BatchCreateDry/>}/>
         <Route path='/batchdry' element={<BatchCreateDirect/>}/>
+
+
+
+
         <Route path="/washreceive" element={<WashReceivePass />} />
         <Route path="/createbatch" element={<CreateBatch />} />
         <Route path="/qceditdel" element={<QCEditDel />} />

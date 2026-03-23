@@ -6,7 +6,7 @@ import { getData, postData} from "./genericApiService";
 import { useEffect, useRef,useState } from "react";
 import DoneAllIcon from '@mui/icons-material/DoneAll';
 import alarmSound from "../assets/BatchCreationError.mp3";
-import { ip } from "../ip";
+import { ip, ptsip } from "../ip";
 import type BatchBundles from "../TypeAnnotations/BatchInstance";
 
 interface Props {
@@ -68,7 +68,7 @@ export default function CheckReceive({items, setItems,qrData,setQrData}: Props){
         // --- First API call (washing scan) ---
         getData<BundleInfo>(
             `washing/${barcode}/`,
-            "http://127.0.0.1:8000",
+            ptsip,
             {}, // body, if needed
             {},
             (result1:BundleInfo) => {
@@ -342,9 +342,9 @@ export default function CheckReceive({items, setItems,qrData,setQrData}: Props){
                             width: 400,
                         }}
                         >
-                        <Typography variant="h6">Not Received Yet!!!</Typography>
-                        <Typography>You have to receive this bundle in Production before washing.
-                        </Typography>
+                        <Typography variant="h6">{errorMessage}</Typography>
+                        {/* <Typography>You have to receive this bundle in Production before washing.
+                        </Typography> */}
                         <Button sx={{ mt: 2 }} onClick={() => setShowErrorPopup(false)}>Close</Button>
                         </Box>
                     </Box>

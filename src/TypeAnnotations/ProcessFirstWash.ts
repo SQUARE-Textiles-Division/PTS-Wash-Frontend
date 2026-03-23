@@ -4,14 +4,16 @@ import type { Machine } from "./Machine";
 
 
 export interface BatchBundle {
-  id: number;
   received: BundleInfo;
 }
 export interface Batch {
   id: number;
   batch_bundles: BatchBundle[];
 }
-
+export interface SourceBundle{
+  bundle:BundleInfo;
+  quantity:number,
+}
 export interface SourceBatch {
   batch: Batch;
   quantity: number;
@@ -22,6 +24,7 @@ export interface BatchForFirstWash {
   total_quantity: number;
   status: string | null;
   source_batches: SourceBatch[];
+  source_bundles: SourceBundle[]
 }
 export interface ProcessFirstWash {
   id: number;

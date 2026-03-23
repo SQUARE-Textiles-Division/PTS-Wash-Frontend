@@ -13,12 +13,14 @@ export default function NumberSpinner({
   id: idProp,
   label,
   error,
-  size = 'medium',
+  size = 'small',
+  disableDecrement=false,
   ...other
 }: BaseNumberField.Root.Props & {
   label?: React.ReactNode;
   size?: 'small' | 'medium';
   error?: boolean;
+  disableDecrement?: boolean;
 }) {
   let id = React.useId();
   if (idProp) {
@@ -63,8 +65,8 @@ export default function NumberSpinner({
             fontSize: '0.875rem',
             color: 'text.primary',
             fontWeight: 500,
-            lineHeight: 1.5,
-            mb: 0.5,
+            lineHeight: 0.5,
+            // mb: 0,
             // mx:1
           }}
         >

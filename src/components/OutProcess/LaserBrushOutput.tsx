@@ -22,6 +22,7 @@ import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import { tbCellColor, tbRowColor } from '../Colors/Colors';
 import { ip } from '../../ip';
+import type RejectionReason from '../../TypeAnnotations/RejectionReason';
 // import { postData } from './genericApiService';
 // import Typography from '@mui/material/Typography';
 
@@ -54,6 +55,7 @@ export default function LaserBrushOutput() {
   const [rejCnt,setRejCnt]=useState<number>(-1)
   const [batchNum,setBatchNum]=useState<number>()
   const [scanned,setScanned]=useState<any>()
+  const [finalrejcnt,setFinalRejCnt]=useState<number>(0)
   useEffect(() => {
      if (stages.length > 0) {
        setCompleted(stages.map(() => false));
@@ -163,6 +165,21 @@ export default function LaserBrushOutput() {
               console.error("Error in second API:", error.response.data[0]);
           }
       );
+      getData<RejectionReason[]>(
+                        `productions/rejections/`,
+                        ip,
+                        {},
+                        {},
+                        (res:RejectionReason[])=>{
+                          let temp=0
+                          for(const obj of res){
+                            if(obj.batch==batchIdNum && obj.stage!='Laser Brush')
+                                temp++;
+                          }
+                          console.log('total_rej',temp)
+                          setFinalRejCnt(temp)
+                        }
+            )
   }
   
 
@@ -279,6 +296,7 @@ export default function LaserBrushOutput() {
                               // console.log(rejres)
                               // console.log(total_rej)
                               setRejCnt(total_rej);
+                              
                             },
                             (error: any) => {
                               console.log(error);
@@ -379,7 +397,8 @@ export default function LaserBrushOutput() {
                           (closeRes: BatchStage) => {
                             console.log(closeRes)
                             const currStage = `${closeRes.current_stage} ${closeRes.current_status}`;
-                              markCompletedUntil(currStage, stages);
+                            markCompletedUntil(currStage, stages);
+                            setFinalRejCnt(finalrejcnt+rejCnt)
                             setRejCnt(-1);
                           },
                           (error: any) => {
@@ -445,7 +464,7 @@ export default function LaserBrushOutput() {
                        <StyledTableCell align="center">{scanned.Size}</StyledTableCell>
                        <StyledTableCell align="center">{scanned.Shades}</StyledTableCell>
                        <StyledTableCell align="center">{scanned.Color}</StyledTableCell>
-                       <StyledTableCell align="center">{scanned.Total_Quantity}</StyledTableCell>
+                       <StyledTableCell align="center">{scanned.Total_Quantity-finalrejcnt}</StyledTableCell>
                       </StyledTableRow>
                   </TableBody>
                 </Table>

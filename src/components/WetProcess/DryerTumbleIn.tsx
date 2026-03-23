@@ -45,38 +45,36 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 
 
 
-export default function LoadStart(){    
+export default function DryerOvenIn(){    
     const [showPopup, setShowPopup] = useState(false);
     const [processError,setProcessError]=useState("");
 
     const[showErrorPopup,setShowErrorPopup]=useState(false);
     const batchqrcoderef=useRef<HTMLInputElement>(null);
-    const [machine,setMachine]=useState(0);
-    const [machines, setMachines] = useState<number[]>([]);
+    // const [machine,setMachine]=useState(0);
+    // const [machines, setMachines] = useState<number[]>([]);
     const [batchdetails,setBatchDetails]=useState<any[]>([])
     const [batchNumber,setBatchNumber]=useState(0)
     const [totQty,setTotQty]=useState(0)
 
-    useEffect(() => {
-        getData<Machine[]>(
-            `wet-process/machines`,
-            ip,
-            {},
-            {},
-            (res) => {
-                setMachines(res.map(m => m.machine_number));
-            }
-        );
-    }, []);
+    // useEffect(() => {
+    //     getData<Machine[]>(
+    //         `wet-process/machines`,
+    //         ip,
+    //         {},
+    //         {},
+    //         (res) => {
+    //             setMachines(res.map(m => m.machine_number));
+    //         }
+    //     );
+    // }, []);
 //    console.log(machineList)
-    const fetchData = (batchcode: string,machine:number) => {
+    const fetchData = (batchcode: string) => {
         if (!batchcode) {
             console.warn("No Barcode entered");
             return;
         }
-        if(!machine){
-            console.warn("No Machine Selected")
-        }
+       
         // --- First API call (washing scan) ---
         const str=batchcode
         const index = str.indexOf("W1");      // find position of ":"
@@ -85,11 +83,12 @@ export default function LoadStart(){
         console.log(batchIdNum)
         const tempBatchDetail:any=[]
         postData<ProcessFirstWash>(
-            `wet-process/first-wash-processes/`,
+            `wet-process/first-wash-dryer-processes/`,
             ip,
             {
                 batch_for_first_wash:batchIdNum,
-                machine:machine
+                machine:5,
+                type:'tumble'
             },
             (result:ProcessFirstWash)=>{
                 console.log(result)
@@ -110,7 +109,7 @@ export default function LoadStart(){
                                 'Size':batchBundle.received.size,
                                 'Buyer':batchBundle.received.buyer,
                                 'Quantity':allocquantity,
-                                'Machine':result.machine.machine_number
+                                'Machine':result.machine
                                 // 'BatchNumber':batchNumber,
                                 // 'BatchQRCode':
                                 // {row.MPO}-${row.Buyer}-${row.Style}-${row.Color}-${row.Shade}-${row.Size}-${row.BatchQRCode}-${row.BatchNumber}-${row.Quantity}
@@ -128,7 +127,7 @@ export default function LoadStart(){
 
                     if (bundleObj.bundle.shade == shade) {
 
-                        const key = `${shade}|${bundleObj.bundle.mpo}|${bundleObj.bundle.so}|${bundleObj.bundle.style}|${bundleObj.bundle.color}|${bundleObj.bundle.size}|${bundleObj.bundle.buyer}|${result.machine.machine_number}`;
+                        const key = `${shade}|${bundleObj.bundle.mpo}|${bundleObj.bundle.so}|${bundleObj.bundle.style}|${bundleObj.bundle.color}|${bundleObj.bundle.size}|${bundleObj.bundle.buyer}|${result.machine}`;
 
                         if (!bundleMap.has(key)) {
                             bundleMap.set(key, allocquantity);
@@ -239,7 +238,7 @@ export default function LoadStart(){
                 // width:250
                 }}
             >
-                <Box sx={{ width: 150}}>
+                {/* <Box sx={{ width: 150}}>
                         <FormControl fullWidth>
                             <InputLabel id="demo-simple-select-label">Machine</InputLabel>
                             <Select
@@ -255,7 +254,7 @@ export default function LoadStart(){
                             ))}
                             </Select>
                         </FormControl>
-                    </Box>
+                    </Box> */}
                 <TextField
                 style={{outline:"red",
                     width:250,
@@ -266,15 +265,15 @@ export default function LoadStart(){
                 
                 autoFocus
                 onChange={() => {
-                    if(machine==0)
-                    {
-                        setShowErrorPopup(true)
-                        batchqrcoderef.current!.value = "";
-                        return
-                    }
+                    // if(machine==0)
+                    // {
+                    //     setShowErrorPopup(true)
+                    //     batchqrcoderef.current!.value = "";
+                    //     return
+                    // }
                     const batchcode = batchqrcoderef.current?.value.trim() || "";
                     if(batchcode.length==25){
-                        fetchData(batchcode,machine);
+                        fetchData(batchcode);
                         batchqrcoderef.current!.value = "";
                     }
                     else{
@@ -372,8 +371,8 @@ export default function LoadStart(){
                                 <StyledTableCell align="center">{row.Size}</StyledTableCell>
                                 {/* <StyledTableCell align="center">{row.BatchQRCode}</StyledTableCell> */}
                                 {/* <StyledTableCell align="center">{row.BatchNumber}</StyledTableCell> */}
-                                <StyledTableCell align="center">{row.Shade}</StyledTableCell>  
-                                 <StyledTableCell align="center">{row.Machine}</StyledTableCell>  
+                                <StyledTableCell align="center">{row.Shade}</StyledTableCell>   
+                                <StyledTableCell align="center">{row.Machine}</StyledTableCell> 
                                 <StyledTableCell align="center">{row.Quantity}</StyledTableCell>
                                 </StyledTableRow>
                             ))}

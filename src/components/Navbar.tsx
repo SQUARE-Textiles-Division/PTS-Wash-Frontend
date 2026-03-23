@@ -8,13 +8,70 @@ import logo from '../assets/PTS Wash Logo.png'
 
 type MenuItem = {
   primary: string;
-  to: string;
-  children?: MenuItem[]; // <-- optional for submenus
+  to?: string;
+  children?: MenuItem[];
 };
 export default function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
 
+  const MenuItemRenderer = ({
+  item,
+  level = 0,
+}: {
+  item: MenuItem & { children?: MenuItem[] };
+  level?: number;
+}) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const isActive = location.pathname === item.to;
+  const isOpen = openSubmenus[item.primary] || false;
+
+  const handleClick = () => {
+    if (item.children) {
+      setOpenSubmenus(prev => ({
+        ...prev,
+        [item.primary]: !isOpen,
+      }));
+    }
+  };
+
+  return (
+    <>
+      <ListItem disablePadding>
+        <ListItemButton
+          onClick={handleClick}
+          component={!item.children && item.to ? RouterLink : "div"}
+          to={!item.children ? item.to : undefined}
+          sx={{
+            bgcolor: isActive ? tbCellColor : "#485e68",
+            "&:hover": { bgcolor: tbCellColor, color: "white" },
+            color: "white",
+            paddingLeft: 4 + level * 4,
+          }}
+        >
+          <ListItemText
+            primaryTypographyProps={{ sx: { fontWeight: 600 } }}
+            primary={item.primary}
+          />
+        </ListItemButton>
+      </ListItem>
+
+      {item.children && isOpen && (
+        <List disablePadding>
+          {item.children.map(child => (
+            <MenuItemRenderer
+              key={child.primary}
+              item={child}
+              level={level + 1}
+            />
+          ))}
+        </List>
+      )}
+    </>
+  );
+};
   const DryProcessItemContent: MenuItem[] = [
     { primary: "Planning", to: "/planning" },
     { primary: "Create Batch", to: "/createbatch" },
@@ -51,39 +108,125 @@ export default function Navbar() {
   ];
 
   const WetProcessItemContent: (MenuItem & { children?: MenuItem[] }) []= [
+    {
+      primary:"First Wash",
+      children:[
+        { primary: "Create Batch (Without Dry)", to: "/batchdry" },
+        { primary: "Create Batch (With Dry)", to: "/batchwithdry" },
+        
+        { primary: "Load",
+          children: [
+            { primary: "Load Start", to: "/loadstart" },
+            { primary: "Load Finish & Process Start", to: "/loadfinish" },
+          ],
+        },
+        { primary: "Unload",
+          // to: "",
+          children: [
+            { primary: "Process Finish & Unload Start", to: "/processfinish" },
+            { primary: "UnLoad Finish", to: "/unloadfinish" },
+          ],
+        },
+        { primary: "Hydro",
+          // to: "",
+          children: [
+            { primary: "Hydro In", to: "/hydroin" },
+            { primary: "Hydro Out", to: "/hydroout" },
+          ],
+        },
+        {
+          primary: "Dryer",
+          children: [
+            { primary: "Dryer Conveyor In", to: "/dryerconveyorin" },
+            { primary: "Dryer Conveyor Out", to: "/dryerconveyorout" },
+            { primary: "Dryer Oven In", to: "/dryerovenin" },
+            { primary: "Dryer Oven Out", to: "/dryerovenout" },
+            { primary: "Dryer Tumble In", to: "/dryertumblein" },
+            { primary: "Dryer Tumble Out", to: "/dryertumbleout" },
+          
+          ],
+        },
+        {primary: "First Wash QC",to:"/firstwashqc"},
+      ]
+    },
+
+    {
+      primary:"Rewash",
+      children:[
+        { primary: "Create Batch", to: "/rewashcreatebatch" },
+        
+        // { primary: "Load",
+        //   children: [
+        //     { primary: "Load Start", to: "/loadstart" },
+        //     { primary: "Load Finish & Process Start", to: "/loadfinish" },
+        //   ],
+        // },
+        // { primary: "Unload",
+        //   // to: "",
+        //   children: [
+        //     { primary: "Process Finish & Unload Start", to: "/processfinish" },
+        //     { primary: "UnLoad Finish", to: "/unloadfinish" },
+        //   ],
+        // },
+        // { primary: "Hydro",
+        //   // to: "",
+        //   children: [
+        //     { primary: "Hydro In", to: "/hydroin" },
+        //     { primary: "Hydro Out", to: "/hydroout" },
+        //   ],
+        // },
+        // {
+        //   primary: "Dryer",
+        //   children: [
+        //     { primary: "Dryer Conveyor In", to: "/dryerconveyorin" },
+        //     { primary: "Dryer Conveyor Out", to: "/dryerconveyorout" },
+        //     { primary: "Dryer Oven In", to: "/dryerovenin" },
+        //     { primary: "Dryer Oven Out", to: "/dryerovenout" },
+        //     { primary: "Dryer Tumble In", to: "/dryertumblein" },
+        //     { primary: "Dryer Tumble Out", to: "/dryertumbleout" },
+          
+        //   ],
+        // },
+        // {primary: "First Wash QC",to:"/firstwashqc"},
+      ]
+    },
     
-    { primary: "Create Batch (Without Dry)", to: "/batchdry" },
-    { primary: "Create Batch (With Dry)", to: "/batchwithdry" },
+    // { primary: "Create Batch (Without Dry)", to: "/batchdry" },
+    // { primary: "Create Batch (With Dry)", to: "/batchwithdry" },
     
-    { primary: "Load",
-      to: "",
-      children: [
-        { primary: "Load Start", to: "/loadstart" },
-        { primary: "Load Finish", to: "/loadfinish" },
-      ],
-    },
-    { primary: "Unload",
-      to: "",
-      children: [
-        { primary: "UnLoad Start", to: "/unloadstart" },
-        { primary: "UnLoad Finish", to: "/unloadfinish" },
-      ],
-    },
-    { primary: "Hydro",
-      to: "",
-      children: [
-        { primary: "Hydro In", to: "/hydroin" },
-        { primary: "Hydro Out", to: "/hydroout" },
-      ],
-    },
-     { primary: "Dryer",
-      to: "",
-      children: [
-        { primary: "Dryer Conveyor", to: "/dryerconveyor" },
-        { primary: "Dryer Over", to: "/dryerover" },
-        { primary: "Dryer Tumble", to: "/dryertumble" }
-      ],
-    },
+    // { primary: "Load",
+    //   to: "",
+    //   children: [
+    //     { primary: "Load Start", to: "/loadstart" },
+    //     { primary: "Load Finish & Process Start", to: "/loadfinish" },
+    //   ],
+    // },
+    // { primary: "Unload",
+    //   to: "#",
+    //   children: [
+    //     { primary: "Process Finish & Unload Start", to: "/processfinish" },
+    //     { primary: "UnLoad Finish", to: "/unloadfinish" },
+    //   ],
+    // },
+    // { primary: "Hydro",
+    //   to: "",
+    //   children: [
+    //     { primary: "Hydro In", to: "/hydroin" },
+    //     { primary: "Hydro Out", to: "/hydroout" },
+    //   ],
+    // },
+    // {
+    //   primary: "Dryer",
+    //   children: [
+    //     { primary: "Dryer Conveyor In", to: "/dryerconveyorin" },
+    //     { primary: "Dryer Conveyor Out", to: "/dryerconveyorout" },
+    //     { primary: "Dryer Oven In", to: "/dryerovenin" },
+    //     { primary: "Dryer Oven Out", to: "/dryerovenout" },
+    //     { primary: "Dryer Tumble In", to: "/dryertumblein" },
+    //     { primary: "Dryer Tumble Out", to: "/dryertumbleout" },
+       
+    //   ],
+    // },
     
   ];
   const [openSubmenus, setOpenSubmenus] = useState<{ [key: string]: boolean }>({});
@@ -137,11 +280,16 @@ export default function Navbar() {
       location.pathname.startsWith("/hydroout")||
       location.pathname.startsWith("/loadstart")||
       location.pathname.startsWith("/loadfinish")||
-      location.pathname.startsWith("/unloadstart")||
+      location.pathname.startsWith("/processfinish")||
       location.pathname.startsWith("/unloadfinish")||
-      location.pathname.startsWith("/dryerconveyor")||
-      location.pathname.startsWith("/dryerover")||
-      location.pathname.startsWith("/dryertumble")
+      location.pathname.startsWith("/dryerconveyorin")||
+      location.pathname.startsWith("/dryerconveyorout")||
+      location.pathname.startsWith("/dryerovenin")||
+      location.pathname.startsWith("/dryerovenout")||
+      location.pathname.startsWith("/dryertumblein")||
+      location.pathname.startsWith("/dryertumbleout")||
+      location.pathname.startsWith("/firstwashqc")||
+      location.pathname.startsWith("/rewashcreatebatch")
     ) {
       setDryProcess(false);
       setItemContent(WetProcessItemContent);
@@ -171,7 +319,13 @@ export default function Navbar() {
     setDryProcess(isDry);
     setItemContent(isDry ? DryProcessItemContent : WetProcessItemContent);
 
-    navigate(isDry ? "/planning" : "/batchdry");
+    // navigate(isDry ? "/planning" : "/batchdry");
+    if(isDry){
+      window.open("/planning", "_blank")
+    }
+    else{
+      window.open("/batchdry", "_blank")
+    }
   };
   return (
     <Box sx={{ 
@@ -204,7 +358,8 @@ export default function Navbar() {
 
           <Box sx={{ display: "flex", gap: 2, alignItems: "center",fontWeight:600 }}>
             <p
-              onClick={() => navigate("/washreceive")}
+              // onClick={() => navigate("/washreceive")}
+              onClick={()=>window.open("/washreceive", "_blank")}
               style={{ textDecoration: "none", color: "#485e68", cursor: "pointer",  }}
             >
               Wash Receive
@@ -248,7 +403,12 @@ export default function Navbar() {
       >
         <Toolbar /> {/* empty toolbar to push content below AppBar */}
         <Box sx={{ overflow: "auto"}}>
-          <List>
+            <List>
+              {ItemContent.map(item => (
+                <MenuItemRenderer key={item.primary} item={item} />
+              ))}
+            </List>
+          {/* <List>
               {ItemContent.map((item) => {
                 const isActive = location.pathname === item.to;
 
@@ -314,7 +474,7 @@ export default function Navbar() {
                   </ListItem>
                 );
               })}
-            </List>
+            </List> */}
         </Box>
       </Drawer>
     </Box>
