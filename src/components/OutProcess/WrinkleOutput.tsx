@@ -75,6 +75,7 @@ export default function WrinkleOutput() {
 
     if (stageIndex === -1) return;
 
+    console.log(normalized,' ',stageIndex)
     setCompleted(stageList.map((_, idx) => idx <= stageIndex));
     setActiveStep(
       stageIndex < stageList.length ? stageIndex + 1 : stageIndex
@@ -258,7 +259,8 @@ export default function WrinkleOutput() {
               const stepProps: { completed?: boolean; disabled?: boolean } = {};
               stepProps.completed = completed[index];
               stepProps.disabled = index !== activeStep;
-
+              console.log('Rendering step:', label, 'Completed:', completed[index], 'Disabled:', stepProps.disabled);
+            
               return (
                 <Step key={label} {...stepProps}
                   sx={{
@@ -266,6 +268,7 @@ export default function WrinkleOutput() {
                   }}
                   >
                   <StepLabel
+                  //  completed={completed[index]}
                     sx={{
                       display: 'flex',
                       flexDirection: 'column',

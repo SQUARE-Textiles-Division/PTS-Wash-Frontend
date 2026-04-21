@@ -73,7 +73,7 @@ useEffect(() => {
     );
 
     if (stageIndex === -1) return;
-
+    console.log(normalized,' ',stageIndex)
     setCompleted(stageList.map((_, idx) => idx <= stageIndex));
     setActiveStep(
       stageIndex < stageList.length ? stageIndex + 1 : stageIndex
@@ -185,7 +185,8 @@ useEffect(() => {
                                         );
 
                                         if (stageIndex === -1) return;
-
+                                        
+                                        console.log(currStage,' ',stageIndex)
                                         setCompleted(newStages.map((_, idx) => idx <= stageIndex));
                                         setActiveStep(
                                         stageIndex < newStages.length - 1 ? stageIndex + 1 : stageIndex
@@ -291,7 +292,7 @@ useEffect(() => {
               const stepProps: { completed?: boolean; disabled?: boolean } = {};
               stepProps.completed = completed[index];
               stepProps.disabled = index !== activeStep;
-
+              // console.log('Rendering step:', label, 'Completed:', completed[index], 'Disabled:', stepProps.disabled);
               return (
                 <Step key={label} {...stepProps}
                   sx={{
@@ -299,6 +300,7 @@ useEffect(() => {
                   }}
                   >
                   <StepLabel
+                  // completed={completed[index]}
                     sx={{
                       display: 'flex',
                       flexDirection: 'column',
@@ -306,7 +308,7 @@ useEffect(() => {
                       maxWidth: 600, // max width for wrapping
                       py: 1,
                       "& .MuiStepIcon-root.Mui-completed": {
-                          color: "green",
+                          color: "green !important", // completed step color
                         },
 
                         // (optional) active step color

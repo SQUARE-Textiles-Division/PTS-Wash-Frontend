@@ -292,7 +292,7 @@ export default function TagIn() {
                       maxWidth: 600, // max width for wrapping
                       py: 1,
                       "& .MuiStepIcon-root.Mui-completed": {
-                          color: "green",
+                          color: "green !important",
                         },
 
                         // (optional) active step color
