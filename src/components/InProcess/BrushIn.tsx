@@ -345,15 +345,15 @@ useEffect(() => {
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              bgcolor: "rgba(0,0,0,0.5)", // dark overlay
+              // bgcolor: "rgba(0,0,0,0.5)", // dark overlay
               }}
           >
               <Box
               sx={{
-                  bgcolor: "rgba(202, 29, 29, 0.5)", // light red background for error
+                  bgcolor: "white", // light red background for error
                   p: 4,
                   borderRadius: 2,
-                  color: "white", // red text for error
+                  color: "red", // red text for error
                   width: 400,
               }}
               >

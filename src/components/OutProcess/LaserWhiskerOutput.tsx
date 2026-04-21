@@ -352,10 +352,10 @@ export default function LaserWhiskerOutput() {
           >
               <Box
               sx={{
-                  bgcolor: "#d9534f", // light red background for error
+                  bgcolor: "white", // light red background for error
                   p: 4,
                   borderRadius: 2,
-                  color: "white", // red text for error
+                  color: "red", // red text for error
                   width: 400,
               }}
               >

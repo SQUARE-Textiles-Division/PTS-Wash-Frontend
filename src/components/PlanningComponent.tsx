@@ -342,7 +342,7 @@ const handleReplaceStage = (newStage: string) => {
                     },
                     (result)=>{
                         console.log(result)
-
+                        setAlreadyInPlan(result.id)
                         setSaved(true)
                     },
                     (error:any)=>{
@@ -356,6 +356,7 @@ const handleReplaceStage = (newStage: string) => {
                               {stages:selectedStages},
                               (success:any)=>{
                                   console.log(success)
+                                  
                               },
                               (error:any)=>{
                                 setAlarm(true)
