@@ -21,7 +21,8 @@ import { tbCellColor,tbRowColor } from '../Colors/Colors';
 import { QRCodeCanvas } from "qrcode.react";
 import { useReactToPrint } from "react-to-print";
 import type FirstWashBatchDirectCreate from "../../TypeAnnotations/FirstWashBatchDirectCreate";
-import type FirstWashBatch from "../../TypeAnnotations/FirstWashBatch";
+import type FirstWashBatch from "../../TypeAnnotations/WetProcessBatch";
+import type WetProcessBatch from "../../TypeAnnotations/WetProcessBatch";
 
 // interface Props {
 //     items: BundleInfo[];
@@ -33,9 +34,12 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
     // backgroundColor: theme.palette.common.black,
     backgroundColor: tbCellColor,
     color: theme.palette.common.white,
+    lineHeight:0.5
   },
   [`&.${tableCellClasses.body}`]: {
     fontSize: 14,
+    lineHeight:0.9,
+    padding: '4px 6px',
   },
 }));
 
@@ -59,6 +63,7 @@ export default function BatchCreateDirect(){
             contentRef: printRef,
         });
     const [planningError,setPlanningError]=useState<string>("")
+    const [saveBarcode,setSaveBarcode]=useState("")
     const [invalideBundleError,setInvalideBundleError]=useState<string>("")
     const [showPopup, setShowPopup] = useState(false);
     const[showErrorPopup,setShowErrorPopup]=useState(false);
@@ -95,7 +100,11 @@ export default function BatchCreateDirect(){
     };
     }, [alarm]);
 
-
+    useEffect(() => {
+        if (items?.length > 0) {
+            setQrData(null);
+        }
+    }, [items]);
     // const[item,setItemss]=useState<BundleInfo[]>([...items]);
     
     const fetchData = (barcode: string) => {
@@ -132,7 +141,7 @@ export default function BatchCreateDirect(){
                                 isDuplicate=true;
                                 // break;
                             }
-                            if(items[i].shade!=result2.shade && items[i].buyer!=result2.buyer && items[i].color!=result2.color){
+                            if(items[i].shade!=result2.shade || items[i].buyer!=result2.buyer || items[i].color!=result2.color){
                                 sameShade=false;
                                 break;
                             }
@@ -154,6 +163,7 @@ export default function BatchCreateDirect(){
                         }
                         if (result2) {
                             setShowPopup(true);
+                            setSaveBarcode(result2.bundle_barcode)
                         }
                         console.log("Second API result:", result2);
                     },
@@ -177,17 +187,17 @@ export default function BatchCreateDirect(){
             <Box
                 sx={{
                 minHeight: '15vh',
+                
                 // display: 'flex',
+            
                 alignItems: 'flex-start',
                 justifyContent: 'center',
-                pt: 5,
+                // pt: 5,
                 width: 1100
                 }}
             >
                 <TextField
-                style={{outline:"red",
-                    marginLeft:'160px'
-                }}
+                style={{position:'fixed',top:80}}
                 inputRef={barcodeRef}
                 label="Scan Barcode Here"
                 
@@ -214,41 +224,48 @@ export default function BatchCreateDirect(){
                             color: "#485e68",               // Label/text color on focus
                         },
                         },
-                        width: 300,
+                         "& .MuiInputBase-root": {
+                            height: 40, // total height
+                        },
+                        // width: 300,
                     }}
                 />
-                
-                <div
-                    style={{
-                        display: "flex",
-                        alignItems: "center",
-                        marginLeft:'550px'}}>
-                                    {showPopup && (
+                 {showPopup && (
                         <div
                             style={{
                                 display: "flex",
                                 alignItems: "center",
                                 gap: '5px',
+                                position:'fixed',
+                                top:80,
+                                right:80
                             }}
                         >
-                            <DoneAllIcon style={{ color: "green", fontSize: 18 }} />
-                            <h5 style={{ margin: 0 }}>Successfully Received</h5>
+                            <DoneAllIcon style={{ color: "green", fontSize: 16 }} />
+                            <p style={{ fontSize:16,fontWeight:'bold'}}>Successfully Received {saveBarcode}</p>
                         </div>
 
                     )
                 }
+                <div
+                    style={{
+                        display: "flex",
+                        alignItems: "center",
+                        marginLeft:'550px'}}>
+                                   
                 {items.length>0 && (
                     <div
                     style={{
                         display:'flex',
                         flexDirection:'column',
-                        marginLeft:'50px',
+                        // marginLeft:'20px',
+                        // marginRight:'180px',
                         gap:'10px',
                     }}
                     >
                         <Button variant="contained"
                         sx={{
-                            mt:2,
+                            mt:20,
                             backgroundColor: "#485e68",
                             '&:hover': {
                                 backgroundColor: '#37474f',
@@ -260,36 +277,39 @@ export default function BatchCreateDirect(){
                             const payload={
                                 "shade":items[0].shade,
                                 "buyer":items[0].buyer,
-                                 "color":items[0].color,
-                                "source_bundles":[] as any
+                                "color":items[0].color,
+                                "stage":"first_wash",
+                                "type":"normal_wash",
+                                "sources_input":[] as any
                             }
                             for(let i=0;i<items.length;i++){
-                                payload.source_bundles.push({
-                                    "received":items[i].id,
+                                payload.sources_input.push({
+                                    "type":"bundle",
+                                    "id":items[i].id,
                                     "quantity":items[i].quantity
                                 })
                             }
-                            postData<FirstWashBatch>(
-                                'wet-process/first-wash-batches/',
+                            postData<WetProcessBatch>(
+                                'wet-process/batches/',
                                 ip,
                                 payload,
                                 (data) => {
                                     let date=data.created_at.slice(0, 10).replace(/-/g, "");
-                                    const sourceBundles=data.source_bundles
+                                    const sourceBundles=data.sources
                                     let mpoSet=new Set<string>();
                                     let colorSet=new Set<string>();
                                     let buyerSet=new Set<string>();
                                     let styleSet=new Set<string>();
                                     let soSet=new Set<string>();
-                                    let sizeSet=new Set<string>();
+                                    // let sizeSet=new Set<string>();
                                     for(let i=0;i<sourceBundles.length;i++){
-                                        let bundle=sourceBundles[i].received;
+                                        let bundle=sourceBundles[i].source;
                                         mpoSet.add(bundle.mpo);
-                                        colorSet.add(bundle.color);
-                                        buyerSet.add(bundle.buyer);
+                                        colorSet.add(data.color);
+                                        buyerSet.add(data.buyer);
                                         styleSet.add(bundle.style);
                                         soSet.add(bundle.so);
-                                        sizeSet.add(bundle.size);
+                                        // sizeSet.add(data.);
                                     }
                                     
                                     const qrPayload = {
@@ -297,12 +317,12 @@ export default function BatchCreateDirect(){
                                         shade:data.shade,
                                         mpo: Array.from(mpoSet).join(", "),
                                         color: Array.from(colorSet).join(", "),
-                                        size: Array.from(sizeSet).join(", "),
+                                        // size: Array.from(sizeSet).join(", "),
                                         buyer: Array.from(buyerSet).join(", "),
                                         style: Array.from(styleSet).join(", "),
                                         so: Array.from(soSet).join(", "),
                                         total_items: data.total_quantity,
-                                        date: date
+                                        date: date.substring(2,4)
                                     };
                                     setQrData(qrPayload);
                                     setItems([]);
@@ -326,13 +346,14 @@ export default function BatchCreateDirect(){
                 <TableContainer
                     component={Paper}
                     sx={{
-                    // maxHeight: 300,          // vertical scrollbar
+                    maxHeight: 250,          // vertical scrollbar
                     overflowX: "auto",       // horizontal scrollbar
                     overflowY: "auto",
-                    maxWidth: 1100,
+                    maxWidth: 1150,
                     border:'none',
-                    marginLeft:'115px',
-                    marginTop:'20px'
+                    marginLeft:'80px',
+                    position:'fixed',
+                    top:125
                     // marginLeft:'100px',
                     }}
                 >
@@ -400,7 +421,7 @@ export default function BatchCreateDirect(){
                                     >
                 
                                         <QRCodeCanvas
-                                        value={`W8220${qrData.date}W100000000${qrData.id}`}
+                                        value={`W822${qrData.date}W1${String(qrData.id).padStart(7, '0')}`}
                                         size={200}
                                         level="H"
                                         />
@@ -411,7 +432,7 @@ export default function BatchCreateDirect(){
                                             fontSize: 12,
                                             mb: 2
                                         }}>
-                                            {`W8220${qrData.date}W1${String(qrData.id).padStart(10, '0')}`}
+                                            {`W822${qrData.date}W1${String(qrData.id).padStart(7, '0')}`}
                                         </Typography>
                                         <Typography variant="body2">
                                             <b>Total Quantity:</b> {qrData.total_items}
@@ -431,9 +452,9 @@ export default function BatchCreateDirect(){
                                         <Typography variant="body2">
                                             <b>Shade:</b> {qrData.shade}
                                         </Typography>
-                                        <Typography variant="body2">
+                                        {/* <Typography variant="body2">
                                             <b>Size:</b> {qrData.size}
-                                        </Typography>
+                                        </Typography> */}
                                         <Typography variant="body2">
                                             <b>Color:</b> {qrData.color}
                                         </Typography>

@@ -4,14 +4,6 @@ import Stepper from '@mui/material/Stepper';
 import Step from '@mui/material/Step';
 import StepLabel from '@mui/material/StepLabel';
 import { useState,useRef,useEffect } from 'react';
-import { styled } from '@mui/material/styles';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell, { tableCellClasses } from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import Paper from '@mui/material/Paper';
 // import Button from '@mui/material/Button';
 import {  Typography, Button} from "@mui/material";
 import { getData, postData } from '../genericApiService';
@@ -20,8 +12,17 @@ import type BatchStage from '../../TypeAnnotations/BatchStage';
 import type BatchInstance from '../../TypeAnnotations/BatchInstance';
 import type RouteSteps from '../../TypeAnnotations/BatchInstance';
 import type Rejection from '../../TypeAnnotations/Rejection';
+import { styled } from '@mui/material/styles';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell, { tableCellClasses } from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import Paper from '@mui/material/Paper';
 import { tbCellColor, tbRowColor } from '../Colors/Colors';
 import { ip } from '../../ip';
+import type BatchStageHistory from '../../TypeAnnotations/BatchStageHistory';
 import type RejectionReason from '../../TypeAnnotations/RejectionReason';
 // import { postData } from './genericApiService';
 // import Typography from '@mui/material/Typography';
@@ -54,12 +55,14 @@ export default function TagOutput() {
   const [batchNum,setBatchNum]=useState<number>()
   const [scanned,setScanned]=useState<any>()
   const [finalrejcnt,setFinalRejCnt]=useState<number>(0)
-  useEffect(() => {
+  const [currentStage, setCurrentStage] = useState("");
+ useEffect(() => {
     if (stages.length > 0) {
-      setCompleted(stages.map(() => false));
-      setActiveStep(0);
+      // setCompleted(stages.map(() => false));
+      // setActiveStep(0);
+      markCompletedUntil(currentStage, stages);
     }
-  }, [stages]);
+  }, [stages,currentStage]);
   const normalizeStage = (s: string) =>
   s.trim().toUpperCase().replace(/\s+/g, " ");
 
@@ -77,12 +80,7 @@ export default function TagOutput() {
       stageIndex < stageList.length ? stageIndex + 1 : stageIndex
     );
   };
-  // console.log(c,ompleted)
-  // cos
-  // useEffect(() => {
-  //   setCompleted(stages.map(() => false));
-  //   setActiveStep(0);
-  // }, [stages])
+
   let batchIdNum=0
   const batchQRCoderef=useRef<HTMLInputElement>(null);
   const fetchPlan=(batchQRCode:string)=>{
@@ -112,7 +110,7 @@ export default function TagOutput() {
                   }
                   console.log(batchIdNum)
                   setStages(newStages);
-                  const proRes=result1
+                                    const proRes=result1
                   const showRes={
                     // "BatchQRCode":batchQRCode
                     BatchQRCode:batchQRCode,
@@ -155,14 +153,14 @@ export default function TagOutput() {
                               {},
                               {},
                               (subresult: BatchStage) => {
+                                const currStage = `${subresult.current_stage} ${subresult.current_status}`;
+                                setCurrentStage(currStage);
+                                markCompletedUntil(currStage, newStages);
                                 
-                                  const currStage = `${subresult.current_stage} ${subresult.current_status}`;
-                                  markCompletedUntil(currStage, newStages);
-                                                                  
                               },
                               (error:any)=>{
                                 console.log('Get Error ',error.response.data)
-                                setErrorLog(error.response.data[0])
+                                setErrorLog(error.response.data.detail)
                               }
                 );   
         },
@@ -170,31 +168,46 @@ export default function TagOutput() {
               console.error("Error in second API:", error.response.data[0]);
           }
       );
-     getData<RejectionReason[]>(
-            `productions/rejections/`,
+      const stageClosedMap = new Map();
+      
+      getData<BatchStageHistory[]>(
+            `productions/batch-stage-history/`,
             ip,
             {},
-            {},
-            (res:RejectionReason[])=>{
-              let temp=0
-              for(const obj of res){
-                if(obj.batch==batchIdNum && obj.stage!='Tag')
-                    temp++;
-              }
-              console.log('total_rej',temp)
-              setFinalRejCnt(temp)
+            {batch:batchIdNum},
+            (stageRes:BatchStageHistory[])=>{
+                for(const obj of stageRes){
+                  if(obj.closed_by!=null){
+                    stageClosedMap.set(obj.stage,true)
+                  }
+                }
             }
-          )
+      )
+      getData<RejectionReason[]>(
+                    `productions/rejections/`,
+                    ip,
+                    {},
+                    {},
+                    (res:RejectionReason[])=>{
+                      let temp=0
+                      for(const obj of res){
+                        if(obj.batch==batchIdNum && stageClosedMap.has(obj.stage))
+                            temp++;
+                      }
+                      console.log('total_rej',temp)
+                      setFinalRejCnt(temp)
+                    }
+                  )
   }
   
 
   const handleComplete = (index: number) => {
-      console.log('Completed ',index)
+
       const newCompleted = [...completed];
       newCompleted[index] = true;
       setCompleted(newCompleted);
 
-      if (index < stages.length ) {
+      if (index < stages.length - 1) {
         setActiveStep(index + 1);
       }
   };
@@ -209,7 +222,7 @@ export default function TagOutput() {
           inputRef={batchQRCoderef}
           onChange={() => {
               const batchQRCode = batchQRCoderef.current?.value.trim() || "";
-              if(batchQRCode.length==24){
+              if(batchQRCode.length==14){
                 fetchPlan(batchQRCode);
                 batchQRCoderef.current!.value = "";
                     // barcodeRef.current!.value = ""}
@@ -278,7 +291,7 @@ export default function TagOutput() {
                       <b>{label}</b>
                       
                     </Typography>
-                    {label.includes('CLOSED')&&!stepProps.disabled&&(
+                    {label.includes('CLOSE')&&!stepProps.disabled&&(
                       <Button sx={{
                         background:'blue',
                         color:'white'
@@ -294,14 +307,14 @@ export default function TagOutput() {
                             },
                             (rejres: Rejection[]) => {
                               let total_rej=0
-                              for(let i=0;i<rejres.length;i++)
-                              {
-                                total_rej+=rejres[i].rejection_count
-                              }
-                              // console.log(rejres)
-                              // console.log(total_rej)
-                              setRejCnt(total_rej);
-                              
+                                for(let i=0;i<rejres.length;i++)
+                                {
+                                  total_rej+=rejres[i].rejection_count
+                                }
+                                // console.log(rejres)
+                                console.log(total_rej)
+                                setRejCnt(total_rej);
+                                
                             },
                             (error: any) => {
                               console.log(error);
@@ -348,7 +361,8 @@ export default function TagOutput() {
                 {/* <Typography>Already batches are allocated according to this plan */}
                 {/* </Typography> */}
                 <Button sx={{ mt: 2 }} onClick={() => {setErrorLog('')
-                  setRejCnt(-1)}}>Close</Button>
+                  setRejCnt(-1)}
+                }>Close</Button>
               </Box>
           </Box>
       </Modal>
@@ -368,7 +382,7 @@ export default function TagOutput() {
           >
                 <Box
                   sx={{
-                      bgcolor: "#ffffe0", // light red background for error
+                    bgcolor: "#ffffe0", // light red background for error
                       
                       border:'3px solid #e6db55',// light red background for error
                       p: 4,
@@ -378,7 +392,7 @@ export default function TagOutput() {
                   }}
                 >
                 <Typography variant="h4">Are you Sure?</Typography>
-                  <Typography variant="h6">You have total {rejCnt} rejections in Tag
+                  <Typography variant="h6">You have total {rejCnt} rejections in  Tag
                   </Typography>
                 <div style={{
                   display:"flex",
@@ -401,10 +415,10 @@ export default function TagOutput() {
                           },
                           (closeRes: BatchStage) => {
                             console.log(closeRes)
-                           const currStage = `${closeRes.current_stage} ${closeRes.current_status}`;
-                            markCompletedUntil(currStage, stages);
-                            setFinalRejCnt(finalrejcnt+rejCnt)
-                            setRejCnt(-1);
+                             const currStage = `${closeRes.current_stage} ${closeRes.current_status}`;
+                              markCompletedUntil(currStage, stages);
+                              setFinalRejCnt(finalrejcnt+rejCnt)
+                              setRejCnt(-1);
                           },
                           (error: any) => {
                             // console.log(batchIdNum)
@@ -469,7 +483,7 @@ export default function TagOutput() {
                        <StyledTableCell align="center">{scanned.Size}</StyledTableCell>
                        <StyledTableCell align="center">{scanned.Shades}</StyledTableCell>
                        <StyledTableCell align="center">{scanned.Color}</StyledTableCell>
-                      <StyledTableCell align="center">{scanned.Total_Quantity-finalrejcnt}</StyledTableCell>
+                       <StyledTableCell align="center">{scanned.Total_Quantity-finalrejcnt}</StyledTableCell>
                       </StyledTableRow>
                   </TableBody>
                 </Table>

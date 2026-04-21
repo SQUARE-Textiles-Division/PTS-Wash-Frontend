@@ -2,6 +2,7 @@ import {Box,TextField}   from "@mui/material";
 import { Modal, Typography, Button } from "@mui/material";
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
+import DoneAllIcon from '@mui/icons-material/DoneAll';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import { styled } from '@mui/material/styles';
@@ -21,15 +22,31 @@ import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import { tbCellColor, tbRowColor } from "../Colors/Colors";
 import { ip } from "../../ip";
 
+interface IndividualMeta{
+  id:number,
+  mpo:string,
+  individual_barcode:string,
+  marker:string,
+  shade:string,
+  color:string,
+  rejected_at:string,
+  size:string,
+  reason:string
+
+}
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
     // backgroundColor: theme.palette.common.black,
     backgroundColor: tbCellColor,
     color: tbRowColor,
+    lineHeight:0.5
+    // fontSize:12
   },
   [`&.${tableCellClasses.body}`]: {
     fontSize: 14,
+    lineHeight:0.1,
+    padding: '1.5px',
   },
 }));
 
@@ -45,7 +62,7 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 export default function WrinkleQC() {
   const individualBarcodeRef = React.useRef<HTMLInputElement>(null);
   const rejectReasons=WhiskerRejectReasons;
-   const [rows, setRows] = React.useState<any[]>([]);
+   const [rows, setRows] = React.useState<IndividualMeta[]>([]);
   const [rejectField,setRejectField]=React.useState<boolean>(false);
   const [reason,setReason]=React.useState<string>("");
   const [rejectPop,setRejectPop]=useState<boolean>(false)
@@ -55,22 +72,27 @@ export default function WrinkleQC() {
   const [deletePop, setDeletePop] = React.useState<boolean>(false);
   const [deleteId, setDeleteId] = React.useState<number>(0);
   const [deleteError,setDeleteError]=React.useState<string>("")
+  const [delbarcode,setDelBarCode]=React.useState<string>("")
+  // const [del]
 
   const handleDelete=(id:number)=>{
     delData<RejectionReason>(
       `productions/rejections/${id}/`,
       ip,
       {},
-      {stage: "Brush"},
+      {stage: "Wrinkle"},
       (data) => {
-        ;
         console.log("Rejection deleted:", data);
+        const delObj=rows.filter((row)=>row.id==id)
+        setDelBarCode(delObj[0].individual_barcode)
+        setinvbarcode("")
+        // delObj.individual_barcode
         const updatedRows = rows.filter((row) => row.id !== id);
         setRows(updatedRows);
         setDeletePop(false);
         setDeleteId(0)
       },
-      (error:any)=>{
+       (error:any)=>{
         console.log('Err',error.response.data[0])
         setDeleteError(error.response.data[0])
       }
@@ -79,27 +101,30 @@ export default function WrinkleQC() {
   return (
     <Box
       sx={{
-        minHeight: "20vh",
+        // minHeight: "20vh",
         display: "flex",
         flexDirection: "column",
         alignItems: "flex-start",
         justifyContent: "center",
         top: 0,
-        left: 0,
+        marginLeft:-50
+        // left: -100,
         // pt: 2,
-        width: '100%',
+        // width: '100%',
       }}
     >
       {/* Barcode Input */}
       <TextField
 
         label="Scan Individual Barcode Here"
-        fullWidth
+        // fullWidth
+        style={{position:'fixed',top:80}}
         inputRef={individualBarcodeRef}
         onChange={() => {
           const inv = individualBarcodeRef.current?.value.trim() || "";
           if (inv.length == 16) {
             setinvbarcode(inv);
+            setDelBarCode("")
             setRejectField(true);
             individualBarcodeRef.current!.value = "";
           }
@@ -115,10 +140,13 @@ export default function WrinkleQC() {
             "&.Mui-focused": {
               color: "#485e68",
             },
+            "& .MuiInputBase-root": {
+                  height: 30, // total height
+              },
           },
-          width: '250px',  // Adjust width as needed
-          mb: 2,  // Space below the input
-          marginLeft:'35%'
+          // width: '250px',  // Adjust width as needed
+          // mb: 2,  // Space below the input
+          // marginRight:'80%'
 
           
         }}
@@ -126,12 +154,16 @@ export default function WrinkleQC() {
 
       {/* Reject Reason Dropdown */}
       {rejectField && (
-        <Box sx={{ mt: 2, width: "100%" , display:'flex', flexDirection:'column', alignItems:'center' }}>
-          <Typography variant="h6" gutterBottom>
+        <Box sx={{  position:'fixed' ,gap:2, display:'flex', flexDirection:'row', alignItems:'flex-start',justifyContent:'center',top:80,left:500 }}>
+          {/* <Typography variant="h6" gutterBottom>
             Reject Reasons
-          </Typography>
+          </Typography> */}
 
-          <FormControl sx={{width: '200px', overflowY: 'auto',mt:2}}>
+          <FormControl sx={{ 
+                          // overflowY: 'auto',
+                           width: 150 ,
+                            "& .MuiInputBase-root": 
+                            {height: 40 }}}>
             <InputLabel id="reject-reason-label">Reject Reason</InputLabel>
             <Select
               labelId="reject-reason-label"
@@ -158,12 +190,40 @@ export default function WrinkleQC() {
           <Button
             variant="contained"
             color="primary"
-            sx={{ mt: 2 ,mb:5}}
+            // sx={{ mt: 2 }}
             disabled={!reason} // prevent opening modal if no reason
             onClick={() => setRejectPop(true)}
           >
             Save
           </Button>
+          {invbarcode &&
+            (
+                <div
+                    style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap:5,
+                    }}
+                >
+                    <DoneAllIcon style={{ color: "green", fontSize: 18 }} />
+                    <p style={{ margin: 0,fontWeight:'bold',fontSize:18 }}>Scanned, Individual Barcode {invbarcode}</p>
+                </div>
+              )
+          }
+          {delbarcode &&
+            (
+                <div
+                    style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap:5,
+                    }}
+                >
+                    <DoneAllIcon style={{ color: "red", fontSize: 18 }} />
+                    <p style={{ margin: 0,fontWeight:'bold',fontSize:18 }}>Deleted, Individual Barcode {delbarcode}</p>
+                </div>
+              )
+          }
           
         </Box>
       )}
@@ -171,17 +231,20 @@ export default function WrinkleQC() {
           component={Paper}
           elevation={0}
           sx={{
-            // maxHeight: 200,          // vertical scrollbar
+            maxHeight: 400,          // vertical scrollbar
             overflowX: "auto",       // horizontal scrollbar
             overflowY: "auto",
-            marginLeft:"100px",
-            border:'none'
+            border:'none',
+            position:'fixed',
+            top:140,
+            maxWidth: 1000,
+            // marginLeft:"50px"
             
           }}
         >
             <Table
               stickyHeader
-              sx={{'& .MuiTableCell-root':{
+              sx={{ '& .MuiTableCell-root':{
                 borderBottom:'none'
             } }}   // force horizontal scroll if screen is smaller
               aria-label="customized table"
@@ -201,7 +264,7 @@ export default function WrinkleQC() {
                   </TableHead>
                           <TableBody>
                           {rows.map((row) => (
-                            <StyledTableRow key={row.id}>
+                            <StyledTableRow key={row.id} >
                               <StyledTableCell>{row.mpo}</StyledTableCell>
                               <StyledTableCell align="center">{row.individual_barcode}</StyledTableCell>
                               <StyledTableCell align="center">{row.marker}</StyledTableCell>
@@ -213,7 +276,11 @@ export default function WrinkleQC() {
                               <StyledTableCell align="center">
                                 <DeleteForeverIcon
                                     color='error' 
-                                    fontSize='medium'
+                                    sx={{
+                                      
+                                      fontSize:20
+                                    }}
+                                 
                                     onClick={()=>{
                                       console.log("Delete clicked for id:", row.id);
                                       setDeletePop(true);
@@ -244,7 +311,9 @@ export default function WrinkleQC() {
                   >
                       <Box
                         sx={{
-                            bgcolor: "#fea116", // light red background for error
+                            bgcolor: "#ffffe0", // light red background for error
+                                
+                            border:'3px solid #e6db55', // light red background for error
                             p: 4,
                             borderRadius: 2,
                             color: "black", // red text for error
@@ -283,7 +352,9 @@ export default function WrinkleQC() {
         >
           <Box
             sx={{
-              bgcolor: "#fea116",
+             bgcolor: "#ffffe0", // light red background for error
+                                
+              border:'3px solid #e6db55',
               p: 4,
               borderRadius: 2,
               color: "black",
@@ -338,7 +409,7 @@ export default function WrinkleQC() {
                             reason: item.reason,
                           }));
 
-                        setRows(prevRows => [...tempRows, ...prevRows]);
+                         setRows(prevRows => [...tempRows, ...prevRows]);
                       }
                     );
                   },
@@ -397,36 +468,36 @@ export default function WrinkleQC() {
                   </Box>
               </Box>
         </Modal>
-         <Modal open={deleteError!=""} onClose={() => setDeleteError("")}>
-              <Box
-                  sx={{
-                  position: "fixed", // ← changed from absolute
-                  top: 0,
-                  left: 0,
-                  width: "100vw",
-                  height: "100vh",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  bgcolor: "rgba(0,0,0,0.5)", // dark overlay
-                  }}
-              >
-                  <Box
-                  sx={{
-                      bgcolor: "rgba(202, 29, 29, 0.5)", // light red background for error
-                      p: 4,
-                      borderRadius: 2,
-                      color: "white", // red text for error
-                      width: 400,
-                  }}
-                  >
-                  <Typography variant="h6">{deleteError}</Typography>
-                  {/* <Typography>Already batches are allocated according to this plan */}
-                  {/* </Typography> */}
-                  <Button sx={{ mt: 2 }} onClick={() => {setDeleteError("");setDeletePop(false);setDeleteId(0);}}>Close</Button>
-                  </Box>
-              </Box>
-        </Modal>
+        <Modal open={deleteError!=""} onClose={() => setDeleteError("")}>
+            <Box
+                sx={{
+                position: "fixed", // ← changed from absolute
+                top: 0,
+                left: 0,
+                width: "100vw",
+                height: "100vh",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                bgcolor: "rgba(0,0,0,0.5)", // dark overlay
+                }}
+            >
+                <Box
+                sx={{
+                    bgcolor: "rgba(202, 29, 29, 0.5)", // light red background for error
+                    p: 4,
+                    borderRadius: 2,
+                    color: "white", // red text for error
+                    width: 400,
+                }}
+                >
+                <Typography variant="h6">{deleteError}</Typography>
+                {/* <Typography>Already batches are allocated according to this plan */}
+                {/* </Typography> */}
+                <Button sx={{ mt: 2 }} onClick={() => {setDeleteError("");setDeletePop(false);setDeleteId(0);}}>Close</Button>
+                </Box>
+            </Box>
+      </Modal>
     </Box>
   );
 };

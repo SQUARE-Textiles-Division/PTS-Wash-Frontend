@@ -1,1 +1,1 @@
-export let washlog=`wet-process/wash-logs/`
+export let washlog=`wet-process/batch-sources/`

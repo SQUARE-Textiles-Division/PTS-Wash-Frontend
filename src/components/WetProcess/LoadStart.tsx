@@ -48,10 +48,13 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 export default function LoadStart(){    
     const [showPopup, setShowPopup] = useState(false);
     const [processError,setProcessError]=useState("");
-
+    const [hourError,setHourError]=useState(false)
+    const [minError,setMinError]=useState(false)
     const[showErrorPopup,setShowErrorPopup]=useState(false);
     const batchqrcoderef=useRef<HTMLInputElement>(null);
     const [machine,setMachine]=useState(0);
+    const [hour,setHour]=useState(0);
+    const [min,setMin]=useState(0);
     const [machines, setMachines] = useState<number[]>([]);
     const [batchdetails,setBatchDetails]=useState<any[]>([])
     const [batchNumber,setBatchNumber]=useState(0)
@@ -64,11 +67,20 @@ export default function LoadStart(){
             {},
             {},
             (res) => {
+                res.filter(item => item.machine_number !== 4);
                 setMachines(res.map(m => m.machine_number));
             }
         );
     }, []);
 //    console.log(machineList)
+    const hours=[]
+    const mins=[]
+    for(let i=1;i<=12;i++){
+        hours.push(i);
+    }
+    for(let i=1;i<=60;i++){
+        mins.push(i);
+    }
     const fetchData = (batchcode: string,machine:number) => {
         if (!batchcode) {
             console.warn("No Barcode entered");
@@ -84,79 +96,108 @@ export default function LoadStart(){
         const batchIdNum = parseInt(batchId, 10);
         console.log(batchIdNum)
         const tempBatchDetail:any=[]
+        let hourStr=''
+        let minStr=''
+        if(hour<10){
+            let ch=hour+""
+            hourStr="0"+ch
+            // hourStr='0'w
+        }
+        else{
+            hourStr=hour+""
+        }
+        if(min<10){
+            let ch=min+""
+            minStr="0"+ch
+            // hourStr='0'w
+        }
+        else{
+            minStr=min+""
+        }
         postData<ProcessFirstWash>(
             `wet-process/first-wash-processes/`,
             ip,
             {
-                batch_for_first_wash:batchIdNum,
-                machine:machine
+                batch:batchIdNum,
+                machine:machine,
+                standard_time: `${hourStr}:${minStr}:00`
             },
             (result:ProcessFirstWash)=>{
                 console.log(result)
-                const shade=result.batch_for_first_wash.shade
-                const sourceBatches=result.batch_for_first_wash.source_batches
-                const batchNumber=result.batch_for_first_wash.id
-                // let batchQR=`W8220${batchDry[i].updated_at}B${String(batchDry[i].id).padStart(10, '0')}`
-                for(const batchObj of sourceBatches){
-                    const allocquantity=batchObj.quantity
-                    for(const batchBundle of batchObj.batch.batch_bundles){
-                        if(batchBundle.received.shade==shade){
-                            tempBatchDetail.push({
-                                'Shade':shade,
-                                'MPO':batchBundle.received.mpo,
-                                'SO':batchBundle.received.so,
-                                'Style':batchBundle.received.style,
-                                'Color':batchBundle.received.color,
-                                'Size':batchBundle.received.size,
-                                'Buyer':batchBundle.received.buyer,
-                                'Quantity':allocquantity,
-                                'Machine':result.machine.machine_number
-                                // 'BatchNumber':batchNumber,
-                                // 'BatchQRCode':
-                                // {row.MPO}-${row.Buyer}-${row.Style}-${row.Color}-${row.Shade}-${row.Size}-${row.BatchQRCode}-${row.BatchNumber}-${row.Quantity}
-                            })
-                            break;
-                        }
+                // const shade=result.batch.shade
+                // const batchNumber=result.batch.id
+                // let batchQR=`W8220${result.batch.updated_at}B${String(batchDry[i].id).padStart(10, '0')}`
+                tempBatchDetail.push(
+                    {
+                        'Shade':result.batch.shade,
+                        'Color':result.batch.color,
+                        'Buyer':result.batch.buyer,
+                        'BatchNumber':result.batch.id,
+                        'Quantity':result.batch.total_quantity,
+                        'Machine':result.machine.machine_number
                     }
-                }
-                const sourceBundles=result.batch_for_first_wash.source_bundles
+                )
+                // for(const batchObj of sourceBatches){
+                //     const allocquantity=batchObj.quantity
+                //     for(const batchBundle of batchObj.batch.batch_bundles){
+                //         if(batchBundle.received.shade==shade){
+                //             tempBatchDetail.push({
+                //                 'Shade':shade,
+                //                 'MPO':batchBundle.received.mpo,
+                //                 'SO':batchBundle.received.so,
+                //                 'Style':batchBundle.received.style,
+                //                 'Color':batchBundle.received.color,
+                //                 'Size':batchBundle.received.size,
+                //                 'Buyer':batchBundle.received.buyer,
+                //                 'Quantity':allocquantity,
+                //                 'Machine':result.machine.machine_number
+                //                 // 'BatchNumber':batchNumber,
+                //                 // 'BatchQRCode':
+                //                 // {row.MPO}-${row.Buyer}-${row.Style}-${row.Color}-${row.Shade}-${row.Size}-${row.BatchQRCode}-${row.BatchNumber}-${row.Quantity}
+                //             })
+                //             break;
+                //         }
+                //     }
+                // }
+                // const sourceBundles=result.batch_for_first_wash.source_bundles
 
-                const bundleMap = new Map();
+            //     const bundleMap = new Map();
 
-               for (const bundleObj of sourceBundles) {
-                    const allocquantity = bundleObj.quantity;
+            //    for (const bundleObj of sourceBundles) {
+            //         const allocquantity = bundleObj.quantity;
 
-                    if (bundleObj.bundle.shade == shade) {
+            //         if (bundleObj.bundle.shade == shade) {
 
-                        const key = `${shade}|${bundleObj.bundle.mpo}|${bundleObj.bundle.so}|${bundleObj.bundle.style}|${bundleObj.bundle.color}|${bundleObj.bundle.size}|${bundleObj.bundle.buyer}|${result.machine.machine_number}`;
+            //             const key = `${shade}|${bundleObj.bundle.mpo}|${bundleObj.bundle.so}|${bundleObj.bundle.style}|${bundleObj.bundle.color}|${bundleObj.bundle.size}|${bundleObj.bundle.buyer}|${result.machine.machine_number}`;
 
-                        if (!bundleMap.has(key)) {
-                            bundleMap.set(key, allocquantity);
-                        } else {
-                            bundleMap.set(key, bundleMap.get(key) + allocquantity);
-                        }
-                    }
-                }
-                for (const [key, value] of bundleMap) {
+            //             if (!bundleMap.has(key)) {
+            //                 bundleMap.set(key, allocquantity);
+            //             } else {
+            //                 bundleMap.set(key, bundleMap.get(key) + allocquantity);
+            //             }
+            //         }
+            //     }
+            //     for (const [key, value] of bundleMap) {
 
-                    const parts = key.split("|");
-                    console.log(parts)
-                    tempBatchDetail.push({
-                        Shade: parts[0],
-                        MPO: parts[1],
-                        SO: parts[2],
-                        Style: parts[3],
-                        Color: parts[4],
-                        Size: parts[5],
-                        Buyer: parts[6],
-                        Machine:parts[7],
-                        // BatchNumber: parts[7],
-                        Quantity: value
-                    });
-                }
-                setBatchDetails(tempBatchDetail)
-                setBatchNumber(batchNumber)
-                setTotQty(result.batch_for_first_wash.total_quantity)
+            //         const parts = key.split("|");
+            //         console.log(parts)
+            //         tempBatchDetail.push({
+            //             Shade: parts[0],
+            //             MPO: parts[1],
+            //             SO: parts[2],
+            //             Style: parts[3],
+            //             Color: parts[4],
+            //             Size: parts[5],
+            //             Buyer: parts[6],
+            //             Machine:parts[7],
+            //             // BatchNumber: parts[7],
+            //             Quantity: value
+            //         });
+            //     }
+            
+            setBatchDetails(tempBatchDetail)
+            setBatchNumber(batchNumber)
+            setTotQty(result.batch.total_quantity)
             },
             (error:any)=>{
                 console.log(error.response.data)
@@ -164,6 +205,7 @@ export default function LoadStart(){
                 Object.entries(error.response.data).forEach(([key, value]:any) => {
                     msg+=value[0]
                 });
+
                 // if
 
                 setProcessError(msg)   
@@ -226,6 +268,8 @@ export default function LoadStart(){
 
 
 
+
+
     return (
             <Box
                 sx={{
@@ -239,19 +283,49 @@ export default function LoadStart(){
                 // width:250
                 }}
             >
-                <Box sx={{ width: 150}}>
+                <Box sx={{width:'50%', display:'flex',gap:3}}>
                         <FormControl fullWidth>
                             <InputLabel id="demo-simple-select-label">Machine</InputLabel>
                             <Select
                             labelId="demo-simple-select-label"
                             id="demo-simple-select"
                             // value={age}
-                            label="Shade"
+                            label="Machine"
                             onChange={(e) => setMachine(e.target.value as number)}
                             >
                            
                             {machines.map((machine) => (
                                 <MenuItem key={machine} value={machine}>{machine}</MenuItem>
+                            ))}
+                            </Select>
+                        </FormControl>
+                        <FormControl fullWidth>
+                            <InputLabel id="demo-simple-select-label">Set Hour</InputLabel>
+                            <Select
+                            labelId="demo-simple-select-label"
+                            id="demo-simple-select"
+                            // value={age}
+                            label="Hour"
+                            onChange={(e) => setHour(e.target.value as number)}
+                            >
+                           
+                            {hours.map((hour) => (
+                                <MenuItem key={hour} value={hour}>{hour}</MenuItem>
+                            ))}
+                            </Select>
+                        </FormControl>
+                        <FormControl fullWidth>
+                            <InputLabel id="demo-simple-select-label">Set Minute</InputLabel>
+                            <Select
+                            labelId="demo-simple-select-label"
+                            id="demo-simple-select"
+                            // value={age}
+                            label="Hour"
+                            onChange={(e) => setMin(e.target.value as number)}
+                            >
+                           
+                            {mins.map((min) => (
+                                <MenuItem key={min} value={min}>{min}</MenuItem>
                             ))}
                             </Select>
                         </FormControl>
@@ -272,8 +346,18 @@ export default function LoadStart(){
                         batchqrcoderef.current!.value = "";
                         return
                     }
+                    if(hour==0){
+                        setHourError(true)
+                         batchqrcoderef.current!.value = "";
+                        return
+                    }
+                     if(min==0){
+                        setMinError(true)
+                        batchqrcoderef.current!.value = "";
+                        return
+                    }
                     const batchcode = batchqrcoderef.current?.value.trim() || "";
-                    if(batchcode.length==25){
+                    if(batchcode.length>=15){
                         fetchData(batchcode,machine);
                         batchqrcoderef.current!.value = "";
                     }
@@ -342,16 +426,17 @@ export default function LoadStart(){
                          
                     <TableHead>
                       <TableRow>
-                        <StyledTableCell align="center">MPO</StyledTableCell>
+                        {/* <StyledTableCell align="center">MPO</StyledTableCell> */}
+                        <StyledTableCell align="center">BatchNumber(First Wash)</StyledTableCell>
                         <StyledTableCell align="center">Buyer</StyledTableCell>
-                        <StyledTableCell align="center">Style</StyledTableCell>
-                        <StyledTableCell align="center">Sales Order</StyledTableCell>
+                        {/* <StyledTableCell align="center">Style</StyledTableCell> */}
+                        {/* <StyledTableCell align="center">Sales Order</StyledTableCell> */}
                         <StyledTableCell align="center">Color</StyledTableCell>
                         
-                        <StyledTableCell align="center">Size</StyledTableCell>
+                        {/* <StyledTableCell align="center">Size</StyledTableCell> */}
                         {/* <StyledTableCell>BundleBarcode</StyledTableCell> */}
                         {/* <StyledTableCell>BatchQRCode</StyledTableCell> */}
-                        {/* <StyledTableCell align="center">BatchNumber(First Wash)</StyledTableCell> */}
+                        
                         <StyledTableCell align="center">Shade</StyledTableCell>
                         <StyledTableCell align="center">Machine No</StyledTableCell>
                         <StyledTableCell align="center">Total Quantity</StyledTableCell>
@@ -362,26 +447,27 @@ export default function LoadStart(){
                       {batchdetails
                             .map((row) => (
                                 <StyledTableRow
-                                key={`${row.MPO}-${row.Buyer}-${row.Style}-${row.Color}-${row.Shade}-${row.Size}-${row.BatchQRCode}-${row.BatchNumber}-${row.Quantity}`}
+                                key={`${row.Buyer}-${row.Color}-${row.Shade}-${row.BatchNumber}-${row.Quantity}`}
                                 >
-                                <StyledTableCell align="center">{row.MPO}</StyledTableCell>
+                                {/* <StyledTableCell align="center">{row.MPO}</StyledTableCell> */}
+                                <StyledTableCell align="center">{row.BatchNumber}</StyledTableCell>
                                 <StyledTableCell align="center">{row.Buyer}</StyledTableCell>
-                                <StyledTableCell align="center">{row.Style}</StyledTableCell>
-                                <StyledTableCell align="center">{row.SO}</StyledTableCell>
+                                {/* <StyledTableCell align="center">{row.Style}</StyledTableCell> */}
+                                {/* <StyledTableCell align="center">{row.SO}</StyledTableCell> */}
                                 <StyledTableCell align="center">{row.Color}</StyledTableCell>
-                                <StyledTableCell align="center">{row.Size}</StyledTableCell>
+                                {/* <StyledTableCell align="center">{row.Size}</StyledTableCell> */}
                                 {/* <StyledTableCell align="center">{row.BatchQRCode}</StyledTableCell> */}
-                                {/* <StyledTableCell align="center">{row.BatchNumber}</StyledTableCell> */}
+                                
                                 <StyledTableCell align="center">{row.Shade}</StyledTableCell>  
                                  <StyledTableCell align="center">{row.Machine}</StyledTableCell>  
                                 <StyledTableCell align="center">{row.Quantity}</StyledTableCell>
                                 </StyledTableRow>
                             ))}
                         <TableRow>
-                                <TableCell colSpan={6} sx={{ textAlign: "end", fontWeight: "bold",color:tbCellColor }}>
+                                {/* <TableCell colSpan={5} sx={{ textAlign: "center", fontWeight: "bold",color:tbCellColor }}>
                                    Batch (First Wash) - {batchNumber}
-                                </TableCell>
-                                <TableCell colSpan={7} sx={{ textAlign: "end", fontWeight: "bold",color:tbCellColor  }}  >Grand Total  = {totQty}</TableCell>
+                                </TableCell> */}
+                                <TableCell colSpan={9} sx={{ textAlign: "end", fontWeight: "bold",color:tbCellColor  }}  >Grand Total  = {totQty}</TableCell>
                         </TableRow>
                     </TableBody>
                   </Table>
@@ -419,7 +505,68 @@ export default function LoadStart(){
                         </Box>
                     </Box>
                 </Modal>
+                
 
+                 <Modal open={hourError} onClose={() => setShowPopup(false)}>
+                    <Box
+                        sx={{
+                        position: "fixed", // ← changed from absolute
+                        top: 0,
+                        left: 0,
+                        width: "100vw",
+                        height: "100vh",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        bgcolor: "rgba(0,0,0,0.5)", // dark overlay
+                        }}
+                    >
+                        <Box
+                        sx={{
+                            bgcolor: "rgba(202, 29, 29, 0.5)", // light red background for error
+                            p: 4,
+                            borderRadius: 2,
+                            color: "white", // red text for error
+                            width: 400,
+                        }}
+                        >
+                        <Typography variant="h6">Set Hour First</Typography>
+            
+                        {/* </Typography> */}
+                        <Button sx={{ mt: 2 }} onClick={() => setHourError(false)}>Close</Button>
+                        </Box>
+                    </Box>
+                </Modal>
+                <Modal open={minError} onClose={() => setShowPopup(false)}>
+                    <Box
+                        sx={{
+                        position: "fixed", // ← changed from absolute
+                        top: 0,
+                        left: 0,
+                        width: "100vw",
+                        height: "100vh",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        bgcolor: "rgba(0,0,0,0.5)", // dark overlay
+                        }}
+                    >
+                        <Box
+                        sx={{
+                            bgcolor: "rgba(202, 29, 29, 0.5)", // light red background for error
+                            p: 4,
+                            borderRadius: 2,
+                            color: "white", // red text for error
+                            width: 400,
+                        }}
+                        >
+                        <Typography variant="h6">Set Minute First</Typography>
+            
+                        {/* </Typography> */}
+                        <Button sx={{ mt: 2 }} onClick={() => setMinError(false)}>Close</Button>
+                        </Box>
+                    </Box>
+                </Modal>
                 <Modal open={processError!=""} onClose={() => setProcessError("")}>
                     <Box
                         sx={{

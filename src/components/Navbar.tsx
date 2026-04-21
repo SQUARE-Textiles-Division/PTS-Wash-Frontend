@@ -295,7 +295,10 @@ export default function Navbar() {
       setItemContent(WetProcessItemContent);
     }
     else {
-      setItemContent([{ primary: "Wash Receive", to: "/washreceive" }]); // <-- nothing by default
+      setItemContent([
+        { primary: "Master Routing", to: "/masterroute" },
+        { primary: "Wash Receive", to: "/washreceive" }
+      ]); // <-- nothing by default
     }
   }, [location.pathname]);
 
@@ -359,6 +362,13 @@ export default function Navbar() {
           <Box sx={{ display: "flex", gap: 2, alignItems: "center",fontWeight:600 }}>
             <p
               // onClick={() => navigate("/washreceive")}
+              onClick={()=>window.open("/masterroute", "_blank")}
+              style={{ textDecoration: "none", color: "#485e68", cursor: "pointer",  }}
+            >
+              Master Routing
+            </p>
+            <p
+              // onClick={() => navigate("/washreceive")}
               onClick={()=>window.open("/washreceive", "_blank")}
               style={{ textDecoration: "none", color: "#485e68", cursor: "pointer",  }}
             >
@@ -388,13 +398,13 @@ export default function Navbar() {
         sx={{
           // fontFamily:"'Inter', system-ui, sans-serif !important",
 
-          width: 200,
+          width: 100,
           bgcolor:'#485e68',
           color:'white',
           paddingLeft:'10px',
           flexShrink: 0,
           "& .MuiDrawer-paper": {
-            width: 230,
+            width: 200,
             
             boxSizing: "border-box",
           },

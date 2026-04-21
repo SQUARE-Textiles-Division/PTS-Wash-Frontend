@@ -179,7 +179,7 @@ const handleReplaceStage = (newStage: string) => {
       sx={{
         maxWidth: 600,
         mx: "auto",
-        mt: 4,
+        // mt: 4,
         display: "flex",
         flexDirection: "column",
         gap: 2,
@@ -188,6 +188,7 @@ const handleReplaceStage = (newStage: string) => {
       {/* MPO INPUT */}
       <TextField
         label="Enter MPO"
+        style={{position:'fixed',top:80}}
         inputRef={mpoRef}
         autoFocus
         onKeyDown={(e) => {
@@ -199,7 +200,7 @@ const handleReplaceStage = (newStage: string) => {
         }}
         sx={{
           width: 220,
-          mb: 5,
+          // mb: 5,
           "& .MuiOutlinedInput-root": {
             "&.Mui-focused fieldset": {
               borderColor: "#485e68",
@@ -209,6 +210,10 @@ const handleReplaceStage = (newStage: string) => {
             "&.Mui-focused": {
               color: "#485e68",
             },
+          },
+          
+          "& .MuiInputBase-root": {
+              height: 40, // total height
           },
         }}
       />
@@ -265,7 +270,7 @@ const handleReplaceStage = (newStage: string) => {
 
           )} */}
          {selectedStages.length > 0 && (
-              <Stepper activeStep={activeStep} nonLinear={true} sx={{ mt: 3, width: 1050 }}>
+              <Stepper activeStep={activeStep} nonLinear={true} sx={{   width: 1000 }}>
               {selectedStages.map((stage) => (
                 <Step key={stage} completed={false} disabled={false}>
                   <StepLabel
@@ -279,7 +284,7 @@ const handleReplaceStage = (newStage: string) => {
                   >
                     <Typography
                       sx={{
-                        fontSize: 16,
+                        fontSize: 14,
                         whiteSpace: "normal",
                         wordBreak: "break-word",
                         fontWeight: "bold",

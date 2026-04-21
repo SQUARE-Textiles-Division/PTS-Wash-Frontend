@@ -20,16 +20,19 @@ export interface SourceBatch {
 }
 export interface BatchForFirstWash {
   id: number;
+  buyer:string,
+  color:string
   shade: string;
-  total_quantity: number;
-  status: string | null;
-  source_batches: SourceBatch[];
-  source_bundles: SourceBundle[]
+  stage:string,
+  type:string,
+  rejection_count:number, 
+  total_quantity:number
 }
 export interface ProcessFirstWash {
   id: number;
-  batch_for_first_wash: BatchForFirstWash;
+  batch: BatchForFirstWash;
   machine: Machine;
+  standard_time:string,
   loading_start: string;
   loading_started_by: string;
   loading_finish: string | null;

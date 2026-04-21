@@ -22,6 +22,7 @@ import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import { tbCellColor, tbRowColor } from '../Colors/Colors';
 import { ip } from '../../ip';
+import type BatchStageHistory from '../../TypeAnnotations/BatchStageHistory';
 import type RejectionReason from '../../TypeAnnotations/RejectionReason';
 // import { postData } from './genericApiService';
 // import Typography from '@mui/material/Typography';
@@ -54,12 +55,14 @@ export default function WhiskerOutput() {
   const [batchNum,setBatchNum]=useState<number>()
   const [scanned,setScanned]=useState<any>()
   const [finalrejcnt,setFinalRejCnt]=useState<number>(0)
+  const [currentStage, setCurrentStage] = useState("");
  useEffect(() => {
     if (stages.length > 0) {
-      setCompleted(stages.map(() => false));
-      setActiveStep(0);
+      // setCompleted(stages.map(() => false));
+      // setActiveStep(0);
+      markCompletedUntil(currentStage, stages);
     }
-  }, [stages]);
+  }, [stages,currentStage]);
   const normalizeStage = (s: string) =>
   s.trim().toUpperCase().replace(/\s+/g, " ");
 
@@ -151,12 +154,13 @@ export default function WhiskerOutput() {
                               {},
                               (subresult: BatchStage) => {
                                 const currStage = `${subresult.current_stage} ${subresult.current_status}`;
-                                  markCompletedUntil(currStage, newStages);
+                                setCurrentStage(currStage);
+                                markCompletedUntil(currStage, newStages);
                                 
                               },
                               (error:any)=>{
                                 console.log('Get Error ',error.response.data)
-                                setErrorLog(error.response.data[0])
+                                setErrorLog(error.response.data.detail)
                               }
                 );   
         },
@@ -164,6 +168,21 @@ export default function WhiskerOutput() {
               console.error("Error in second API:", error.response.data[0]);
           }
       );
+      const stageClosedMap = new Map();
+      
+      getData<BatchStageHistory[]>(
+            `productions/batch-stage-history/`,
+            ip,
+            {},
+            {batch:batchIdNum},
+            (stageRes:BatchStageHistory[])=>{
+                for(const obj of stageRes){
+                  if(obj.closed_by!=null){
+                    stageClosedMap.set(obj.stage,true)
+                  }
+                }
+            }
+      )
       getData<RejectionReason[]>(
                     `productions/rejections/`,
                     ip,
@@ -172,7 +191,7 @@ export default function WhiskerOutput() {
                     (res:RejectionReason[])=>{
                       let temp=0
                       for(const obj of res){
-                        if(obj.batch==batchIdNum && obj.stage!='Whisker')
+                        if(obj.batch==batchIdNum && stageClosedMap.has(obj.stage))
                             temp++;
                       }
                       console.log('total_rej',temp)
@@ -203,7 +222,7 @@ export default function WhiskerOutput() {
           inputRef={batchQRCoderef}
           onChange={() => {
               const batchQRCode = batchQRCoderef.current?.value.trim() || "";
-              if(batchQRCode.length==24){
+              if(batchQRCode.length==14){
                 fetchPlan(batchQRCode);
                 batchQRCoderef.current!.value = "";
                     // barcodeRef.current!.value = ""}
@@ -293,7 +312,7 @@ export default function WhiskerOutput() {
                                   total_rej+=rejres[i].rejection_count
                                 }
                                 // console.log(rejres)
-                                // console.log(total_rej)
+                                console.log(total_rej)
                                 setRejCnt(total_rej);
                                 
                             },
@@ -399,7 +418,7 @@ export default function WhiskerOutput() {
                              const currStage = `${closeRes.current_stage} ${closeRes.current_status}`;
                               markCompletedUntil(currStage, stages);
                               setFinalRejCnt(finalrejcnt+rejCnt)
-                            setRejCnt(-1);
+                              setRejCnt(-1);
                           },
                           (error: any) => {
                             // console.log(batchIdNum)

@@ -14,13 +14,15 @@ export default function NumberSpinner({
   label,
   error,
   size = 'small',
+   customSize,
   disableDecrement=false,
   ...other
 }: BaseNumberField.Root.Props & {
   label?: React.ReactNode;
-  size?: 'small' | 'medium';
+  size?: 'small' ;
   error?: boolean;
   disableDecrement?: boolean;
+  customSize?:number
 }) {
   let id = React.useId();
   if (idProp) {
@@ -46,6 +48,12 @@ export default function NumberSpinner({
                 color: 'text.primary',
               },
             },
+            '& .MuiInputBase-root': {
+                height: 20  ,
+                // minHeight: 0,
+                padding: 0
+              },
+
           }}
         >
           {props.children}
@@ -54,7 +62,7 @@ export default function NumberSpinner({
     >
       <BaseNumberField.ScrubArea
         render={
-          <Box component="span" sx={{ userSelect: 'none', width: '900' }} />
+          <Box component="span" sx={{ userSelect: 'none', width: '900',height:`0px` }} />
         }
       >
         <FormLabel
@@ -62,10 +70,11 @@ export default function NumberSpinner({
           sx={{
             display: 'inline-block',
             cursor: 'ew-resize',
-            fontSize: '0.875rem',
+            fontSize: 14,
             color: 'text.primary',
-            fontWeight: 500,
-            lineHeight: 0.5,
+            // fontWeight: 500,
+            // lineHeight: 0.1,
+          
             // mb: 0,
             // mx:1
           }}
@@ -93,6 +102,11 @@ export default function NumberSpinner({
                 '&.Mui-disabled': {
                   borderRight: '0px',
                 },
+                "&.MuiButtonBase-root":{
+                  height:20
+                }
+
+                // height:`${customSize}px`
               }}
             />
           }
@@ -117,7 +131,8 @@ export default function NumberSpinner({
                   
                   sx: {
                     textAlign: 'center',
-                     width: '60px'
+                     width: '20px',
+                     height:`${customSize}px`
                   },
                 },
               }}
@@ -139,6 +154,9 @@ export default function NumberSpinner({
                 '&.Mui-disabled': {
                   borderLeft: '0px',
                 },
+                 "&.MuiButtonBase-root":{
+                  height:20
+                }
               }}
             />
           }

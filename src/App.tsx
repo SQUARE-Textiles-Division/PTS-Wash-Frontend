@@ -49,6 +49,7 @@ import DryerOvenOut from './components/WetProcess/DryerOvenOut'
 import DryerTumbleOut from './components/WetProcess/DryerTumbleOut'
 import FirstWashQC from './components/WetProcess/FirstWashQC'
 import Rewash from './components/WetProcess/Rewash'
+import { MasterRouting } from './components/MasterRouting'
 function App() {
   // const [count, setCount] = useState(0)
   return (
@@ -102,6 +103,7 @@ function App() {
         <Route path='/tiein' element={<TieIn/>}/>
         <Route path='/tieqc' element={<TieQC/>}/>
         <Route path='/tieoutput' element={<TieOutput/>}/>
+        <Route path='/masterroute' element={<MasterRouting/>}/>
 
         {/* <Route path='/tieoutput' element={<TieOutput/>}/> */}
 

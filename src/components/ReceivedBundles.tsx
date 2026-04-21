@@ -19,14 +19,20 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
     // backgroundColor: theme.palette.common.black,
     // backgroundColor: '#485e68',
     backgroundColor: tbCellColor,
+    lineHeight:0.5,
     color: "white",
   },
   [`&.${tableCellClasses.body}`]: {
     fontSize: 14,
+    lineHeight:0.9,
+    padding: '4px 6px',
+    
+    // paddingRight:'50px'
   },
 }));
 
 const StyledTableRow = styled(TableRow)(({ theme }) => ({
+  // height: '5px', 
   '&:nth-of-type(odd)': {
     backgroundColor: tbRowColor
   },
@@ -46,12 +52,14 @@ export default function ReceivedBundles({ rows }: Props) {
         component={Paper}
         elevation={0}
         sx={{
-          maxHeight: 300,          // vertical scrollbar
+          maxHeight: 480,          // vertical scrollbar
           overflowX: "auto",       // horizontal scrollbar
           overflowY: "auto",
-          marginLeft:'200px',
-          maxWidth: 1100,
-          border:"none"
+          marginLeft:'235px',
+          maxWidth: 1150,
+          border:"none",
+          position:'fixed',
+          top:125
         }}
       >
         <Table
@@ -66,7 +74,7 @@ export default function ReceivedBundles({ rows }: Props) {
           }}
         >
         <TableHead>
-          <TableRow>
+          <TableRow >
             <StyledTableCell>MPO</StyledTableCell>
             <StyledTableCell align="center">Buyer</StyledTableCell>
             <StyledTableCell align="center">Style</StyledTableCell>
@@ -78,7 +86,7 @@ export default function ReceivedBundles({ rows }: Props) {
             <StyledTableCell align="center">Shade</StyledTableCell>
             <StyledTableCell align="center">Color</StyledTableCell>
             <StyledTableCell align="center">Quantity</StyledTableCell>
-            <StyledTableCell align="center">Status</StyledTableCell>
+            {/* <StyledTableCell align="center">Status</StyledTableCell> */}
           </TableRow>
         </TableHead>
         <TableBody>
@@ -98,7 +106,7 @@ export default function ReceivedBundles({ rows }: Props) {
               <StyledTableCell align="center">{row.shade}</StyledTableCell>
               <StyledTableCell align="center">{row.color}</StyledTableCell>
               <StyledTableCell align="center">{row.quantity}</StyledTableCell>
-                <StyledTableCell align="center">{row.status}</StyledTableCell>
+                {/* <StyledTableCell align="center">{row.status}</StyledTableCell> */}
             </StyledTableRow>
           ))}
         </TableBody>

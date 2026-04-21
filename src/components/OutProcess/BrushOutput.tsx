@@ -22,6 +22,7 @@ import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import { tbCellColor, tbRowColor } from '../Colors/Colors';
 import { ip } from '../../ip';
+import type BatchStageHistory from '../../TypeAnnotations/BatchStageHistory';
 import type RejectionReason from '../../TypeAnnotations/RejectionReason';
 // import { postData } from './genericApiService';
 // import Typography from '@mui/material/Typography';
@@ -45,45 +46,41 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
     border: 0,
   },
 }));
-export default function BrushOutput() {
+export default function BrushrOutput() {
   const [stages,setStages]=useState<string[]>([])
   const [activeStep, setActiveStep] = React.useState(0); // step that is currently clickable
   const [completed, setCompleted] = React.useState<boolean[]>(stages.map(() => false)); 
   const [errorLog,setErrorLog]=useState<string>('')
   const [rejCnt,setRejCnt]=useState<number>(-1)
-  const [batchNum,setBatchNum]=useState<number>() 
+  const [batchNum,setBatchNum]=useState<number>()
   const [scanned,setScanned]=useState<any>()
   const [finalrejcnt,setFinalRejCnt]=useState<number>(0)
-    useEffect(() => {
-      if (stages.length > 0) {
-        setCompleted(stages.map(() => false));
-        setActiveStep(0);
-      }
-    }, [stages]);
-    const normalizeStage = (s: string) =>
-    s.trim().toUpperCase().replace(/\s+/g, " ");
-  
-    const markCompletedUntil = (currStage: string, stageList: string[]) => {
-      const normalized = normalizeStage(currStage);
-  
-      const stageIndex = stageList.findIndex(
-        stage => normalizeStage(stage) === normalized
-      );
-  
-      if (stageIndex === -1) return;
-  
-      setCompleted(stageList.map((_, idx) => idx <= stageIndex));
-      setActiveStep(
-        stageIndex < stageList.length ? stageIndex + 1 : stageIndex
-      );
-    };
-    // console.l
-  // console.log(c,ompleted)
-  // cos
-  // useEffect(() => {
-  //   setCompleted(stages.map(() => false));
-  //   setActiveStep(0);
-  // }, [stages])
+  const [currentStage, setCurrentStage] = useState("");
+ useEffect(() => {
+    if (stages.length > 0) {
+      // setCompleted(stages.map(() => false));
+      // setActiveStep(0);
+      markCompletedUntil(currentStage, stages);
+    }
+  }, [stages,currentStage]);
+  const normalizeStage = (s: string) =>
+  s.trim().toUpperCase().replace(/\s+/g, " ");
+
+  const markCompletedUntil = (currStage: string, stageList: string[]) => {
+    const normalized = normalizeStage(currStage);
+
+    const stageIndex = stageList.findIndex(
+      stage => normalizeStage(stage) === normalized
+    );
+
+    if (stageIndex === -1) return;
+
+    setCompleted(stageList.map((_, idx) => idx <= stageIndex));
+    setActiveStep(
+      stageIndex < stageList.length ? stageIndex + 1 : stageIndex
+    );
+  };
+
   let batchIdNum=0
   const batchQRCoderef=useRef<HTMLInputElement>(null);
   const fetchPlan=(batchQRCode:string)=>{
@@ -111,7 +108,7 @@ export default function BrushOutput() {
                     newStages.push(`${stage} IN`);
                     newStages.push(`${stage} CLOSED`);
                   }
-                  // console.log(batchIdNum)
+                  console.log(batchIdNum)
                   setStages(newStages);
                                     const proRes=result1
                   const showRes={
@@ -157,12 +154,13 @@ export default function BrushOutput() {
                               {},
                               (subresult: BatchStage) => {
                                 const currStage = `${subresult.current_stage} ${subresult.current_status}`;
+                                setCurrentStage(currStage);
                                 markCompletedUntil(currStage, newStages);
                                 
                               },
                               (error:any)=>{
                                 console.log('Get Error ',error.response.data)
-                                setErrorLog(error.response.data[0])
+                                setErrorLog(error.response.data.detail)
                               }
                 );   
         },
@@ -170,21 +168,36 @@ export default function BrushOutput() {
               console.error("Error in second API:", error.response.data[0]);
           }
       );
-      getData<RejectionReason[]>(
-            `productions/rejections/`,
+      const stageClosedMap = new Map();
+      
+      getData<BatchStageHistory[]>(
+            `productions/batch-stage-history/`,
             ip,
             {},
-            {},
-            (res:RejectionReason[])=>{
-              let temp=0
-              for(const obj of res){
-                if(obj.batch==batchIdNum && obj.stage!='Brush')
-                    temp++;
-              }
-              console.log('total_rej',temp)
-              setFinalRejCnt(temp)
+            {batch:batchIdNum},
+            (stageRes:BatchStageHistory[])=>{
+                for(const obj of stageRes){
+                  if(obj.closed_by!=null){
+                    stageClosedMap.set(obj.stage,true)
+                  }
+                }
             }
       )
+      getData<RejectionReason[]>(
+                    `productions/rejections/`,
+                    ip,
+                    {},
+                    {},
+                    (res:RejectionReason[])=>{
+                      let temp=0
+                      for(const obj of res){
+                        if(obj.batch==batchIdNum && stageClosedMap.has(obj.stage))
+                            temp++;
+                      }
+                      console.log('total_rej',temp)
+                      setFinalRejCnt(temp)
+                    }
+                  )
   }
   
 
@@ -209,7 +222,7 @@ export default function BrushOutput() {
           inputRef={batchQRCoderef}
           onChange={() => {
               const batchQRCode = batchQRCoderef.current?.value.trim() || "";
-              if(batchQRCode.length==24){
+              if(batchQRCode.length==14){
                 fetchPlan(batchQRCode);
                 batchQRCoderef.current!.value = "";
                     // barcodeRef.current!.value = ""}
@@ -294,14 +307,14 @@ export default function BrushOutput() {
                             },
                             (rejres: Rejection[]) => {
                               let total_rej=0
-                              for(let i=0;i<rejres.length;i++)
-                              {
-                                total_rej+=rejres[i].rejection_count
-                              }
-                              // console.log(rejres)
-                              // console.log(total_rej)
-                              setRejCnt(total_rej);
-                              // setFinalRejCnt(total_rej)
+                                for(let i=0;i<rejres.length;i++)
+                                {
+                                  total_rej+=rejres[i].rejection_count
+                                }
+                                // console.log(rejres)
+                                console.log(total_rej)
+                                setRejCnt(total_rej);
+                                
                             },
                             (error: any) => {
                               console.log(error);
@@ -348,7 +361,8 @@ export default function BrushOutput() {
                 {/* <Typography>Already batches are allocated according to this plan */}
                 {/* </Typography> */}
                 <Button sx={{ mt: 2 }} onClick={() => {setErrorLog('')
-                  setRejCnt(-1)}}>Close</Button>
+                  setRejCnt(-1)}
+                }>Close</Button>
               </Box>
           </Box>
       </Modal>
@@ -368,7 +382,7 @@ export default function BrushOutput() {
           >
                 <Box
                   sx={{
-                       bgcolor: "#ffffe0", // light red background for error
+                    bgcolor: "#ffffe0", // light red background for error
                       
                       border:'3px solid #e6db55',// light red background for error
                       p: 4,
@@ -378,7 +392,7 @@ export default function BrushOutput() {
                   }}
                 >
                 <Typography variant="h4">Are you Sure?</Typography>
-                  <Typography variant="h6">You have total {rejCnt} rejections in Brush
+                  <Typography variant="h6">You have total {rejCnt} rejections in  Brush
                   </Typography>
                 <div style={{
                   display:"flex",
@@ -401,11 +415,10 @@ export default function BrushOutput() {
                           },
                           (closeRes: BatchStage) => {
                             console.log(closeRes)
-                            const currStage = `${closeRes.current_stage} ${closeRes.current_status}`;
-                            markCompletedUntil(currStage, stages);
-                            setFinalRejCnt(finalrejcnt+rejCnt)
-                            setRejCnt(-1);
-                            
+                             const currStage = `${closeRes.current_stage} ${closeRes.current_status}`;
+                              markCompletedUntil(currStage, stages);
+                              setFinalRejCnt(finalrejcnt+rejCnt)
+                              setRejCnt(-1);
                           },
                           (error: any) => {
                             // console.log(batchIdNum)
@@ -436,9 +449,8 @@ export default function BrushOutput() {
                     // maxHeight: 200,          // vertical scrollbar
                     overflowX: "auto",       // horizontal scrollbar
                     overflowY: "auto",
-                    border:'none',
                     // marginLeft:'200px',
-                    maxWidth: 1100,
+                    maxWidth:1100
                   }}
                >
                   <Table

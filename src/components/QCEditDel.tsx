@@ -24,9 +24,12 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
     // backgroundColor: theme.palette.common.black,
     backgroundColor: tbCellColor,
     color: tbRowColor,
+    lineHeight:0.5
   },
   [`&.${tableCellClasses.body}`]: {
     fontSize: 14,
+    lineHeight:0.1,
+    padding: '1.5px',
   },
 }));
 
@@ -138,29 +141,29 @@ export default function QCEditDel() {
                 display:'flex',
                 flexDirection:'column',
                 alignItems:'center',
-                gap:'20px',
+                // gap:'20px',
                 marginLeft:'100px'
             }
             }>
               <Box
                 sx={{
-                minHeight: '20vh',
+                // minHeight: '20vh',
                 display: 'flex',
                 alignItems: 'flex-start',
                 justifyContent: 'center',
-                pt: 2,
-                width:250
+                // pt: 2,
+                // width:250
                 }}
             >
               <TextField
-                      style={{outline:"red"}}
+                      style={{position:'fixed',top:80}}
                       inputRef={batchRef}
                       label="Scan Batch QRCode Here"
-                      fullWidth
+                      // fullWidth
                       autoFocus
                       onChange={()=>{
                         const batchcode = batchRef.current?.value.trim() || "";
-                        if(batchcode.length==24){
+                        if(batchcode.length==14){
                             fetchData(batchcode);
                             batchRef.current!.value = "";
                                 // barcodeRef.current!.value = ""}
@@ -173,9 +176,12 @@ export default function QCEditDel() {
                           },
                           },
                           "& .MuiInputLabel-root": {
-                          "&.Mui-focused": {
-                              color: "#485e68",               // Label/text color on focus
+                              "&.Mui-focused": {
+                                  color: "#485e68",               // Label/text color on focus
+                              },
                           },
+                          "& .MuiInputBase-root": {
+                              height: 30, // total height
                           },
                       }}
                 />
@@ -186,11 +192,14 @@ export default function QCEditDel() {
                 elevation={0}
                 sx={{
                   // maxHeight: 200,          // vertical scrollbar
+                  maxHeight: 400,   
                   overflowX: "auto",       // horizontal scrollbar
                   overflowY: "auto",
                   border:'none',
-                  marginLeft:"50px"
-                  
+                  marginLeft:"50px",
+                  position:'fixed',
+                  top:140,
+                  maxWidth: 1000,
                 }}
               >
                     <Table
@@ -229,6 +238,7 @@ export default function QCEditDel() {
                               <StyledTableCell align="center"><Button sx={{
                                 backgroundColor: '#485e68',
                                 color: 'white',
+                                height:15
                               }}
                               onClick={(e) => {
                                 setAnchorEl(e.currentTarget);
@@ -237,6 +247,10 @@ export default function QCEditDel() {
                               >Edit</Button></StyledTableCell>
                               <StyledTableCell align="center">
                                 <DeleteForeverIcon
+                                  sx={{
+                                        
+                                        fontSize:20
+                                      }}
                                     color='error' 
                                     fontSize='medium'
                                     onClick={()=>{
@@ -281,12 +295,14 @@ export default function QCEditDel() {
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      bgcolor: "rgba(148, 131, 131, 0.5)", // dark overlay
+                      // bgcolor: "rgba(148, 131, 131, 0.5)", // dark overlay
                     }}
                   >
                       <Box
                         sx={{
-                            bgcolor: "#fea116", // light red background for error
+                           bgcolor: "#ffffe0", // light red background for error
+                                
+                            border:'3px solid #e6db55', // light red background for error
                             p: 4,
                             borderRadius: 2,
                             color: "black", // red text for error

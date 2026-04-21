@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type BundleInfo from "../TypeAnnotations/BundleInfo";
 import CheckReceive from "./CheckReceive";
 import BatchBundles from "./BatchBundles";
@@ -7,7 +7,7 @@ import { Typography ,Paper,Box,Button} from "@mui/material";
 import { useReactToPrint } from "react-to-print";
 
 export default function CreateBatch() {
-        
+    
 
     const [items, setItems] = useState<BundleInfo[]>([]);
     const [qrData, setQrData] = useState<any | null>(null);
@@ -15,6 +15,11 @@ export default function CreateBatch() {
     const handlePrint = useReactToPrint({
         contentRef: printRef,
     });
+   useEffect(() => {
+        if (items?.length > 0) {
+            setQrData(null);
+        }
+    }, [items]);
      return (
             <div style={
             {
@@ -26,12 +31,13 @@ export default function CreateBatch() {
             }>
                 <CheckReceive items={items} setItems={setItems} qrData={qrData} setQrData={setQrData} />
                 <BatchBundles rows={items}></BatchBundles>
+                
                 {qrData && (
                         <Paper
                             ref={printRef}
                             elevation={5}
                             sx={{
-                            mt: 3,
+                            mt: 25,
                             px: 2,
                             pt:1,
                             pb:1,
@@ -58,8 +64,8 @@ export default function CreateBatch() {
                             </Typography> */}
 
                             <QRCodeCanvas
-                            value={`W8220${qrData.date}B00000000${qrData.batch_id}`}
-                            size={200}
+                            value={`W822${qrData.yearonly}B${String(qrData.batch_id).padStart(7, '0')}`}
+                            size={100}
                             level="H"
                             />
 
@@ -69,7 +75,7 @@ export default function CreateBatch() {
                                 fontSize: 12,
                                 mb: 2
                             }}>
-                                {`W8220${qrData.date}B${String(qrData.batch_id).padStart(10, '0')}`}
+                                {`W822${qrData.yearonly}B${String(qrData.batch_id).padStart(7, '0')}`}
                             </Typography>
                             <Typography variant="body2">
                                 <b>Total Quantity:</b> {qrData.total_items}

@@ -4,14 +4,6 @@ import Stepper from '@mui/material/Stepper';
 import Step from '@mui/material/Step';
 import StepLabel from '@mui/material/StepLabel';
 import { useState,useRef,useEffect } from 'react';
-import { styled } from '@mui/material/styles';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell, { tableCellClasses } from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import Paper from '@mui/material/Paper';
 // import Button from '@mui/material/Button';
 import {  Typography, Button} from "@mui/material";
 import { getData, postData } from '../genericApiService';
@@ -20,8 +12,17 @@ import type BatchStage from '../../TypeAnnotations/BatchStage';
 import type BatchInstance from '../../TypeAnnotations/BatchInstance';
 import type RouteSteps from '../../TypeAnnotations/BatchInstance';
 import type Rejection from '../../TypeAnnotations/Rejection';
+import { styled } from '@mui/material/styles';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell, { tableCellClasses } from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import Paper from '@mui/material/Paper';
 import { tbCellColor, tbRowColor } from '../Colors/Colors';
 import { ip } from '../../ip';
+import type BatchStageHistory from '../../TypeAnnotations/BatchStageHistory';
 import type RejectionReason from '../../TypeAnnotations/RejectionReason';
 // import { postData } from './genericApiService';
 // import Typography from '@mui/material/Typography';
@@ -29,7 +30,7 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
     // backgroundColor: theme.palette.common.black,
     backgroundColor: tbCellColor,
-    color: tbRowColor
+    color: tbRowColor,
   },
   [`&.${tableCellClasses.body}`]: {
     fontSize: 14,
@@ -45,7 +46,6 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
     border: 0,
   },
 }));
-
 export default function TieOutput() {
   const [stages,setStages]=useState<string[]>([])
   const [activeStep, setActiveStep] = React.useState(0); // step that is currently clickable
@@ -55,12 +55,14 @@ export default function TieOutput() {
   const [batchNum,setBatchNum]=useState<number>()
   const [scanned,setScanned]=useState<any>()
   const [finalrejcnt,setFinalRejCnt]=useState<number>(0)
-useEffect(() => {
+  const [currentStage, setCurrentStage] = useState("");
+ useEffect(() => {
     if (stages.length > 0) {
-      setCompleted(stages.map(() => false));
-      setActiveStep(0);
+      // setCompleted(stages.map(() => false));
+      // setActiveStep(0);
+      markCompletedUntil(currentStage, stages);
     }
-  }, [stages]);
+  }, [stages,currentStage]);
   const normalizeStage = (s: string) =>
   s.trim().toUpperCase().replace(/\s+/g, " ");
 
@@ -78,6 +80,7 @@ useEffect(() => {
       stageIndex < stageList.length ? stageIndex + 1 : stageIndex
     );
   };
+
   let batchIdNum=0
   const batchQRCoderef=useRef<HTMLInputElement>(null);
   const fetchPlan=(batchQRCode:string)=>{
@@ -150,14 +153,14 @@ useEffect(() => {
                               {},
                               {},
                               (subresult: BatchStage) => {
-                                
-                               const currStage = `${subresult.current_stage} ${subresult.current_status}`;
-                                  markCompletedUntil(currStage, newStages);
+                                const currStage = `${subresult.current_stage} ${subresult.current_status}`;
+                                setCurrentStage(currStage);
+                                markCompletedUntil(currStage, newStages);
                                 
                               },
                               (error:any)=>{
                                 console.log('Get Error ',error.response.data)
-                                setErrorLog(error.response.data[0])
+                                setErrorLog(error.response.data.detail)
                               }
                 );   
         },
@@ -165,21 +168,36 @@ useEffect(() => {
               console.error("Error in second API:", error.response.data[0]);
           }
       );
-    getData<RejectionReason[]>(
-                  `productions/rejections/`,
-                  ip,
-                  {},
-                  {},
-                  (res:RejectionReason[])=>{
-                    let temp=0
-                    for(const obj of res){
-                      if(obj.batch==batchIdNum && obj.stage!='Laser Whisker')
-                          temp++;
-                    }
-                    console.log('total_rej',temp)
-                    setFinalRejCnt(temp)
+      const stageClosedMap = new Map();
+      
+      getData<BatchStageHistory[]>(
+            `productions/batch-stage-history/`,
+            ip,
+            {},
+            {batch:batchIdNum},
+            (stageRes:BatchStageHistory[])=>{
+                for(const obj of stageRes){
+                  if(obj.closed_by!=null){
+                    stageClosedMap.set(obj.stage,true)
                   }
-                )
+                }
+            }
+      )
+      getData<RejectionReason[]>(
+                    `productions/rejections/`,
+                    ip,
+                    {},
+                    {},
+                    (res:RejectionReason[])=>{
+                      let temp=0
+                      for(const obj of res){
+                        if(obj.batch==batchIdNum && stageClosedMap.has(obj.stage))
+                            temp++;
+                      }
+                      console.log('total_rej',temp)
+                      setFinalRejCnt(temp)
+                    }
+                  )
   }
   
 
@@ -204,7 +222,7 @@ useEffect(() => {
           inputRef={batchQRCoderef}
           onChange={() => {
               const batchQRCode = batchQRCoderef.current?.value.trim() || "";
-              if(batchQRCode.length==24){
+              if(batchQRCode.length==14){
                 fetchPlan(batchQRCode);
                 batchQRCoderef.current!.value = "";
                     // barcodeRef.current!.value = ""}
@@ -233,8 +251,6 @@ useEffect(() => {
             <Stepper activeStep={activeStep} orientation="horizontal"
               sx={{
                     maxWidth: 900,
-                   
-                    
                   }}
             >
             {stages.map((label, index) => {
@@ -291,14 +307,14 @@ useEffect(() => {
                             },
                             (rejres: Rejection[]) => {
                               let total_rej=0
-                              for(let i=0;i<rejres.length;i++)
-                              {
-                                total_rej+=rejres[i].rejection_count
-                              }
-                              // console.log(rejres)
-                              // console.log(total_rej)
-                              setRejCnt(total_rej);
-                              
+                                for(let i=0;i<rejres.length;i++)
+                                {
+                                  total_rej+=rejres[i].rejection_count
+                                }
+                                // console.log(rejres)
+                                console.log(total_rej)
+                                setRejCnt(total_rej);
+                                
                             },
                             (error: any) => {
                               console.log(error);
@@ -318,7 +334,7 @@ useEffect(() => {
         ) }
 
         
-        <Modal open={errorLog!=''} onClose={() => setErrorLog('')} BackdropProps={{sx: {backgroundColor: "rgba(0,0,0,0.05)"}}}>
+        <Modal open={errorLog!=''} onClose={() => setErrorLog('')}>
           <Box
               sx={{
                 position: "fixed", // ← changed from absolute
@@ -344,13 +360,13 @@ useEffect(() => {
                 <Typography variant="h6">{errorLog}</Typography>
                 {/* <Typography>Already batches are allocated according to this plan */}
                 {/* </Typography> */}
-                <Button sx={{ mt: 2 ,bgcolor:tbCellColor,color:'white'}} onClick={() => {setErrorLog('')
-                  setRejCnt(-1)
-                }}>Close</Button>
+                <Button sx={{ mt: 2 }} onClick={() => {setErrorLog('')
+                  setRejCnt(-1)}
+                }>Close</Button>
               </Box>
           </Box>
       </Modal>
-      <Modal open={rejCnt!=-1} onClose={()=>setRejCnt(-1)}   hideBackdrop>
+      <Modal open={rejCnt!=-1} onClose={()=>setRejCnt(-1)}>
           <Box
               sx={{
                 position: "fixed",
@@ -361,14 +377,14 @@ useEffect(() => {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                // bgcolor: "rgba(121, 104, 104, 0.5)", // dark overlay
+                // bgcolor: "rgba(148, 131, 131, 0.5)", // dark overlay
               }}
           >
                 <Box
                   sx={{
-                      bgcolor: "#ffffe0", // light red background for error
+                    bgcolor: "#ffffe0", // light red background for error
                       
-                      border:'3px solid #e6db55',
+                      border:'3px solid #e6db55',// light red background for error
                       p: 4,
                       borderRadius: 2,
                       color: "#9c9999", // red text for error
@@ -376,7 +392,7 @@ useEffect(() => {
                   }}
                 >
                 <Typography variant="h4">Are you Sure?</Typography>
-                  <Typography variant="h6">You have total {rejCnt} rejections in Tie
+                  <Typography variant="h6">You have total {rejCnt} rejections in  Tie
                   </Typography>
                 <div style={{
                   display:"flex",
@@ -386,7 +402,7 @@ useEffect(() => {
                   gap:'40px'
                 }}>
                     <Button
-                      sx={{ mt: 2 ,background:tbCellColor,color:'white'}}
+                      sx={{ mt: 2 ,background:'blue',color:'white'}}
                       onClick={() =>{
                           
                         postData<BatchStage>(
@@ -399,10 +415,10 @@ useEffect(() => {
                           },
                           (closeRes: BatchStage) => {
                             console.log(closeRes)
-                           const currStage = `${closeRes.current_stage} ${closeRes.current_status}`;
-                                  markCompletedUntil(currStage, stages);
-                            setFinalRejCnt(finalrejcnt+rejCnt)
-                            setRejCnt(-1);
+                             const currStage = `${closeRes.current_stage} ${closeRes.current_status}`;
+                              markCompletedUntil(currStage, stages);
+                              setFinalRejCnt(finalrejcnt+rejCnt)
+                              setRejCnt(-1);
                           },
                           (error: any) => {
                             // console.log(batchIdNum)
@@ -414,7 +430,7 @@ useEffect(() => {
                     >
                       Yes
                     </Button>
-                  <Button sx={{ mt: 2 ,background:'#d9534f',color:'white'}} onClick={() => setRejCnt(-1)}>No</Button>
+                  <Button sx={{ mt: 2 ,background:'red',color:'white'}} onClick={() => setRejCnt(-1)}>No</Button>
                 </div>
                 </Box>
           </Box>
@@ -431,17 +447,17 @@ useEffect(() => {
                   elevation={0}
                   sx={{
                     // maxHeight: 200,          // vertical scrollbar
-                    overflowX: "auto",
-                    // marginLeft:'200px',
-                    maxWidth:1100,       // horizontal scrollbar
+                    overflowX: "auto",       // horizontal scrollbar
                     overflowY: "auto",
+                    // marginLeft:'200px',
+                    maxWidth:1100
                   }}
                >
                   <Table
                     stickyHeader
                     sx={{ '& .MuiTableCell-root':{
                 borderBottom:'none'
-            }  }}   // force horizontal scroll if screen is smaller
+            } }}   // force horizontal scroll if screen is smaller
                     aria-label="customized table"
                   >
                   <TableHead>

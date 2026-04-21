@@ -22,6 +22,7 @@ import type RouteSteps from '../../TypeAnnotations/BatchInstance';
 import { tbCellColor, tbRowColor } from '../Colors/Colors';
 import { ip } from '../../ip';
 import type RejectionReason from '../../TypeAnnotations/RejectionReason';
+import type BatchStageHistory from '../../TypeAnnotations/BatchStageHistory';
 // import { postData } from './genericApiService';
 // import Typography from '@mui/material/Typography';
 
@@ -200,6 +201,21 @@ useEffect(() => {
                   console.error("Error in second API:", error.response.data[0]);
               }
           );
+        const stageClosedMap = new Map();
+        
+        getData<BatchStageHistory[]>(
+              `productions/batch-stage-history/`,
+              ip,
+              {},
+              {batch:batchIdNum},
+              (stageRes:BatchStageHistory[])=>{
+                  for(const obj of stageRes){
+                    if(obj.closed_by!=null){
+                      stageClosedMap.set(obj.stage,true)
+                    }
+                  }
+              }
+        )
         getData<RejectionReason[]>(
           `productions/rejections/`,
           ip,
@@ -208,7 +224,7 @@ useEffect(() => {
           (res:RejectionReason[])=>{
             let temp=0
             for(const obj of res){
-              if(obj.batch==batchIdNum && obj.stage!='Wrinkle')
+              if(obj.batch==batchIdNum && stageClosedMap.has(obj.stage))
                   temp++;
             }
             console.log('total_rej',temp)
@@ -239,7 +255,7 @@ useEffect(() => {
           inputRef={batchQRCoderef}
           onChange={() => {
               const batchQRCode = batchQRCoderef.current?.value.trim() || "";
-              if(batchQRCode.length==24){
+              if(batchQRCode.length==14){
                 fetchPlan(batchQRCode);
                 batchQRCoderef.current!.value = "";
                     // barcodeRef.current!.value = ""}

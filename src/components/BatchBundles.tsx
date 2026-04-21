@@ -19,9 +19,12 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
     // backgroundColor: theme.palette.common.black,
     backgroundColor: tbCellColor,
     color: theme.palette.common.white,
+    lineHeight:0.5
   },
   [`&.${tableCellClasses.body}`]: {
     fontSize: 14,
+    lineHeight:0.9,
+    padding: '4px 6px',
   },
 }));
 
@@ -44,12 +47,14 @@ export default function ReceivedBundles({ rows }: Props) {
       <TableContainer
         component={Paper}
         sx={{
-          maxHeight: 300,          // vertical scrollbar
+          maxHeight: 480,          // vertical scrollbar
           overflowX: "auto",       // horizontal scrollbar
           overflowY: "auto",
-          maxWidth: 1100,
+          maxWidth: 1150,
           border:'none',
           marginLeft:'200px',
+          position:'fixed',
+          top:125
           // marginLeft:'100px',
         }}
       >
@@ -77,7 +82,7 @@ export default function ReceivedBundles({ rows }: Props) {
               <StyledTableCell align="center">Shade</StyledTableCell>
               <StyledTableCell align="center">Color</StyledTableCell>
               <StyledTableCell align="center">Quantity</StyledTableCell>
-              <StyledTableCell align="center">Status</StyledTableCell>
+              {/* <StyledTableCell align="center">Status</StyledTableCell> */}
             </TableRow>
           </TableHead>
 
@@ -95,7 +100,7 @@ export default function ReceivedBundles({ rows }: Props) {
                 <StyledTableCell align="center">{row.shade}</StyledTableCell>
                 <StyledTableCell align="center">{row.color}</StyledTableCell>
                 <StyledTableCell align="center">{row.quantity}</StyledTableCell>
-                <StyledTableCell align="center">{row.status}</StyledTableCell>
+                {/* <StyledTableCell align="center">{row.status}</StyledTableCell> */}
               </StyledTableRow>
             ))}
           </TableBody>

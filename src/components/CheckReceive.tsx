@@ -21,6 +21,7 @@ export default function CheckReceive({items, setItems,qrData,setQrData}: Props){
 
     // const [qrData, setQrData] = useState<any | null>(null);
     const printRef = useRef<HTMLDivElement>(null);
+    const [barcode,setBarcode]=useState<string>("")
     const [planningError,setPlanningError]=useState<string>("")
     const [invalideBundleError,setInvalideBundleError]=useState<string>("")
     const [showPopup, setShowPopup] = useState(false);
@@ -84,6 +85,7 @@ export default function CheckReceive({items, setItems,qrData,setQrData}: Props){
                     (result2:BatchBundle) => {
                         let isDuplicate = false;
                         let sameMpoSize=true;
+                        setBarcode(result2.bundle_barcode)
                         // setSecondData(result2);
                         for(let i=0;i<items.length;i++){
                             console.log("Checking item:", items[i], "against", result2);
@@ -146,10 +148,10 @@ export default function CheckReceive({items, setItems,qrData,setQrData}: Props){
                 }}
             >
                 <TextField
-                style={{outline:"red"}}
+                style={{position:'fixed',top:80}}
                 inputRef={barcodeRef}
                 label="Scan Barcode Here"
-                fullWidth
+                // fullWidth
                 autoFocus
                 onChange={() => {
                     
@@ -173,20 +175,26 @@ export default function CheckReceive({items, setItems,qrData,setQrData}: Props){
                             color: "#485e68",               // Label/text color on focus
                         },
                         },
+                        "& .MuiInputBase-root": {
+                            height: 40, // total height
+                        },
                     }}
                 />
                 
                 
                 {showPopup && (
                         <div
-                            style={{
+                           style={{
                                 display: "flex",
                                 alignItems: "center",
                                 gap: '5px',
+                                position:'fixed',
+                                top:80,
+                                right:80
                             }}
                         >
-                            <DoneAllIcon style={{ color: "green", fontSize: 18 }} />
-                            <h5 style={{ margin: 0 }}>Successfully Received</h5>
+                             <DoneAllIcon style={{ color: "green", fontSize: 16 }} />
+                            <p style={{ fontSize:16,fontWeight:'bold'}}>Successfully Received {barcode}</p>
                         </div>
 
                     )
@@ -198,9 +206,12 @@ export default function CheckReceive({items, setItems,qrData,setQrData}: Props){
                         flexDirection:'column',
                         marginLeft:'50px',
                         gap:'10px',
+                        // position:'relative',
+                        top:500
                     }}
                     >
                         <Button variant="contained"
+                        // disabled={qr
                         sx={{
                             mt:2,
                             backgroundColor: "#485e68",
@@ -234,7 +245,7 @@ export default function CheckReceive({items, setItems,qrData,setQrData}: Props){
                                         bundles: data.batch_bundles,
                                         routing: data.planning?.route_steps ?? [],
                                         total_items: data.total_quantity,
-                                        date: data.updated_at,
+                                        yearonly: data.updated_at.substring(2, 4)
                                     };
                                     setQrData(qrPayload);
                                     setItems([]);

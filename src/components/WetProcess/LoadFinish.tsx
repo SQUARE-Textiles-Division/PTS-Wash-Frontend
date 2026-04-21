@@ -70,11 +70,12 @@ export default function LoadFinish(){
         const tempBatchDetail:any=[]
         // let getId=0
         getData<ProcessFirstWash[]>(
-            `wet-process/first-wash-processes/`,
+            `wet-process/first-wash-processes`,
             ip,
             {},
             {
-                batch:batchIdNum
+                batch:batchIdNum,
+                // type:'oven'
             },
             (res:ProcessFirstWash[])=>{
                 // getId=res[0].id
@@ -88,70 +89,20 @@ export default function LoadFinish(){
                     },
                   (result:ProcessFirstWash)=>{
                         console.log(result)
-                        const shade=result.batch_for_first_wash.shade
-                        const sourceBatches=result.batch_for_first_wash.source_batches
-                        const batchNumber=result.batch_for_first_wash.id
-                        // let batchQR=`W8220${batchDry[i].updated_at}B${String(batchDry[i].id).padStart(10, '0')}`
-                        for(const batchObj of sourceBatches){
-                            const allocquantity=batchObj.quantity
-                            for(const batchBundle of batchObj.batch.batch_bundles){
-                                if(batchBundle.received.shade==shade){
-                                    tempBatchDetail.push({
-                                        'Shade':shade,
-                                        'MPO':batchBundle.received.mpo,
-                                        'SO':batchBundle.received.so,
-                                        'Style':batchBundle.received.style,
-                                        'Color':batchBundle.received.color,
-                                        'Size':batchBundle.received.size,
-                                        'Buyer':batchBundle.received.buyer,
-                                        'Quantity':allocquantity,
-                                        'Machine':result.machine.machine_number
-                                        // 'BatchNumber':batchNumber,
-                                        // 'BatchQRCode':
-                                        // {row.MPO}-${row.Buyer}-${row.Style}-${row.Color}-${row.Shade}-${row.Size}-${row.BatchQRCode}-${row.BatchNumber}-${row.Quantity}
-                                    })
-                                    break;
-                                }
+                        tempBatchDetail.push(
+                            {
+                                'Shade':result.batch.shade,
+                                'Color':result.batch.color,
+                                'Buyer':result.batch.buyer,
+                                'BatchNumber':result.batch.id,
+                                'Quantity':result.batch.total_quantity,
+                                'Machine':result.machine.machine_number
                             }
-                        }
-                        const sourceBundles=result.batch_for_first_wash.source_bundles
-
-                        const bundleMap = new Map();
-
-                        for (const bundleObj of sourceBundles) {
-                                const allocquantity = bundleObj.quantity;
-
-                                if (bundleObj.bundle.shade == shade) {
-
-                                    const key = `${shade}|${bundleObj.bundle.mpo}|${bundleObj.bundle.so}|${bundleObj.bundle.style}|${bundleObj.bundle.color}|${bundleObj.bundle.size}|${bundleObj.bundle.buyer}|${result.machine.machine_number}`;
-
-                                    if (!bundleMap.has(key)) {
-                                        bundleMap.set(key, allocquantity);
-                                    } else {
-                                        bundleMap.set(key, bundleMap.get(key) + allocquantity);
-                                    }
-                                }
-                            }
-                        for (const [key, value] of bundleMap) {
-
-                            const parts = key.split("|");
-                            console.log(parts)
-                            tempBatchDetail.push({
-                                Shade: parts[0],
-                                MPO: parts[1],
-                                SO: parts[2],
-                                Style: parts[3],
-                                Color: parts[4],
-                                Size: parts[5],
-                                Buyer: parts[6],
-                                Machine:parts[7],
-                                // BatchNumber: parts[7],
-                                Quantity: value
-                            });
-                        }
+                        )
+        
                         setBatchDetails(tempBatchDetail)
                         setBatchNumber(batchNumber)
-                        setTotQty(result.batch_for_first_wash.total_quantity)
+                        setTotQty(result.batch.total_quantity)
                     },
                     (error:any)=>{
                         console.log(error.response.data)
@@ -214,7 +165,7 @@ export default function LoadFinish(){
                 autoFocus
                 onChange={() => {
                     const batchcode = batchqrcoderef.current?.value.trim() || "";
-                    if(batchcode.length==25){
+                    if(batchcode.length>=15){
                         fetchData(batchcode);
                         batchqrcoderef.current!.value = "";
                     }
@@ -282,16 +233,16 @@ export default function LoadFinish(){
                          
                     <TableHead>
                       <TableRow>
-                        <StyledTableCell align="center">MPO</StyledTableCell>
+                        <StyledTableCell align="center">BatchNumber(First Wash)</StyledTableCell>
                         <StyledTableCell align="center">Buyer</StyledTableCell>
-                        <StyledTableCell align="center">Style</StyledTableCell>
-                        <StyledTableCell align="center">Sales Order</StyledTableCell>
+                        {/* <StyledTableCell align="center">Style</StyledTableCell> */}
+                        {/* <StyledTableCell align="center">Sales Order</StyledTableCell> */}
                         <StyledTableCell align="center">Color</StyledTableCell>
                         
-                        <StyledTableCell align="center">Size</StyledTableCell>
+                        {/* <StyledTableCell align="center">Size</StyledTableCell> */}
                         {/* <StyledTableCell>BundleBarcode</StyledTableCell> */}
                         {/* <StyledTableCell>BatchQRCode</StyledTableCell> */}
-                        {/* <StyledTableCell align="center">BatchNumber(First Wash)</StyledTableCell> */}
+                        
                         <StyledTableCell align="center">Shade</StyledTableCell>
                         <StyledTableCell align="center">Machine No</StyledTableCell>
                         <StyledTableCell align="center">Total Quantity</StyledTableCell>
@@ -299,29 +250,28 @@ export default function LoadFinish(){
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {batchdetails
+                       {batchdetails
                             .map((row) => (
                                 <StyledTableRow
-                                key={`${row.MPO}-${row.Buyer}-${row.Style}-${row.Color}-${row.Shade}-${row.Size}-${row.BatchQRCode}-${row.BatchNumber}-${row.Quantity}`}
+                                key={`${row.Buyer}-${row.Color}-${row.Shade}-${row.BatchNumber}-${row.Quantity}`}
                                 >
-                                <StyledTableCell align="center">{row.MPO}</StyledTableCell>
+                                {/* <StyledTableCell align="center">{row.MPO}</StyledTableCell> */}
+                                <StyledTableCell align="center">{row.BatchNumber}</StyledTableCell>
                                 <StyledTableCell align="center">{row.Buyer}</StyledTableCell>
-                                <StyledTableCell align="center">{row.Style}</StyledTableCell>
-                                <StyledTableCell align="center">{row.SO}</StyledTableCell>
+                                {/* <StyledTableCell align="center">{row.Style}</StyledTableCell> */}
+                                {/* <StyledTableCell align="center">{row.SO}</StyledTableCell> */}
                                 <StyledTableCell align="center">{row.Color}</StyledTableCell>
-                                <StyledTableCell align="center">{row.Size}</StyledTableCell>
+                                {/* <StyledTableCell align="center">{row.Size}</StyledTableCell> */}
                                 {/* <StyledTableCell align="center">{row.BatchQRCode}</StyledTableCell> */}
-                                {/* <StyledTableCell align="center">{row.BatchNumber}</StyledTableCell> */}
-                                <StyledTableCell align="center">{row.Shade}</StyledTableCell>   
-                                <StyledTableCell align="center">{row.Machine}</StyledTableCell>
+                                
+                                <StyledTableCell align="center">{row.Shade}</StyledTableCell>  
+                                 <StyledTableCell align="center">4</StyledTableCell>  
                                 <StyledTableCell align="center">{row.Quantity}</StyledTableCell>
                                 </StyledTableRow>
                             ))}
                         <TableRow>
-                            <TableCell colSpan={6} sx={{ textAlign: "end", fontWeight: "bold",color:tbCellColor }}>
-                                Batch (First Wash) - {batchNumber}
-                            </TableCell>
-                            <TableCell colSpan={7} sx={{ textAlign: "end", fontWeight: "bold",color:tbCellColor  }}  >Grand Total  = {totQty}</TableCell>
+                           
+                            <TableCell colSpan={9} sx={{ textAlign: "end", fontWeight: "bold",color:tbCellColor  }}  >Grand Total  = {totQty}</TableCell>
                         </TableRow>
                     </TableBody>
                   </Table>
@@ -329,37 +279,7 @@ export default function LoadFinish(){
                 
                    
                 
-            <Modal open={showErrorPopup} onClose={() => setShowPopup(false)}>
-                    <Box
-                        sx={{
-                        position: "fixed", // ← changed from absolute
-                        top: 0,
-                        left: 0,
-                        width: "100vw",
-                        height: "100vh",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        bgcolor: "rgba(0,0,0,0.5)", // dark overlay
-                        }}
-                    >
-                        <Box
-                        sx={{
-                            bgcolor: "rgba(202, 29, 29, 0.5)", // light red background for error
-                            p: 4,
-                            borderRadius: 2,
-                            color: "white", // red text for error
-                            width: 400,
-                        }}
-                        >
-                        <Typography variant="h6">Select Machine First</Typography>
-                        <Typography>You have to select machine at first
-                        </Typography>
-                        <Button sx={{ mt: 2 }} onClick={() => setShowErrorPopup(false)}>Close</Button>
-                        </Box>
-                    </Box>
-                </Modal>
-
+            
                 <Modal open={processError!=""} onClose={() => setProcessError("")}>
                     <Box
                         sx={{

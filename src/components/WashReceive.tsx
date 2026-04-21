@@ -2,26 +2,35 @@ import {Box,TextField}   from "@mui/material";
 import { Modal, Typography, Button } from "@mui/material";
 import type BundleInfo from "../TypeAnnotations/BundleInfo";
 import { getData,postData} from "./genericApiService";
-import { useRef,useState } from "react";
+import { useEffect, useRef,useState } from "react";
 import DoneAllIcon from '@mui/icons-material/DoneAll';
 import ReceivedBundles from "./ReceivedBundles";
 import { red } from "@mui/material/colors";
 import { ip, ptsip } from "../ip";
-
+import success from '../assets/success.mp3'
 
 interface Props {
     items: BundleInfo[];
     setItems: React.Dispatch<React.SetStateAction<BundleInfo[]>>;
 }
+
 export default function WashReceive({items, setItems}: Props){
+    // const audioRef = useRef<HTMLAudioElement | null>(null);
+    // const [successAlarm,setSuccessAlarm]=useState<boolean>(false)
+    const [alarmTrigger, setAlarmTrigger] = useState(0);
+
+    const playSuccess = () => {
+    setAlarmTrigger(prev => prev + 1);
+    };
     const [showPopup, setShowPopup] = useState(false);
     const [sewingError,setSewingError]=useState(false);
+    const [saveBarcode,setSaveBarcode]=useState("")
     const[showErrorPopup,setShowErrorPopup]=useState(false);
     const barcodeRef=useRef<HTMLInputElement>(null);
     const [data,setData]=useState<BundleInfo|null>(null);
     const [secondData,setSecondData]=useState<any>(null);
     // const[item,setItemss]=useState<BundleInfo[]>([...items]);
-    
+   
     const fetchData = (barcode: string) => {
         if (!barcode) {
             console.warn("No Barcode entered");
@@ -67,6 +76,10 @@ export default function WashReceive({items, setItems}: Props){
                             ]);
                         if (result2) {
                             setShowPopup(true);
+                            setSaveBarcode(result2.bundle_barcode)
+                            playSuccess()
+                            // setSuccessAlarm(true)
+                            // result2.bundle_barcode
                         }
                         console.log("Second API result:", result2);
                     },
@@ -83,7 +96,13 @@ export default function WashReceive({items, setItems}: Props){
         );
     };
 
-
+    // {showPopup && (()=>
+    //     useEffect(() => {
+    //             if (showPopup) {
+    //                 setSuccessAlarm(false);
+    //             }
+    //             }, [showPopup]))
+    // }
 
     return (
             <Box
@@ -96,11 +115,30 @@ export default function WashReceive({items, setItems}: Props){
                 width:250
                 }}
             >
+                {showPopup && (
+                    // setSuccessAlarm(null)
+                        <div
+                            style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 5,
+                                position:'fixed',
+                                top:80,
+                                right:80
+                                // marginTop:'150px'
+                            }}
+                        >
+                            <DoneAllIcon style={{ color: "green", fontSize: 18 }} />
+                            <p style={{ fontSize:18,fontWeight:'bold' }}>Successfully Received {saveBarcode}</p>
+                        </div>
+
+                    )
+                }
                 <TextField
-                style={{outline:"red"}}
+                style={{position:'fixed',top:80}}
                 inputRef={barcodeRef}
                 label="Scan Barcode Here"
-                fullWidth
+                // fullWidth
                 autoFocus
                 onChange={() => {
                     
@@ -124,24 +162,14 @@ export default function WashReceive({items, setItems}: Props){
                             color: "#485e68",               // Label/text color on focus
                         },
                         },
+                        "& .MuiInputBase-root": {
+                            height: 40, // total height
+                        },
                     }}
                 />
                 
                 
-                {showPopup && (
-                        <div
-                            style={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: 0,
-                            }}
-                        >
-                            <DoneAllIcon style={{ color: "green", fontSize: 18 }} />
-                            <h5 style={{ margin: 0 }}>Successfully Received</h5>
-                        </div>
-
-                    )
-                }
+                
                 
 
                 

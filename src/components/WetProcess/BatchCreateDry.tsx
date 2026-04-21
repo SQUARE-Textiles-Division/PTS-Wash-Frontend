@@ -1,64 +1,63 @@
-    import { useEffect, useState } from "react"
-    import type BatchInstance from "../../TypeAnnotations/BatchInstance"
-    import { QRCodeCanvas } from "qrcode.react";
-    // import { Typography ,Paper,Box,Button} from "@mui/material";
-    import { useRef } from "react";
-    import { useReactToPrint } from "react-to-print";
-    import type BatchStage from "../../TypeAnnotations/BatchStage"
-    import { getData, getDataAsync, postData } from "../genericApiService"
-    import { styled } from '@mui/material/styles';
-    import Table from '@mui/material/Table';
-    import TableBody from '@mui/material/TableBody';
-    import TableCell, { tableCellClasses } from '@mui/material/TableCell';
-    import TableContainer from '@mui/material/TableContainer';
-    import TableHead from '@mui/material/TableHead';
-    import TableRow from '@mui/material/TableRow';
-    import Paper from '@mui/material/Paper';
-    import { tbCellColor,tbRowColor } from '../Colors/Colors'
-    import NumberSpinner from "../NumberSpinner";
-    import Checkbox from '@mui/material/Checkbox';
-    import { ip } from "../../ip";
-    import { Box, Button, Modal, TextField, Typography } from "@mui/material";
-    import type RejectionReason from "../../TypeAnnotations/RejectionReason";
-    import type FirstWashBatch from "../../TypeAnnotations/FirstWashBatch";
-    import type FirstWashBatchCreate from "../../TypeAnnotations/FirstWashBatchCreate";
-    import InputLabel from '@mui/material/InputLabel';
-    import MenuItem from '@mui/material/MenuItem';
-    import FormControl from '@mui/material/FormControl';
-    import Select from '@mui/material/Select';
+import { useEffect, useState } from "react"
+import type BatchInstance from "../../TypeAnnotations/BatchInstance"
+import { QRCodeCanvas } from "qrcode.react";
+// import { Typography ,Paper,Box,Button} from "@mui/material";
+import { useRef } from "react";
+import { useReactToPrint } from "react-to-print";
+import type BatchStage from "../../TypeAnnotations/BatchStage"
+import { getData, getDataAsync, postData } from "../genericApiService"
+import { styled } from '@mui/material/styles';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell, { tableCellClasses } from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import Paper from '@mui/material/Paper';
+import { tbCellColor,tbRowColor } from '../Colors/Colors'
+import NumberSpinner from "../NumberSpinner";
+import Checkbox from '@mui/material/Checkbox';
+import { ip } from "../../ip";
+import { Box, Button, Modal, TextField, Typography } from "@mui/material";
+import type RejectionReason from "../../TypeAnnotations/RejectionReason";
+import type FirstWashBatch from "../../TypeAnnotations/WetProcessBatch";
+import type FirstWashBatchCreate from "../../TypeAnnotations/FirstWashBatchCreate";
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import FormControl from '@mui/material/FormControl';
+import Select from '@mui/material/Select';
+import type { SourceBatch } from "../../TypeAnnotations/ProcessFirstWash";
+import type BatchSourceEntry from "../../TypeAnnotations/SourceBatch";
+import type WetProcessBatch from "../../TypeAnnotations/WetProcessBatch";
 
     // import type RejectionReason from "../../TypeAnnotations/RejectionReason";
     // import type RejectionReason from "../../TypeAnnotations/RejectionReason";
-    interface RejectItem {
-    BundleBarcode: string;
-    quantity: number;
-    }
+interface RejectItem {
+BundleBarcode: string;
+quantity: number;
+}
 
-    interface MpoColorShade{
-        mpo:string,
-        color:string,
-        shade:string
-    }
-    // interface StoreMeta {
-    //   mpo: string[];
-    //   buyer: string[];
-    //   style: string[];
-    //   so: string[];
-    //   color: string[];
-    //   size: string[];
-    //   shade: string;
-    //   quantity: number;
-    // }
-
-    interface FirstWashSourceBatch {
-    shade:string,
-    buyer:string,
+interface MpoColorShade{
+    mpo:string,
     color:string,
-        source_batches:{
-            mpo:string,style:string,so:string,quantity:number
-        }[],
-    }
-    interface BatchDryItem {
+    shade:string
+}
+// interface StoreMeta {
+//   mpo: string[];
+//   buyer: string[];
+//   style: string[];
+//   so: string[];
+//   color: string[];
+//   size: string[];
+//   shade: string;
+//   quantity: number;
+// }
+
+
+
+
+
+interface BatchDryItem {
     BundleBarcode: string;
     BatchQRCode: string;
     BatchNumber: number;
@@ -70,21 +69,21 @@
     Style:string,
     SO:string,
     Quantity: number;
-    }
+}
     const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
         // backgroundColor: theme.palette.common.black,
         // backgroundColor: '#485e68',
         backgroundColor: tbCellColor,
         color: "white",
-        lineHeight: 1.2,             // reduce text height
-        fontSize: 15,
+        lineHeight:0.2           // reduce text height
+     
          
     },
     [`&.${tableCellClasses.body}`]: {
-         lineHeight: 1.0,   
-        fontSize: 13,
-        padding: "1px 2px", 
+        fontSize: 14,
+        lineHeight:0.1,
+        padding: '0px',
     },
     }));
 
@@ -106,6 +105,7 @@
         const [errorLog,setErrorLog]=useState<string>('')
         const [shadeList,setShadeList]=useState<string[]>([])
         const [shade,setShade]=useState<string>("")
+        const [chosenQty, setChosenQty] = useState<Record<string, number|null>>({});
         const [filter, setFilter] = useState({
             MPO: "",
             Buyer: "",
@@ -121,12 +121,12 @@
             contentRef: printRef,
         });
         const [selectedRows, setSelectedRows] = useState<
-            { BatchNumber: number; MPO:string,Buyer:string,Style:string,SO:string,Size:string,Color:string,Shade: string; Quantity: number }[]
+            { BatchNumber: number; MPO:string,Buyer:string,Style:string,SO:string,Size:string,Color:string,Shade: string; Quantity: any }[]
             >([]);
         
         const [shadeWarn,setShadeWarn]=useState(false)
         
-        const fetchPrimary=()=>{
+        const fetchPrimary=()=>{ 
 
                 getData<BatchInstance[]>(
                     `productions/batches/`,
@@ -147,7 +147,7 @@
                         for (let i = 0; i < batchDry.length; i++) {
                             let received = batchDry[i].batch_bundles;
                             if (!received) continue; // skip if undefined
-                            let batchQR=`W8220${batchDry[i].updated_at}B${String(batchDry[i].id).padStart(10, '0')}`
+                            let batchQR=`W822${batchDry[i].updated_at}B${String(batchDry[i].id).padStart(7, '0')}`
                             for (let j = 0; j < received.length; j++) {
                                 const recBundle = received[j]?.received; // optional chaining
                                 tempBatch.push({'BundleBarcode':recBundle.bundle_barcode,'BatchQRCode':batchQR,'BatchNumber':batchDry[i].id,'MPO':batchDry[i].mpo,'Buyer':recBundle.buyer,'Style':recBundle.style,'SO':recBundle.so,'Shade':recBundle.shade,'Color':batchDry[i].color,'Size':batchDry[i].size,'Quantity':recBundle.quantity})
@@ -191,16 +191,17 @@
                                 let prev = firstFetch.Quantity;
 
                                 for (let i = 1; i < tempBatchCopy.length; i++) {
-                                if (tempBatchCopy[i].Size === firstFetch.Size && tempBatchCopy[i].Shade === firstFetch.Shade) {
-                                    prev += tempBatchCopy[i].Quantity;
-                                } else {
-                                    batchDryFinal.push({
-                                    ...firstFetch,
-                                    Quantity: prev
-                                    });
-                                    firstFetch = tempBatchCopy[i];
-                                    prev = firstFetch.Quantity;
-                                }
+                                    if (tempBatchCopy[i].Size === firstFetch.Size && tempBatchCopy[i].Shade === firstFetch.Shade) {
+                                        prev += tempBatchCopy[i].Quantity;
+                                    } 
+                                    else {
+                                        batchDryFinal.push({
+                                        ...firstFetch,
+                                        Quantity: prev
+                                        });
+                                        firstFetch = tempBatchCopy[i];
+                                        prev = firstFetch.Quantity;
+                                    }
                                 }
 
                                 batchDryFinal.push({
@@ -215,16 +216,16 @@
                                 async function applyFirstWashAdjustment(batchDryFinal: BatchDryItem[]) {
                                     try {
                                         const result = await getDataAsync<FirstWashBatch[]>(
-                                        `wet-process/first-wash-batches/`,
+                                        `wet-process/batches/`,
                                         ip
                                         );
-
+                                        result.filter(batch => batch.stage === "first_wash" && batch.type === "normal_wash");
                                         // 1️⃣ Build First Wash Map
                                         const firstWashMap = new Map<string, number>();
 
                                         for (const res of result) {
-                                            for (const sourceBatch of res.source_batches) {
-                                                const key = `${res.shade}-${res.buyer}-${res.color}-${sourceBatch.mpo}-${sourceBatch.style}-${sourceBatch.so}`;
+                                            for (const sourceBatch of res.sources) {
+                                                const key = `${res.shade}-${res.buyer}-${res.color}-${sourceBatch.source.mpo}-${sourceBatch.source.style}-${sourceBatch.source.so}`;
                                                 const existing = firstWashMap.get(key) || 0;
 
                                                 firstWashMap.set(
@@ -234,25 +235,8 @@
                                             }
                                         }
 
-                                        // 2️⃣ Subtract first wash quantities from batchDryFinal
-                                        const updatedBatches = batchDryFinal.map(batch => {
-                                            const key = `${batch.Shade}-${batch.Buyer}-${batch.Color}-${batch.MPO}-${batch.Style}-${batch.SO}`;
-
-                                            if (firstWashMap.has(key)) {
-                                                const firstWashQty = firstWashMap.get(key) || 0;
-
-                                                return {
-                                                ...batch,
-                                                Quantity: Math.max(batch.Quantity - firstWashQty, 0)
-                                                };
-                                            }
-
-                                            return batch;
-                                        });
-
-                                        console.log("After First Wash Adjustment:", updatedBatches);
                                         let shadeSet=new Set<string>()
-                                        for(const batch of updatedBatches){
+                                        for(const batch of batchDryFinal){
                                             if(batch.Quantity>0)
                                                 shadeSet.add(batch.Shade)
                                         }
@@ -262,14 +246,14 @@
 
                                         const mpocolorshade = new Map<string, number>();
 
-                                        for (const obj of updatedBatches) {
+                                        for (const obj of batchDryFinal) {
                                             const key = `${obj.MPO}|${obj.Color}|${obj.Shade}`;
                                             mpocolorshade.set(key, (mpocolorshade.get(key) || 0) + obj.Quantity);
                                         }
 
                                         const tempModifyBatchMap = new Map();
 
-                                        for (const obj of updatedBatches) {
+                                        for (const obj of batchDryFinal) {
                                             const key = `${obj.MPO}|${obj.Color}|${obj.Shade}`;
                                             const qty = mpocolorshade.get(key);
                                             if (qty !== undefined) {
@@ -285,9 +269,27 @@
                                             }
                                         }
 
-                                        const tempModifyBatchList = [...tempModifyBatchMap.values()];
+                                        let tempModifyBatchList = [...tempModifyBatchMap.values()];
                                         console.log(tempModifyBatchList)
-                                        setDryBatchList(tempModifyBatchList);
+                                        // setDryBatchList(tempModifyBatchList);
+                                        // 2️⃣ Subtract first wash quantities from batchDryFinal
+                                        const updatedBatches = tempModifyBatchList.map(batch => {
+                                            const key = `${batch.Shade}-${batch.Buyer}-${batch.Color}-${batch.MPO}-${batch.Style}-${batch.SO}`;
+                                            
+                                            if (firstWashMap.has(key)) {
+                                                const firstWashQty = firstWashMap.get(key) || 0;
+
+                                                return {
+                                                ...batch,
+                                                Quantity: Math.max(batch.Quantity - firstWashQty, 0)
+                                                };
+                                            }
+
+                                            return batch;
+                                        });
+
+                                        console.log("After First Wash Adjustment:", updatedBatches);
+                                        setDryBatchList(updatedBatches);
                                         // setDryBatchList(updatedBatches);
 
                                     } 
@@ -511,31 +513,45 @@
                 // Add row to state with initial Quantity = 0
                 setSelectedRows(prev => [
                 ...prev,
-                { BatchNumber: row.BatchNumber, Shade: row.Shade, MPO:row.MPO, Buyer:row.Buyer, Style:row.Style, SO:row.SO, Size:row.Size, Color:row.Color, Quantity: 0 },
+                { BatchNumber: row.BatchNumber, Shade: row.Shade, MPO:row.MPO, Buyer:row.Buyer, Style:row.Style, SO:row.SO, Size:row.Size, Color:row.Color, Quantity: null },
                 ]);
             }
             else {
+                const key =`${row.Buyer}-${row.Color}-${row.Shade}-${row.MPO}-${row.Style}-${row.SO}`;
+                setChosenQty(prev => ({
+                    ...prev,
+                    [key]: null
+                }));
                 // Remove row from state
                 setSelectedRows(prev =>
-                prev.filter(item => item.MPO!=row.MPO && item.Style!=row.Style && item.SO!=row.SO && item.Buyer!=row.Buyer && item.Color!=row.Color && item.Shade!=row.Shade)
+                    prev.filter(item => item.MPO!=row.MPO || item.Style!=row.Style || item.SO!=row.SO || item.Buyer!=row.Buyer || item.Color!=row.Color || item.Shade!=row.Shade)
                 );
             }
         };
+
+
         const handleQuantityChange = (row: any, value: number) => {
             console.log(value)
+            const key =`${row.Buyer}-${row.Color}-${row.Shade}-${row.MPO}-${row.Style}-${row.SO}`;
+
+            setChosenQty(prev => ({
+                ...prev,
+                [key]: value
+            }));
             // console.log('Quantity changed for BatchNumber:', row.BatchNumber, 'New Quantity:', value);
             setSelectedRows(prev => {
                 const exists = prev.find(item => item.SO==row.SO && item.Buyer==row.Buyer && item.Style==row.Style && item.Color==row.Color && item.MPO==row.MPO && item.Shade==row.Shade);
                 if (exists) {
                     console.log(exists)
-                return prev.map(item =>
-                    item.SO==row.SO &&  item.Buyer==row.Buyer && item.Style==row.Style && item.Color==row.Color && item.MPO==row.MPO && item.Shade==row.Shade
-                    ? { ...item, Quantity: value }
-                    : item
-                );
-                } else {
+                    return prev.map(item =>
+                        item.SO==row.SO &&  item.Buyer==row.Buyer && item.Style==row.Style && item.Color==row.Color && item.MPO==row.MPO && item.Shade==row.Shade
+                        ? { ...item, Quantity: value }
+                        : item
+                    );
+                } 
+                else {
                 // Automatically add row if it doesn’t exist
-                return [...prev, { BatchNumber: row.BatchNumber, Shade: row.Shade,MPO:row.MPO,Buyer:row.Buyer,Style:row.Style,SO:row.SO,Size:row.Size,Color:row.Color, Quantity: value }];
+                    return [...prev, { BatchNumber: row.BatchNumber, Shade: row.Shade,MPO:row.MPO,Buyer:row.Buyer,Style:row.Style,SO:row.SO,Size:row.Size,Color:row.Color, Quantity: value }];
                 }
             });
         };
@@ -553,32 +569,50 @@
         const prevBuyer=selectedRows[0].Buyer
         const prevColor=selectedRows[0].Color
         console.log(prevShade,' ',prevBuyer,' ',prevColor)
+        const faultyRows=[]
+        let warn=false
         for(let i=1;i<selectedRows.length;i++){
                 console.log(selectedRows[i].Buyer,' ',selectedRows[i].Shade,' ',selectedRows[i].Color,' ',selectedRows[i].Quantity)
                 if(selectedRows[i].Shade!=prevShade || selectedRows[i].Buyer!=prevBuyer || selectedRows[i].Color!=prevColor){
                     setShadeWarn(true)
+                    for(const row of selectedRows){
+                        const key =`${row.Buyer}-${row.Color}-${row.Shade}-${row.MPO}-${row.Style}-${row.SO}`;
+                        setChosenQty(prev => ({
+                            ...prev,
+                            [key]: null
+                        }));
+                    }
                     setSelectedRows([])
                     
                     return;
                 }
                 
         }
-        let  payload:FirstWashSourceBatch={
+
+
+        let  payload:BatchSourceEntry={
             shade:"",
             buyer:"",
             color: "",
-            source_batches:[]
+            stage:"",
+            type:"",
+            sources_input:[]
         }
         //    const batchQtyList=[]
         payload.shade=selectedRows[0].Shade
         payload.buyer=selectedRows[0].Buyer
         payload.color=selectedRows[0].Color
+        payload.stage="first_wash"
+        payload.type="normal_wash"
         
         //    const preShade=payload.shade
         //    const prevBatch={batch:selectedRows[0].BatchNumber,quantity:selectedRows[0].Quantity}
         for(let i=0;i<selectedRows.length;i++){
-                payload.source_batches.push({mpo:selectedRows[i].MPO,style:selectedRows[i].Style,so:selectedRows[i].SO,quantity:selectedRows[i].Quantity})
+            // if(selectedRows[i].Quantity!=0){
+                payload.sources_input.push({type:"internal",mpo:selectedRows[i].MPO,style:selectedRows[i].Style,so:selectedRows[i].SO,quantity:selectedRows[i].Quantity})
+            // }
         }
+                
 
         console.log('Payload for First Wash Batch Creation:', payload)
         let storeMeta:any={ mpo: [] as string[],
@@ -614,11 +648,11 @@
             // storeMeta.size=Array.from(sizeSet)
             storeMeta.shade=payload.shade
         
-        postData<FirstWashBatch>(
-            `wet-process/first-wash-batches/`,
+        postData<WetProcessBatch>(
+            `wet-process/batches/`,
             ip,
             payload,
-            (result:FirstWashBatch)=>{
+            (result:WetProcessBatch)=>{
                 setBatchCard(true)
                 const qrInfo={
                     id:result.id,
@@ -633,27 +667,67 @@
                     color:""
                 }
                 let date=result.created_at.slice(0, 10).replace(/-/g, "");
-                qrInfo.date=date
+                qrInfo.date=date.substring(2,4) // get last 6 digits of date
                 qrInfo.mpo=storeMeta.mpo.join(", ")
                 qrInfo.buyer=storeMeta.buyer.join(", ")
                 qrInfo.style=storeMeta.style.join(", ")
                 qrInfo.so=storeMeta.so.join(", ")
                 qrInfo.color=storeMeta.color.join(", ")
                 // qrInfo.size=storeMeta.size.join(", ")
+                qrInfo.quantity=0
                 qrInfo.shade=storeMeta.shade
-                qrInfo.quantity=result.total_quantity
-                
+                for(const source of result.sources){
+                    qrInfo.quantity+=source.quantity
+                }
+                // qrInfo.quantity=result.total_quantity
+                console.log(qrInfo)
                 setQrData(qrInfo)
+                for(const row of selectedRows){
+                    const key =`${row.Buyer}-${row.Color}-${row.Shade}-${row.MPO}-${row.Style}-${row.SO}`;
+                    setChosenQty(prev => ({
+                        ...prev,
+                        [key]: null
+                    }));
+                }
                 setSelectedRows([]) 
                 // console.log(payload.batch_source)
                 console.log('Batch created successfully:', result) 
 
             },
-            (error: any)=>{
-                console.log('Error creating batch:', error.response.data)
+            (err: any)=>{
+                console.log('Error creating batch:', err.response.data)
+                const data = err.response?.data;
+                if (typeof data?.shade === 'string') {
+                    setErrorLog(data.shade);
+                }
+                else if (typeof data?.buyer === 'string') {
+                    setErrorLog(data.buyer);
+                }
+                else if (typeof data?.color === 'string') {
+                    setErrorLog(data.color);
+                }
+                else if (typeof data?.type === 'string') {
+                    setErrorLog(data.type);
+                }
+                else if (typeof data?.sources_input?.[0]?.type?.[0] === 'string') {
+                    setErrorLog(data.sources_input[0].type[0]);
+                }
+                else if (typeof data?.sources_input?.[0]?.mpo?.[0] === 'string') {
+                    setErrorLog(data.sources_input[0].mpo[0]);
+                }
+                else if (typeof data?.sources_input?.[0]?.style?.[0] === 'string') {
+                    setErrorLog(data.sources_input[0].style[0]);
+                }
+                else if (typeof data?.sources_input?.[0]?.so?.[0] === 'string') {
+                    setErrorLog(data.sources_input[0].so[0]);
+                }
+                else if (typeof data?.sources_input?.[0]?.quantity?.[0] === 'string') {
+                    setErrorLog(data.sources_input[0].quantity[0]);
+                }
+                // setErrorLog(error.response.data.sources_input)
             }
-            )
-        }
+        )
+    }
 
 
 
@@ -683,14 +757,20 @@
             </Box> */}
         <TableContainer
             component={Paper}
-            elevation={0}
+            elevation={5}
             sx={{
-            maxHeight: 300,          // vertical scrollbar
+            position: "fixed",
+            top:80,
+            // left:5,
+            left: 0,
+            right: 0,
+            // maxHeight: 1050,          // vertical scrollbar
             overflowX: "auto",       // horizontal scrollbar
             overflowY: "auto",
-            marginLeft:'220px',
-            // marginRight:'100px',
-            maxWidth: 1000,
+            marginLeft:'250px',
+            
+            // marginRight:'70px',
+            maxWidth: 1100,
             border:"none",
             // mt:2,
             }}
@@ -702,14 +782,16 @@
             aria-label="customized table"
             sx={{
                 '& .MuiTableCell-root':{
-                    borderBottom:'none'
+                    borderBottom:'none',
+                    
                 },
-            
+                // maxHeight:100
                 // my: 1,
             }}
             >
                 
-            <TableHead>
+            <TableHead
+            >
             <TableRow >
                 <StyledTableCell align="center"
                 >
@@ -718,27 +800,50 @@
                         sx={{
                             background:'white',
                             "& .MuiOutlinedInput-root": {
-                            "&.Mui-focused fieldset": {
-                                // borderColor: "#485e68",  
-                                //       // Outline color on focus
-                                borderColor:'white'
-                            },
+                                "&.Mui-focused fieldset": {
+                                    // borderColor: "#485e68",  
+                                    //       // Outline color on focus
+                                    borderColor:'white'
+                                },
+                                // "& input": {
+                                //     textAlign: "center", // center input text
+                                //     padding: "0 8px",
+                                // },
+                            // height:'100%'
+                            // width:'5px'
                             },
                             "& .MuiInputLabel-root": {
-                            "&.Mui-focused": {
-                                color: "black",
-                                fontWeight:'bold'               // Label/text color on focus
-                            },
+                                "&.Mui-focused": {
+                                    color: "black",
+                                    fontWeight:'bold'               // Label/text color on focus
+                                },
+                                textAlign: "center",
+                                // top:'50%'
                             },
                             // width: 100,
                             fontWeight:'bold',
-                            // fontSize:11
+                            "& .MuiInputBase-root": {
+                                 height: 20, // total height
+                                 width:'80px'
+                            },
+                            "& .MuiFormLabel-root":{
+                                lineHeight:1,
+                                fontSize:12,
+                                left:10,
+                                top:-5,
+                                fontWeight:'bold'
+                                // textAlign:'center'
+                            }
+                            // width:'5px'
+                            // fontSize:
                             // height:'30px',
                             // textEmphasisColor:'white'
                         }}
                         autoFocus
                         size="small"
                         label="MPO"
+                       
+                        
                          onChange={(e) => {
                             const value = e.target.value;
                             setFilter((prev) => ({ ...prev, ["MPO"]: value }));
@@ -751,19 +856,36 @@
                     <TextField
                         
                         sx={{
+                            // position:'absolute',
+                            // border:'none',
                             background:'white',
                             "& .MuiOutlinedInput-root": {
-                            "&.Mui-focused fieldset": {
-                                // borderColor: "#485e68",  
-                                //       // Outline color on focus
-                                borderColor:'white'
-                            },
+                                "&.Mui-focused fieldset": {
+                                    // borderColor: "#485e68",  
+                                    //       // Outline color on focus
+                                    borderColor:'white',
+                                   
+                                },
+                                //  height:'100%'
                             },
                             "& .MuiInputLabel-root": {
                             "&.Mui-focused": {
                                 color: "black",
                                 fontWeight:'bold'               // Label/text color on focus
                             },
+                            },
+                             "& .MuiInputBase-root": {
+                                 height: 20, // total height
+                                 width:'80px'
+                                //  width:20
+                            },
+                            "& .MuiFormLabel-root":{
+                                lineHeight:1,
+                                fontSize:12,
+                                left:10,
+                                top:-5,
+                                fontWeight:'bold'
+                                // textAlign:'center'
                             },
                             // width: 100,
                             fontWeight:'bold',
@@ -786,21 +908,36 @@
                         sx={{
                             background:'white',
                             "& .MuiOutlinedInput-root": {
-                            "&.Mui-focused fieldset": {
-                                // borderColor: "#485e68",  
-                                //       // Outline color on focus
-                                borderColor:'white'
-                            },
+                                "&.Mui-focused fieldset": {
+                                    // borderColor: "#485e68",  
+                                    //       // Outline color on focus
+                                    borderColor:'white'
+                                },
+                                //  height:'100%'
                             },
                             "& .MuiInputLabel-root": {
-                            "&.Mui-focused": {
-                                color: "black",
-                                fontWeight:'bold'               // Label/text color on focus
-                            },
+                                "&.Mui-focused": {
+                                    color: "black",
+                                    fontWeight:'bold'               // Label/text color on focus
+                                },
+                                //  textAlign: "center",
+                                
                             },
                             // width: 100,
                             fontWeight:'bold',
-                            // height:'30px',
+                             "& .MuiInputBase-root": {
+                                 height: 20, // total height
+                                 width:'80px'
+                                //  width:0
+                            },
+                            "& .MuiFormLabel-root":{
+                                lineHeight:1,
+                                fontSize:12,
+                                left:10,
+                                top:-5,
+                                 fontWeight:'bold'
+                                // textAlign:'center'
+                            }
                             // textEmphasisColor:'white'
                         }}
                         autoFocus
@@ -818,13 +955,15 @@
                     <TextField
                         
                         sx={{
+                            // alignItems:'center',
                             background:'white',
                             "& .MuiOutlinedInput-root": {
-                            "&.Mui-focused fieldset": {
-                                // borderColor: "#485e68",  
-                                //       // Outline color on focus
-                                borderColor:'white'
-                            },
+                                "&.Mui-focused fieldset": {
+                                    // borderColor: "#485e68",  
+                                    //       // Outline color on focus
+                                    borderColor:'white'
+                                },
+                                //  height:'100%'
                             },
                             "& .MuiInputLabel-root": {
                             "&.Mui-focused": {
@@ -834,7 +973,18 @@
                             },
                             // width: 100,
                             fontWeight:'bold',
-                            // height:'30px',
+                            "& .MuiInputBase-root": {
+                                 height: 20, // total height
+                                 width:'80px'
+                            },
+                            "& .MuiFormLabel-root":{
+                                lineHeight:1,
+                                fontSize:12,
+                                left:10,
+                                top:-5,
+                                fontWeight:'bold'
+                                // textAlign:'center'
+                            }
                             // textEmphasisColor:'white'
                         }}
                         autoFocus
@@ -853,21 +1003,37 @@
                         sx={{
                             background:'white',
                             "& .MuiOutlinedInput-root": {
-                            "&.Mui-focused fieldset": {
-                                // borderColor: "#485e68",  
-                                //       // Outline color on focus
-                                borderColor:'white'
-                            },
+                                "&.Mui-focused fieldset": {
+                                    // borderColor: "#485e68",  
+                                    //       // Outline color on focus
+                                    borderColor:'white',
+                                    // fontSize:'10'
+                                },
+                                //  height:'100%'
                             },
                             "& .MuiInputLabel-root": {
                             "&.Mui-focused": {
                                 color: "black",
-                                fontWeight:'bold'               // Label/text color on focus
+                                fontWeight:'bold' ,
+                                // fontSize:'10'
+                                              // Label/text color on focus
                             },
                             },
                             // width: 100,
                             fontWeight:'bold',
-                            // height:'30px',
+                            
+                             "& .MuiInputBase-root": {
+                                 height: 20, // total height
+                                 width:'80px'
+                            },
+                            "& .MuiFormLabel-root":{
+                                lineHeight:1,
+                                fontSize:12,
+                                left:10,
+                                top:-5,
+                                fontWeight:'bold'
+                                // textAlign:'center'
+                            }
                             // textEmphasisColor:'white'
                         }}
                         autoFocus
@@ -889,13 +1055,15 @@
                     <TextField
                         
                         sx={{
+                            // textAlign:'center',
                             background:'white',
                             "& .MuiOutlinedInput-root": {
-                            "&.Mui-focused fieldset": {
-                                // borderColor: "#485e68",  
-                                //       // Outline color on focus
-                                borderColor:'white'
-                            },
+                                "&.Mui-focused fieldset": {
+                                    // borderColor: "#485e68",  
+                                    //       // Outline color on focus
+                                    borderColor:'white'
+                                },
+                                //  height:'100%'
                             },
                             "& .MuiInputLabel-root": {
                             "&.Mui-focused": {
@@ -905,7 +1073,19 @@
                             },
                             // width: 100,
                             fontWeight:'bold',
-                            // height:'30px',
+                            // fontSize:12
+                             "& .MuiInputBase-root": {
+                                 height: 20, // total height
+                                 width:'80px'
+                            },
+                            "& .MuiFormLabel-root":{
+                                lineHeight:1,
+                                fontSize:12,
+                                left:10,
+                                top:-5,
+                                fontWeight:'bold'
+                                // textAlign:'center'
+                            }
                             // textEmphasisColor:'white'
                         }}
                         autoFocus
@@ -935,12 +1115,26 @@
                                 .toLowerCase()
                                 .includes(value.toLowerCase())
                             )
-                        )
-                    .map((row) => (
+                        )   
+                    .map((row) => {
+                            const isDisabled = !selectedRows.some(
+                                item =>
+                                    item.Buyer === row.Buyer &&
+                                    item.Color === row.Color &&
+                                    item.Shade === row.Shade &&
+                                    item.MPO === row.MPO &&
+                                    item.Style === row.Style &&
+                                    item.SO == row.SO
+                            );
+                            const key =`${row.Buyer}-${row.Color}-${row.Shade}-${row.MPO}-${row.Style}-${row.SO}`;
+
+                            const actualValue =chosenQty[key] ??null; 
+                            const displayValue = isDisabled ? null : actualValue;
+                        return(
                         <StyledTableRow  sx={{
                             //  height:'2px'
                         }}
-                        key={`${row.MPO}-${row.Buyer}-${row.Style}-${row.Color}-${row.Shade}-${row.Quantity}`}
+                        key={`${row.Buyer}-${row.Color}-${row.Shade}-${row.MPO}-${row.Style}-${row.SO}`}
                         >
                         <StyledTableCell align="center">{row.MPO}</StyledTableCell>
                         <StyledTableCell align="center">{row.Buyer}</StyledTableCell>
@@ -955,37 +1149,43 @@
                         <StyledTableCell align="center">
                             <NumberSpinner
                             size="small"
-                            min={0}
-                            max={row?.Quantity ?? 0}
-                            disabled={!selectedRows.some(item => item.Buyer===row.Buyer  && item.Color===row.Color && item.Shade === row.Shade && item.MPO===row.MPO && item.Style===row.Style && item.SO==row.SO)}
+                            min={1}
+                            max={row?.Quantity ?? 1}
+                            customSize={5} // new prop
+                            disabled={isDisabled}
+                            value={displayValue}
                             onValueChange={(value) => handleQuantityChange(row, value ?? 0)}
                             />
                         </StyledTableCell>  
-                        <StyledTableCell>
+                        <StyledTableCell align="center">
                             <Checkbox 
                             checked={selectedRows.some(item => item.Buyer===row.Buyer  && item.Color===row.Color && item.Shade === row.Shade && item.MPO===row.MPO && item.Style===row.Style && item.SO==row.SO)}
                             onChange={(e, checked) => handleRowSelect(row, checked)}
                             slotProps={{ input: { 'aria-label': 'select-row' } }}
+                            sx={{
+                                height:10
+                            }}
                             />
                         </StyledTableCell>
-                        </StyledTableRow>
-                    ))}
+                        </StyledTableRow>)
+                    })}
             </TableBody>
         </Table>
         </TableContainer>
-        <Button variant="contained"  onClick={handleCreateBatch} sx={{mt:2,position:'relative', background:tbCellColor}}>Create Batch</Button>
+        <Button variant="contained"  onClick={handleCreateBatch} sx={{mt:70,background:tbCellColor}}>Create Batch</Button>
 
-        <div style={{marginLeft:"500px"}}>
+        <div style={{marginLeft:"150px"}}>
             {qrData && (
                         <Paper
                             ref={printRef}
                             elevation={5}
                             sx={{
                             alignContent: "right",
-                            mt: 3,
+                            mt: 1,
                             px: 2,
                             pt:1,
                             pb:1,
+                            position:'fixed',
                             // p: 3,
                             width: 280,
                             textAlign: "center",
@@ -993,8 +1193,8 @@
                         >
 
                             <QRCodeCanvas
-                            value={`W8220${qrData.date}W100000000${qrData.id}`}
-                            size={200}
+                            value={`W822${qrData.date}W1${String(qrData.id).padStart(7, '0')}`}
+                            size={100}
                             level="H"
                             />
 
@@ -1004,7 +1204,7 @@
                                 fontSize: 12,
                                 mb: 2
                             }}>
-                                {`W8220${qrData.date}W1${String(qrData.id).padStart(10, '0')}`}
+                                {`W822${qrData.date}W1${String(qrData.id).padStart(7, '0')}`}
                             </Typography>
                             <Typography variant="body2">
                                 <b>Total Quantity:</b> {qrData.quantity}
@@ -1033,7 +1233,9 @@
                             
                             </Box>
                         </Paper>)}
-                {qrData && (
+                
+        </div>
+        {qrData && (
                     <Button
                         variant="outlined"
                         sx={{ mt: 2 ,marginRight:"450px"}}
@@ -1042,8 +1244,6 @@
                         Print QR Code
                     </Button>
                 )}
-        </div>
-        
         <Modal open={shadeWarn} onClose={() => setShadeWarn(false)}>
             <Box
                 sx={{

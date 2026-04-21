@@ -20,15 +20,18 @@ import Checkbox from '@mui/material/Checkbox';
 import { ip } from "../../ip";
 import { Box, Button, Modal, TextField, Typography } from "@mui/material";
 import type RejectionReason from "../../TypeAnnotations/RejectionReason";
-import type FirstWashBatch from "../../TypeAnnotations/FirstWashBatch";
+import type FirstWashBatch from "../../TypeAnnotations/WetProcessBatch";
 // import type FirstWashBatchCreate from "../../TypeAnnotations/FirstWashBatchCreate";
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
-import type FetchFirstWash from "../../TypeAnnotations/FetchFirstWash";
+import type FetchFirstWash from "../../TypeAnnotations/WetProcessBatchMeta";
 import type RewashBatchCreate from "../../TypeAnnotations/RewashBatchCreate";
 import type RewashBatchCreateResult from "../../TypeAnnotations/RewashBatchCreateResult";
+import type BatchSourceEntry from "../../TypeAnnotations/SourceBatch";
+import type WetProcessBatchMeta from "../../TypeAnnotations/WetProcessBatchMeta";
+import type WetProcessBatch from "../../TypeAnnotations/WetProcessBatch";
 
 
     // interface StoreMeta {
@@ -44,8 +47,9 @@ import type RewashBatchCreateResult from "../../TypeAnnotations/RewashBatchCreat
 
 
     interface RewashBatch{
-        content_type:string,
-        object_id:number,
+        mpo:string,
+        style:string,
+        so:string,
         buyer:string,
         color:string,
         shade:string,
@@ -57,14 +61,14 @@ import type RewashBatchCreateResult from "../../TypeAnnotations/RewashBatchCreat
         // backgroundColor: '#485e68',
         backgroundColor: tbCellColor,
         color: "white",
-        lineHeight: 1.2,             // reduce text height
-        fontSize: 15,
+        lineHeight: 0.2 ,             // reduce text height
+        // fontSize: 14,
          
     },
     [`&.${tableCellClasses.body}`]: {
-         lineHeight: 1.0,   
-        fontSize: 13,
-        padding: "1px 2px", 
+         lineHeight: 0.1,   
+        fontSize: 14,
+        padding: "0px", 
     },
     }));
 
@@ -90,50 +94,109 @@ import type RewashBatchCreateResult from "../../TypeAnnotations/RewashBatchCreat
             buyer: "",
             color: "",
             shade: "",
+            mpo:"",
+            style:"",
+            so:""
         });
-
+        const [chosenQty, setChosenQty] = useState<Record<string, number|null>>({});
 
 
         const handlePrint = useReactToPrint({
             contentRef: printRef,
         });
         const [selectedRows, setSelectedRows] = useState<
-            {   content_type:string,
-                object_id:number,
-                buyer:string,
-                color:string,
-                shade:string,
-                quantity:number }[]
+        {       mpo: string,
+                style: string,
+                so: string,
+                buyer: string,
+                color: string,
+                shade: string,
+                quantity: any }[]
             >([]);
         
         const [shadeWarn,setShadeWarn]=useState(false)
         
         const fetchPrimary=()=>{
 
-                getData<FetchFirstWash[]>(
-                    `wet-process/wash-logs/rewashing/`,
+                getData<WetProcessBatchMeta[]>(
+                    `wet-process/batch-sources/`,
                     ip,
                     {},
-                    {},
-                    (result2:FetchFirstWash[])=>{
+                    {stage:'first_wash'},
+                    (result2:WetProcessBatchMeta[])=>{
                         let tempBatch:RewashBatch[]=[]
-                        // let batchDryFinal:BatchDryItem[]=[]
+                        const BatchMetaMap = new Map();
+                        const RewashtMap = new Map();
                         for(let i=0;i<result2.length;i++){
+                            const key=`${result2[i].source.mpo}-${result2[i].source.style}-${result2[i].source.so}-${result2[i].batch.buyer}-${result2[i].batch.color}-${result2[i].batch.shade}`
+                            BatchMetaMap.set(key,(BatchMetaMap.get(key)||0)+result2[i].rewash_quantity)
+                            if(result2[i].batch.type=='rewash'){
+                                RewashtMap.set(key,(RewashtMap.get(key)||0)+result2[i].quantity)
+                            }
+                           
+                        }
+                        for (const [key] of BatchMetaMap) {
+                            BatchMetaMap.set(
+                                key,
+                                (BatchMetaMap.get(key) || 0) - (RewashtMap.get(key) || 0)
+                            );
+                        }
+                        for(const[key,val] of BatchMetaMap){
+                            const [mpo, style, so, buyer, color, shade] = key.split("-");
                             tempBatch.push(
                                 {
-                                    content_type:result2[i].content_type,
-                                    object_id:result2[i].object_id,
-                                    buyer:result2[i].batch_details.buyer,
-                                    color:result2[i].batch_details.color,
-                                    shade:result2[i].batch_details.shade,
-                                    quantity:result2[i].remaining_rewash_quantity
-
+                                    mpo:mpo,
+                                    style:style,
+                                    so:so,
+                                    buyer:buyer,
+                                    color:color,
+                                    shade:shade,
+                                    quantity:val
                                 }
                             )
+                            // tempBatch.p
                         }
+                        const mpocolorshade = new Map<string, number>();
+
+                        for (const obj of tempBatch) {
+                            const key = `${obj.mpo}|${obj.color}|${obj.shade}`;
+                            mpocolorshade.set(key, (mpocolorshade.get(key) || 0) + obj.quantity);
+                        }
+
+                        const tempModifyBatchMap = new Map();
+                        for (const obj of tempBatch) {
+                                const key = `${obj.mpo}|${obj.color}|${obj.shade}`;
+                                const qty = mpocolorshade.get(key);
+                                if (qty !== undefined) {
+                                tempModifyBatchMap.set(key, {
+                                    mpo: obj.mpo,
+                                    buyer: obj.buyer,
+                                    style: obj.style,
+                                    so: obj.so,
+                                    color: obj.color,
+                                    shade: obj.shade,
+                                    quantity: qty,
+                                });
+                                }
+                        }
+                        let tempModifyBatchList = [...tempModifyBatchMap.values()];
+                        // let batchDryFinal:BatchDryItem[]=[]
+                        // for(let i=0;i<result2.length;i++){
+                        //     tempBatch.push(
+                        //         {
+                        //             content_type:result2[i].content_type,
+                        //             object_id:result2[i].object_id,
+                        //             buyer:result2[i].batch_details.buyer,
+                        //             color:result2[i].batch_details.color,
+                        //             shade:result2[i].batch_details.shade,
+                        //             quantity:result2[i].remaining_rewash_quantity
+
+                        //         }
+                        //     )
+                        // }
                         // let shadeSet = new Set();
 
-                        tempBatch.sort((a, b) => {
+                        tempModifyBatchList.sort((a, b) => {
                             // Compare Shade first
                                 if (a.shade < b.shade) return -1;
                                 if (a.shade > b.shade) return 1;
@@ -141,7 +204,7 @@ import type RewashBatchCreateResult from "../../TypeAnnotations/RewashBatchCreat
                                 return 0; // Shade and Size are equal
                         })
 
-                        setRewashBatchList(tempBatch)
+                        setRewashBatchList(tempModifyBatchList)
 
                     }
                 )
@@ -157,32 +220,43 @@ import type RewashBatchCreateResult from "../../TypeAnnotations/RewashBatchCreat
                 // Add row to state with initial Quantity = 0
                 setSelectedRows(prev => [
                 ...prev,
-                { content_type:row.content_type,object_id:row.object_id, shade: row.shade,  buyer:row.buyer,  color:row.color, quantity: 0 },
+                { mpo:row.mpo,style:row.style,so:row.so, shade: row.shade,  buyer:row.buyer,  color:row.color, quantity: null },
                 ]);
             }
             else {
+
+                const key=`${row.mpo}-${row.color}-${row.shade}`
+                setChosenQty(prev => ({
+                    ...prev,
+                    [key]: null
+                }));
                 // Remove row from state
                 setSelectedRows(prev =>
-                prev.filter(item => item.object_id!=row.object_id && item.buyer!=row.buyer && item.color!=row.color && item.shade!=row.shade)
+                prev.filter(item => item.mpo!=row.mpo || item.style!=row.style || item.so!=row.so || item.buyer!=row.buyer ||item.color!=row.color || item.shade!=row.shade)
                 );
             }
         };
         const handleQuantityChange = (row: any, value: number) => {
             console.log(value)
+            const key=`${row.mpo}-${row.color}-${row.shade}`
+                setChosenQty(prev => ({
+                    ...prev,
+                    [key]: value
+                }));
             // console.log('Quantity changed for BatchNumber:', row.BatchNumber, 'New Quantity:', value);
             setSelectedRows(prev => {
-                const exists = prev.find(item => item.buyer==row.buyer  && item.color==row.color && item.shade==row.shade);
+                const exists = prev.find(item => item.mpo==row.mpo  && item.style==row.style && item.so==row.so && item.buyer==row.buyer && item.color==row.color && item.shade==row.shade);
                 if (exists) {
                     console.log(exists)
                     return prev.map(item =>
-                        item.object_id==row.object_id && item.buyer==row.buyer &&  item.color==row.color &&  item.shade==row.shade
+                        item.mpo==row.mpo && item.color==row.color && item.shade==row.shade && item.style==row.style && item.so==row.so && item.buyer==row.buyer
                         ? { ...item, quantity: value }
                         : item
                     )
                 } 
                 else {
                 // Automatically add row if it doesn’t exist
-                    return [...prev, {  content_type:row.content_type,object_id:row.object_id, shade: row.shade,  buyer:row.buyer,  color:row.color, quantity: value  }];
+                    return [...prev, {  mpo:row.mpo,style:row.style,so:row.so, shade: row.shade,  buyer:row.buyer,  color:row.color, quantity: value  }];
                 }
             });
         };
@@ -211,21 +285,24 @@ import type RewashBatchCreateResult from "../../TypeAnnotations/RewashBatchCreat
                 }
                 
         }
-        let  payload:RewashBatchCreate={
+        let  payload:BatchSourceEntry={
+            shade:"",
             buyer:"",
             color: "",
-            shade:"",
-            source_batches:[]
+            stage:"",
+            type:"",
+            sources_input:[]
         }
         //    const batchQtyList=[]
         payload.shade=selectedRows[0].shade
         payload.buyer=selectedRows[0].buyer
         payload.color=selectedRows[0].color
-        
+        payload.stage="first_wash"
+        payload.type="rewash"
         //    const preShade=payload.shade
         //    const prevBatch={batch:selectedRows[0].BatchNumber,quantity:selectedRows[0].Quantity}
         for(let i=0;i<selectedRows.length;i++){
-                payload.source_batches.push({content_type: selectedRows[i].content_type,object_id: selectedRows[i].object_id,quantity: selectedRows[i].quantity})
+                payload.sources_input.push({type:"internal",mpo:selectedRows[i].mpo,style:selectedRows[i].style,so:selectedRows[i].so,quantity:selectedRows[i].quantity})
         }
 
         console.log('Payload for First Wash Batch Creation:', payload)
@@ -256,11 +333,11 @@ import type RewashBatchCreateResult from "../../TypeAnnotations/RewashBatchCreat
             // storeMeta.size=Array.from(sizeSet)
             storeMeta.shade=payload.shade
         
-        postData<RewashBatchCreateResult>(
-            `wet-process/rewash-batches/`,
+        postData<WetProcessBatch>(
+            `wet-process/batches/`,
             ip,
             payload,
-            (result:RewashBatchCreateResult)=>{
+            (result:WetProcessBatch)=>{
                 setBatchCard(prev => !prev)
                 const qrInfo={
                     id:result.id,
@@ -274,20 +351,26 @@ import type RewashBatchCreateResult from "../../TypeAnnotations/RewashBatchCreat
                     color:""
                 }
                 let date=result.created_at.slice(0, 10).replace(/-/g, "");
-                qrInfo.date=date
+                qrInfo.date=date.substring(2,4)
                 qrInfo.buyer=storeMeta.buyer.join(", ")
                 qrInfo.color=storeMeta.color.join(", ")
                 // qrInfo.size=storeMeta.size.join(", ")
                 qrInfo.shade=storeMeta.shade
                 qrInfo.quantity=0
-                for(const obj of result.source_batches){
+                for(const obj of result.sources){
                     qrInfo.quantity+=obj.quantity
                 }
 
                 // qrInfo.quantity=result.total_quantity
                 
                 setQrData(qrInfo)
-
+                for(const row of selectedRows){
+                    const key =`${row.mpo}-${row.color}-${row.shade}`
+                    setChosenQty(prev => ({
+                        ...prev,
+                        [key]: null
+                    }));
+                }
                 setSelectedRows([]) 
                 // console.log(payload.batch_source)
                 console.log('Batch created successfully:', result) 
@@ -295,6 +378,35 @@ import type RewashBatchCreateResult from "../../TypeAnnotations/RewashBatchCreat
             },
             (error: any)=>{
                 console.log('Error creating batch:', error.response.data)
+                // console.log('Error creating batch:', err.response.data)
+                const data = error.response?.data;
+                if (typeof data?.shade === 'string') {
+                    setErrorLog(data.shade);
+                }
+                else if (typeof data?.buyer === 'string') {
+                    setErrorLog(data.buyer);
+                }
+                else if (typeof data?.color === 'string') {
+                    setErrorLog(data.color);
+                }
+                else if (typeof data?.type === 'string') {
+                    setErrorLog(data.type);
+                }
+                else if (typeof data?.sources_input?.[0]?.type?.[0] === 'string') {
+                    setErrorLog(data.sources_input[0].type[0]);
+                }
+                else if (typeof data?.sources_input?.[0]?.mpo?.[0] === 'string') {
+                    setErrorLog(data.sources_input[0].mpo[0]);
+                }
+                else if (typeof data?.sources_input?.[0]?.style?.[0] === 'string') {
+                    setErrorLog(data.sources_input[0].style[0]);
+                }
+                else if (typeof data?.sources_input?.[0]?.so?.[0] === 'string') {
+                    setErrorLog(data.sources_input[0].so[0]);
+                }
+                else if (typeof data?.sources_input?.[0]?.quantity?.[0] === 'string') {
+                    setErrorLog(data.sources_input[0].quantity[0]);
+                }
             }
             )
         }
@@ -329,12 +441,18 @@ import type RewashBatchCreateResult from "../../TypeAnnotations/RewashBatchCreat
             component={Paper}
             elevation={0}
             sx={{
-            maxHeight: 300,          // vertical scrollbar
+            top:80,
+            position:'fixed',
+            // position: "fixed",
+            // top:85,
+            // left: 0,
+            right: 0,
+            maxHeight: 250,          // vertical scrollbar
             overflowX: "auto",       // horizontal scrollbar
             overflowY: "auto",
-            marginLeft:'220px',
-            // marginRight:'100px',
-            maxWidth: 1000,
+            marginLeft:'250px',
+            // marginRight:'70px',
+            maxWidth: 1100,
             border:"none",
             // mt:2,
             }}
@@ -356,21 +474,32 @@ import type RewashBatchCreateResult from "../../TypeAnnotations/RewashBatchCreat
             <TableHead>
             <TableRow >
 
-               <StyledTableCell align="center">Batch Number </StyledTableCell>
-               <StyledTableCell align="center">Batch Type</StyledTableCell>
-                
-               <StyledTableCell align="center"
+              <StyledTableCell align="center"
                 >
                     <TextField
                         
                         sx={{
                             background:'white',
                             "& .MuiOutlinedInput-root": {
-                            "&.Mui-focused fieldset": {
-                                // borderColor: "#485e68",  
-                                //       // Outline color on focus
-                                borderColor:'white'
+                                "&.Mui-focused fieldset": {
+                                    // borderColor: "#485e68",  
+                                    //       // Outline color on focus
+                                    borderColor:'white'
+                                },
+                                // height:30
                             },
+                            "& .MuiInputBase-root": {
+                                 height: 20, // total height
+                                 width:'80px'
+                                //  width:20
+                            },
+                            "& .MuiFormLabel-root":{
+                                lineHeight:1,
+                                fontSize:12,
+                                left:10,
+                                top:-5,
+                                fontWeight:'bold'
+                                // textAlign:'center'
                             },
                             "& .MuiInputLabel-root": {
                             "&.Mui-focused": {
@@ -385,15 +514,13 @@ import type RewashBatchCreateResult from "../../TypeAnnotations/RewashBatchCreat
                         }}
                         autoFocus
                         size="small"
-                        label="Buyer"
+                        label="MPO"
                          onChange={(e) => {
                             const value = e.target.value;
-                            setFilter((prev) => ({ ...prev, ["buyer"]: value }));
+                            setFilter((prev) => ({ ...prev, ["mp"]: value }));
                         }}
                     ></TextField> 
                 </StyledTableCell>
-  
-
                 <StyledTableCell align="center"
                 >
                     <TextField
@@ -401,11 +528,12 @@ import type RewashBatchCreateResult from "../../TypeAnnotations/RewashBatchCreat
                         sx={{
                             background:'white',
                             "& .MuiOutlinedInput-root": {
-                            "&.Mui-focused fieldset": {
-                                // borderColor: "#485e68",  
-                                //       // Outline color on focus
-                                borderColor:'white'
-                            },
+                                "&.Mui-focused fieldset": {
+                                    // borderColor: "#485e68",  
+                                    //       // Outline color on focus
+                                    borderColor:'white'
+                                },
+                                // height:30
                             },
                             "& .MuiInputLabel-root": {
                             "&.Mui-focused": {
@@ -416,6 +544,162 @@ import type RewashBatchCreateResult from "../../TypeAnnotations/RewashBatchCreat
                             // width: 100,
                             fontWeight:'bold',
                             // height:'30px',
+                            "& .MuiFormLabel-root":{
+                                lineHeight:1,
+                                fontSize:12,
+                                left:10,
+                                top:-5,
+                                fontWeight:'bold'
+                                // textAlign:'center'
+                            },
+                            "& .MuiInputBase-root": {
+                                 height: 20, // total height
+                                 width:'80px'
+                                //  width:20
+                            },
+                            // textEmphasisColor:'white'
+                        }}
+                        autoFocus
+                        size="small"
+                        label="Buyer"
+                         onChange={(e) => {
+                            const value = e.target.value;
+                            setFilter((prev) => ({ ...prev, ["buyer"]: value }));
+                        }}
+                    ></TextField> 
+                </StyledTableCell>
+               
+  
+                <StyledTableCell align="center"
+                >
+                    <TextField
+                        
+                        sx={{
+                            background:'white',
+                            "& .MuiOutlinedInput-root": {
+                                "&.Mui-focused fieldset": {
+                                    // borderColor: "#485e68",  
+                                    //       // Outline color on focus
+                                    borderColor:'white'
+                                },
+                                // height:30
+                            },
+                            "& .MuiInputLabel-root": {
+                            "&.Mui-focused": {
+                                color: "black",
+                                fontWeight:'bold'               // Label/text color on focus
+                            },
+                            },
+                            // width: 100,
+                            fontWeight:'bold',
+                            // height:'30px',
+                            "& .MuiInputBase-root": {
+                                 height: 20, // total height
+                                 width:'80px'
+                                //  width:20
+                            },
+                            "& .MuiFormLabel-root":{
+                                lineHeight:1,
+                                fontSize:12,
+                                left:10,
+                                top:-5,
+                                fontWeight:'bold'
+                                // textAlign:'center'
+                            },
+                            // textEmphasisColor:'white'
+                        }}
+                        autoFocus
+                        size="small"
+                        label="Style"
+                         onChange={(e) => {
+                            const value = e.target.value;
+                            setFilter((prev) => ({ ...prev, ["style"]: value }));
+                        }}
+                    ></TextField> 
+                </StyledTableCell>
+                <StyledTableCell align="center"
+                >
+                    <TextField
+                        
+                        sx={{
+                            background:'white',
+                            "& .MuiOutlinedInput-root": {
+                                "&.Mui-focused fieldset": {
+                                    // borderColor: "#485e68",  
+                                    //       // Outline color on focus
+                                    borderColor:'white'
+                                },
+                                // height:30
+                            },
+                            "& .MuiInputLabel-root": {
+                            "&.Mui-focused": {
+                                color: "black",
+                                fontWeight:'bold'               // Label/text color on focus
+                            },
+                            },
+                            // width: 100,
+                            fontWeight:'bold',
+                            // height:'30px',
+                            "& .MuiInputBase-root": {
+                                 height: 20, // total height
+                                 width:'80px'
+                                //  width:20
+                            },
+                            "& .MuiFormLabel-root":{
+                                lineHeight:1,
+                                fontSize:12,
+                                left:10,
+                                top:-5,
+                                fontWeight:'bold'
+                                // textAlign:'center'
+                            },
+                            // textEmphasisColor:'white'
+                        }}
+                        autoFocus
+                        size="small"
+                        label="Sales Order"
+                         onChange={(e) => {
+                            const value = e.target.value;
+                            setFilter((prev) => ({ ...prev, ["so"]: value }));
+                        }}
+                    ></TextField> 
+                </StyledTableCell>
+                <StyledTableCell align="center"
+                >
+                    <TextField
+                        
+                        sx={{
+                            background:'white',
+                            "& .MuiOutlinedInput-root": {
+                                "&.Mui-focused fieldset": {
+                                    // borderColor: "#485e68",  
+                                    //       // Outline color on focus
+                                    borderColor:'white'
+                                },
+                                // height:30
+                            },
+                            "& .MuiInputLabel-root": {
+                            "&.Mui-focused": {
+                                color: "black",
+                                fontWeight:'bold'               // Label/text color on focus
+                            },
+                            },
+                            // width: 100,
+                            fontWeight:'bold',
+                            // height:'30px',
+                            "& .MuiInputBase-root": {
+                                 height: 20, // total height
+                                 width:'80px'
+                                //  width:20
+                            },
+                            "& .MuiFormLabel-root":{
+                                lineHeight:1,
+                                fontSize:12,
+                                left:10,
+                                top:-5,
+                                fontWeight:'bold'
+                                // textAlign:'center'
+                            },
                             // textEmphasisColor:'white'
                         }}
                         autoFocus
@@ -439,11 +723,12 @@ import type RewashBatchCreateResult from "../../TypeAnnotations/RewashBatchCreat
                         sx={{
                             background:'white',
                             "& .MuiOutlinedInput-root": {
-                            "&.Mui-focused fieldset": {
-                                // borderColor: "#485e68",  
-                                //       // Outline color on focus
-                                borderColor:'white'
-                            },
+                                "&.Mui-focused fieldset": {
+                                    // borderColor: "#485e68",  
+                                    //       // Outline color on focus
+                                    borderColor:'white'
+                                },
+                                // height:30
                             },
                             "& .MuiInputLabel-root": {
                             "&.Mui-focused": {
@@ -454,6 +739,19 @@ import type RewashBatchCreateResult from "../../TypeAnnotations/RewashBatchCreat
                             // width: 100,
                             fontWeight:'bold',
                             // height:'30px',
+                            "& .MuiInputBase-root": {
+                                 height: 20, // total height
+                                 width:'80px'
+                                //  width:20
+                            },
+                            "& .MuiFormLabel-root":{
+                                lineHeight:1,
+                                fontSize:12,
+                                left:10,
+                                top:-5,
+                                fontWeight:'bold'
+                                // textAlign:'center'
+                            },
                             // textEmphasisColor:'white'
                         }}
                         autoFocus
@@ -484,62 +782,84 @@ import type RewashBatchCreateResult from "../../TypeAnnotations/RewashBatchCreat
                                 .includes(value.toLowerCase())
                             )
                         )
-                    .map((row) => (
+                    .map((row) => {
+                        const isDisabled = !selectedRows.some(
+                            item =>
+                                
+                                item.color === row.color &&
+                                item.shade === row.shade &&
+                                item.mpo === row.mpo
+                                
+                        );
+                        const key =`${row.mpo}-${row.color}-${row.shade}`;
+
+                        const actualValue =chosenQty[key] ??null; 
+                        const displayValue = isDisabled ? null : actualValue;
+                        return(
                         <StyledTableRow  sx={{
                             //  height:'2px'
                         }}
-                        key={`${row.content_type}-${row.object_id}-${row.buyer}-${row.color}-${row.shade}`}
+                        key={`${row.mpo}-${row.color}-${row.shade}`}
                         >
-                        <StyledTableCell align="center">{row.object_id}</StyledTableCell>
-                        <StyledTableCell align="center">{row.content_type=='batchforfirstwash'?'FIRST WASH':'REWASH'}</StyledTableCell>
+                        <StyledTableCell align="center">{row.mpo}</StyledTableCell>
                         <StyledTableCell align="center">{row.buyer}</StyledTableCell>
+                        <StyledTableCell align="center">{row.style}</StyledTableCell>
+                        <StyledTableCell align="center">{row.so}</StyledTableCell>
                         <StyledTableCell align="center">{row.color}</StyledTableCell>
                         <StyledTableCell align="center">{row.shade}</StyledTableCell>   
                         <StyledTableCell align="center">{row.quantity}</StyledTableCell>
                         <StyledTableCell align="center">
                             <NumberSpinner
                             size="small"
-                            min={0}
-                            max={row?.quantity ?? 0}
-                            disabled={!selectedRows.some(item => item.content_type==row.content_type && item.object_id==row.object_id && item.buyer==row.buyer && item.color==row.color && item.shade==row.shade)}
+                            min={1}
+                            max={row?.quantity ?? 1}
+                            // disabled={!selectedRows.some(item => item.mpo==row.mpo && item.style==row.style && item.so==row.so && item.buyer==row.buyer && item.color==row.color && item.shade==row.shade)}
                             // value={selectedRows.quantity ?? 0} 
+                            customSize={5}
+                            disabled={isDisabled}
+                            value={displayValue}
                             onValueChange={(value) => handleQuantityChange(row, value ?? 0)}
                             />
                         </StyledTableCell>  
-                        <StyledTableCell>
+                        <StyledTableCell align="center">
                             <Checkbox 
-                            checked={selectedRows.some(item => item.content_type==row.content_type && item.object_id==row.object_id && item.buyer==row.buyer && item.color==row.color && item.shade==row.shade)}
+                            checked={selectedRows.some(item => item.mpo==row.mpo &&  item.color==row.color && item.shade==row.shade)}
                             onChange={(e, checked) => handleRowSelect(row, checked)}
                             slotProps={{ input: { 'aria-label': 'select-row' } }}
+                            sx={{
+                                height:10
+                            }}
                             />
                         </StyledTableCell>
-                        </StyledTableRow>
-                    ))}
+                        </StyledTableRow>)
+                    
+                    })}
             </TableBody>
         </Table>
         </TableContainer>
-        <Button variant="contained"  onClick={handleCreateBatch} sx={{mt:2,position:'relative', background:tbCellColor}}>Create Batch</Button>
+        <Button variant="contained"  onClick={handleCreateBatch} sx={{ mt:2,background:tbCellColor}}>Create Batch</Button>
 
-        <div style={{marginLeft:"500px"}}>
+        <div style={{marginLeft:"150px"}}>
             {qrData && (
                         <Paper
                             ref={printRef}
                             elevation={5}
                             sx={{
                             alignContent: "right",
-                            mt: 3,
+                            mt: 1,
                             px: 2,
                             pt:1,
                             pb:1,
                             // p: 3,
+                            position:'fixed',
                             width: 280,
                             textAlign: "center",
                             }}
                         >
 
                             <QRCodeCanvas
-                            value={`W8220${qrData.date}W100000000${qrData.id}`}
-                            size={200}
+                            value={`RW822${qrData.date}W1${String(qrData.id).padStart(7, '0')}`}
+                            size={100}
                             level="H"
                             />
 
@@ -549,7 +869,7 @@ import type RewashBatchCreateResult from "../../TypeAnnotations/RewashBatchCreat
                                 fontSize: 12,
                                 mb: 2
                             }}>
-                                {`RW8220${qrData.date}W1${String(qrData.id).padStart(10, '0')}`}
+                                {`RW822${qrData.date}W1${String(qrData.id).padStart(7, '0')}`}
                             </Typography>
                             <Typography variant="body2">
                                 <b>Total Quantity:</b> {qrData.quantity}
@@ -571,7 +891,9 @@ import type RewashBatchCreateResult from "../../TypeAnnotations/RewashBatchCreat
                             
                             </Box>
                         </Paper>)}
-                {qrData && (
+                
+        </div>
+        {qrData && (
                     <Button
                         variant="outlined"
                         sx={{ mt: 2 ,marginRight:"450px"}}
@@ -580,8 +902,6 @@ import type RewashBatchCreateResult from "../../TypeAnnotations/RewashBatchCreat
                         Print QR Code
                     </Button>
                 )}
-        </div>
-        
         <Modal open={shadeWarn} onClose={() => setShadeWarn(false)}>
             <Box
                 sx={{
