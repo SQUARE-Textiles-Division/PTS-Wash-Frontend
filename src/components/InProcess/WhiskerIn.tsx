@@ -211,9 +211,10 @@ useEffect(() => {
                       stageClosedMap.set(obj.stage,true)
                     }
                   }
-              }
-        )
-        getData<RejectionReason[]>(
+                  
+                  
+                    
+                  getData<RejectionReason[]>(
                       `productions/rejections/`,
                       ip,
                       {},
@@ -228,8 +229,10 @@ useEffect(() => {
                         setFinalRejCnt(temp)
                       }
                     )
-  }
-  
+
+              }
+        )
+      }
 
   const handleComplete = (index: number) => {
 

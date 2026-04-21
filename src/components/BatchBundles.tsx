@@ -47,7 +47,7 @@ export default function ReceivedBundles({ rows }: Props) {
       <TableContainer
         component={Paper}
         sx={{
-          maxHeight: 480,          // vertical scrollbar
+          maxHeight: 540,          // vertical scrollbar
           overflowX: "auto",       // horizontal scrollbar
           overflowY: "auto",
           maxWidth: 1150,

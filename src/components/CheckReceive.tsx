@@ -206,8 +206,8 @@ export default function CheckReceive({items, setItems,qrData,setQrData}: Props){
                         flexDirection:'column',
                         marginLeft:'50px',
                         gap:'10px',
-                        // position:'relative',
-                        top:500
+                        position:'fixed',
+                        top:580
                     }}
                     >
                         <Button variant="contained"

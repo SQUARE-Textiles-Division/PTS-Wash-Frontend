@@ -26,7 +26,7 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
     color: "white",
   },
   [`&.${tableCellClasses.body}`]: {
-     lineHeight: 0.4,  
+     lineHeight: 1,  
     fontSize: 14,
     padding: '0px 6px',
     // lineHeight: 0.8, 
@@ -606,7 +606,7 @@ export default function FirstWashQC(){
 
                     {/* Table below */}
                     <Box sx={{ ml:'40px' }}>
-                    <TableContainer component={Paper} sx={{ maxHeight: 180, overflow: "auto",marginLeft:"105px",position:'relative',top:'10px'}}>
+                    <TableContainer component={Paper} sx={{ maxHeight: 380, overflow: "auto",marginLeft:"105px",position:'relative',top:'10px'}}>
                         <Table stickyHeader aria-label="customized table">
                         <TableHead>
                             <TableRow>
@@ -636,14 +636,14 @@ export default function FirstWashQC(){
                                 </StyledTableCell>
                                 <StyledTableCell align="center">
                                 <b style={{ color: "red" }}>
-                                     <FormControl sx={{ width: 150 ,height:'22px',marginTop:-1}} size="small">
+                                     <FormControl sx={{ width: 150 ,height:'15px',marginTop:0.9}} size="small">
     
                                             <Select
                                                 labelId="reject-reason-label"
                                                 id={`reject-reason-${row.individual_barcode}`}
                                                 value={row.reason}
                                                 onChange={(e) => handleRowReasonChange(row.individual_barcode, e.target.value as string)}
-                                                style={{height:'22px'}}
+                                                style={{height:'10px'}}
                                                 // setReason(selectedActual);
 
                                                 // const selectedItem = rejectReasons.find(

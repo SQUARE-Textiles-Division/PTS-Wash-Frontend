@@ -181,6 +181,9 @@ export default function LaserWhiskerOutput() {
                     stageClosedMap.set(obj.stage,true)
                   }
                 }
+                for (const [key, value] of stageClosedMap) {
+                  console.log(key, value);
+                }
             }
       )
       getData<RejectionReason[]>(
@@ -192,6 +195,7 @@ export default function LaserWhiskerOutput() {
                       let temp=0
                       for(const obj of res){
                         if(obj.batch==batchIdNum && stageClosedMap.has(obj.stage))
+                            console.log(obj.stage,' ',obj.individual_barcode)
                             temp++;
                       }
                       console.log('total_rej',temp)

@@ -200,23 +200,24 @@ export default function TagIn() {
                     stageClosedMap.set(obj.stage,true)
                   }
                 }
+                 getData<RejectionReason[]>(
+                  `productions/rejections/`,
+                  ip,
+                  {},
+                  {},
+                  (res:RejectionReason[])=>{
+                    let temp=0
+                    for(const obj of res){
+                      if(obj.batch==batchIdNum && stageClosedMap.has(obj.stage))
+                          temp++;
+                    }
+                    console.log('total_rej',temp)
+                    setFinalRejCnt(temp)
+                  }
+                )
             }
       )
-       getData<RejectionReason[]>(
-              `productions/rejections/`,
-              ip,
-              {},
-              {},
-              (res:RejectionReason[])=>{
-                let temp=0
-                for(const obj of res){
-                  if(obj.batch==batchIdNum && stageClosedMap.has(obj.stage))
-                      temp++;
-                }
-                console.log('total_rej',temp)
-                setFinalRejCnt(temp)
-              }
-            )
+      
   }
   
 

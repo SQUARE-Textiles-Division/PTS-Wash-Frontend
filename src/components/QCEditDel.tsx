@@ -1,4 +1,4 @@
-import { Box, Button, patch, TextField } from "@mui/material";
+import { Box, Button, patch, Popper, TextField } from "@mui/material";
 import { Modal, Typography,  Menu, MenuItem } from "@mui/material";
 import React from "react";
 import { styled } from '@mui/material/styles';
@@ -45,6 +45,8 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 
 export default function QCEditDel() {
   const [rows, setRows] = React.useState<any[]>([]);
+  const [popperActive,setPopperActive]=React.useState<boolean>(false)
+  // const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const batchRef = React.useRef<HTMLInputElement>(null);
   const [batchNum, setBatchNum] = React.useState<number>(0);
   const [deletePop, setDeletePop] = React.useState<boolean>(false);
@@ -52,10 +54,19 @@ export default function QCEditDel() {
   const rejectReasons=WhiskerRejectReasons;
   const [reason,setReason]=React.useState<string>("");
   const [reasonDisplay,setReasonDisplay]=React.useState<string>("");
+  const [popanchorEl, setPopAnchorEl] = React.useState<null | HTMLElement>(null);
+  const containerRef = React.useRef<HTMLDivElement | null>(null);
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [selectedRow, setSelectedRow] = React.useState<any>(null);
   const [deleteStage,setDeleteStage]=React.useState<string>("")
   const [deleteError,setDeleteError]=React.useState<string>("")
+  // React.useEffect(() => {
+  //   if (popperActive && containerRef.current) {
+  //     setPopAnchorEl(containerRef.current);
+  //   } else {
+  //     setPopAnchorEl(null); // 👈 clear when closed
+  //   }
+  // }, [popperActive]);
 
   const menuOpen = Boolean(anchorEl);
   let batchIdNum: number = 0;
@@ -78,6 +89,17 @@ export default function QCEditDel() {
       (rejectedData:RejectionReason[]) => {
         const tempRows: any[] = [];
         // console.log("Rejection Reasons:", rejectedData);
+        if (rejectedData.length === 0) {
+            if (containerRef.current) {
+              setPopAnchorEl(containerRef.current);
+            }
+            setPopperActive(true);
+            setRows([])
+            return;
+        }
+        else{
+          setPopperActive(false);
+        }
         for(let i=0;i<rejectedData.length;i++){
           const obj={
             "id":rejectedData[i].id,
@@ -163,7 +185,7 @@ export default function QCEditDel() {
                       autoFocus
                       onChange={()=>{
                         const batchcode = batchRef.current?.value.trim() || "";
-                        if(batchcode.length==14){
+                        if(batchcode.length>=14){
                             fetchData(batchcode);
                             batchRef.current!.value = "";
                                 // barcodeRef.current!.value = ""}
@@ -185,6 +207,15 @@ export default function QCEditDel() {
                           },
                       }}
                 />
+                <div ref={containerRef} style={{ display: "inline-block",position:'fixed',top:180,left:800 }}>
+                  {/* Anchor Area */}
+                </div>
+
+                <Popper open={popperActive} anchorEl={popanchorEl} placement="top">
+                  <Box sx={{ p: 1,  color: '#e0c055',fontWeight:'bold' ,position:'fixed',top:10 ,width:280}}>
+                    No rejections for this batch
+                  </Box>
+                </Popper>
             </Box>
 
             <TableContainer

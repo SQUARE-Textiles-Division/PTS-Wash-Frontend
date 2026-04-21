@@ -422,7 +422,7 @@ const handleReplaceStage = (newStage: string) => {
             >
                 <Box
                   sx={{
-                      bgcolor: "#fea116", // light red background for error
+                      bgcolor: "#ffffe0", // light red background for error
                       p: 4,
                       borderRadius: 2,
                       color: "black", // red text for error
