@@ -223,7 +223,11 @@ useEffect(() => {
                         let temp=0
                         for(const obj of res){
                           if(obj.batch==batchIdNum && stageClosedMap.has(obj.stage))
+                          {
+                              // console.log('rej stage',obj.stage,'closed',obj.individual_barcode)
                               temp++;
+                          }
+                              
                         }
                         console.log('total_rej',temp)
                         setFinalRejCnt(temp)

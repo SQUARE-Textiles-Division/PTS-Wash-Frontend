@@ -181,9 +181,7 @@ export default function WhiskerOutput() {
                     stageClosedMap.set(obj.stage,true)
                   }
                 }
-            }
-      )
-      getData<RejectionReason[]>(
+                getData<RejectionReason[]>(
                     `productions/rejections/`,
                     ip,
                     {},
@@ -197,7 +195,10 @@ export default function WhiskerOutput() {
                       console.log('total_rej',temp)
                       setFinalRejCnt(temp)
                     }
-                  )
+                )
+            }
+      )
+      
   }
   
 
@@ -257,7 +258,7 @@ export default function WhiskerOutput() {
               const stepProps: { completed?: boolean; disabled?: boolean } = {};
               stepProps.completed = completed[index];
               stepProps.disabled = index !== activeStep;
-
+            
               return (
                 <Step key={label} {...stepProps}
                   sx={{
@@ -291,7 +292,9 @@ export default function WhiskerOutput() {
                       <b>{label}</b>
                       
                     </Typography>
-                    {label.includes('CLOSE')&&!stepProps.disabled&&(
+                    {label.includes('CLOSE')&&!stepProps.disabled && 
+                        // label=='WHISKER CLOSED' &&
+                        (
                       <Button sx={{
                         background:'blue',
                         color:'white'

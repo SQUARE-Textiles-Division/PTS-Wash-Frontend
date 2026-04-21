@@ -181,12 +181,8 @@ export default function LaserWhiskerOutput() {
                     stageClosedMap.set(obj.stage,true)
                   }
                 }
-                for (const [key, value] of stageClosedMap) {
-                  console.log(key, value);
-                }
-            }
-      )
-      getData<RejectionReason[]>(
+              
+                 getData<RejectionReason[]>(
                     `productions/rejections/`,
                     ip,
                     {},
@@ -195,13 +191,15 @@ export default function LaserWhiskerOutput() {
                       let temp=0
                       for(const obj of res){
                         if(obj.batch==batchIdNum && stageClosedMap.has(obj.stage))
-                            console.log(obj.stage,' ',obj.individual_barcode)
                             temp++;
                       }
                       console.log('total_rej',temp)
                       setFinalRejCnt(temp)
                     }
                   )
+            }
+      )
+     
   }
   
 
@@ -316,7 +314,7 @@ export default function LaserWhiskerOutput() {
                                   total_rej+=rejres[i].rejection_count
                                 }
                                 // console.log(rejres)
-                                console.log(total_rej)
+                                // console.log(total_rej)
                                 setRejCnt(total_rej);
                                 
                             },

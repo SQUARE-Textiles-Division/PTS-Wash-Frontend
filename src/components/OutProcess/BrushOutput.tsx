@@ -181,9 +181,7 @@ export default function BrushrOutput() {
                     stageClosedMap.set(obj.stage,true)
                   }
                 }
-            }
-      )
-      getData<RejectionReason[]>(
+                 getData<RejectionReason[]>(
                     `productions/rejections/`,
                     ip,
                     {},
@@ -198,6 +196,9 @@ export default function BrushrOutput() {
                       setFinalRejCnt(temp)
                     }
                   )
+            }
+      )
+     
   }
   
 
