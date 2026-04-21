@@ -188,7 +188,7 @@ const handleReplaceStage = (newStage: string) => {
       {/* MPO INPUT */}
       <TextField
         label="Enter MPO"
-        style={{position:'fixed',top:80}}
+        style={{position:'fixed',top:80,left:300}}
         inputRef={mpoRef}
         autoFocus
         onKeyDown={(e) => {
@@ -219,14 +219,19 @@ const handleReplaceStage = (newStage: string) => {
       />
 
       {mpoExists === false && (
-        <Typography color="error">❌ MPO does not exist</Typography>
+        <Typography sx={{position:'fixed',top:120,left:300}} color="error">❌ MPO does not exist</Typography>
       )}
       {mpoExists === true && (
         <>
            <Typography sx={{
-            fontWeight:'bold'
+            fontWeight:'bold',
+            position:'fixed',
+            textAlign:'center',
+            top:120,
+            left:300
            }}>MPO - {mpoNo},    Buyer - {buyer},     Style - {style} </Typography>
-          <Typography color="green">✅ MPO exists</Typography>
+          <Typography color="green" sx={{position:'fixed',
+            top:150,left:400}}>✅ MPO exists</Typography>
         </>
        
       )}
@@ -242,7 +247,7 @@ const handleReplaceStage = (newStage: string) => {
             // setActiveStep((prev) => prev + 1);
           }}
           disabled={availableStagesToAdd.length === 0}
-          sx={{ width: 150 }}
+          sx={{ width: 150,position:'fixed',top:200,left:300 }}
         >
             + Add Stage
           </Button>
@@ -270,7 +275,7 @@ const handleReplaceStage = (newStage: string) => {
 
           )} */}
          {selectedStages.length > 0 && (
-              <Stepper activeStep={activeStep} nonLinear={true} sx={{   width: 1000 }}>
+              <Stepper activeStep={activeStep} nonLinear={true} sx={{position:'fixed',top:250,left:300, width: 990 }}>
               {selectedStages.map((stage) => (
                 <Step key={stage} completed={false} disabled={false}>
                   <StepLabel
