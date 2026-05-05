@@ -8,24 +8,30 @@ import ReceivedBundles from "./ReceivedBundles";
 import { red } from "@mui/material/colors";
 import { ip, ptsip } from "../ip";
 import success from '../assets/success.mp3'
+import type IndividualInfo from "../TypeAnnotations/IndividualInfo";
 
 interface Props {
-    items: BundleInfo[];
-    setItems: React.Dispatch<React.SetStateAction<BundleInfo[]>>;
+    items: IndividualInfo[];
+    setItems: React.Dispatch<React.SetStateAction<IndividualInfo[]>>;
 }
 
 export default function WashReceive({items, setItems}: Props){
     // const audioRef = useRef<HTMLAudioElement | null>(null);
     // const [successAlarm,setSuccessAlarm]=useState<boolean>(false)
+    const successAudio = new Audio(success);
     const [alarmTrigger, setAlarmTrigger] = useState(0);
-
-    const playSuccess = () => {
-    setAlarmTrigger(prev => prev + 1);
+    const setAlarm = () => {
+        successAudio.currentTime = 0; // restart if already playing
+        successAudio.play();
     };
+    // const playSuccess = () => {
+    // setAlarmTrigger(prev => prev + 1);
+    // };
     const [showPopup, setShowPopup] = useState(false);
     const [sewingError,setSewingError]=useState(false);
     const [saveBarcode,setSaveBarcode]=useState("")
     const[showErrorPopup,setShowErrorPopup]=useState(false);
+    const [networkError,setNetworkError]=useState("")
     const barcodeRef=useRef<HTMLInputElement>(null);
     const [data,setData]=useState<BundleInfo|null>(null);
     const [secondData,setSecondData]=useState<any>(null);
@@ -36,7 +42,11 @@ export default function WashReceive({items, setItems}: Props){
             console.warn("No Barcode entered");
             return;
         }
+        
 
+        let bundleBarcode = `8220`+barcode.slice(0,12)+`001`;
+        let individualBarcode = barcode
+        barcode = bundleBarcode;
         // --- First API call (washing scan) ---
         getData<BundleInfo>(
             `washing/${barcode}/`,
@@ -54,21 +64,23 @@ export default function WashReceive({items, setItems}: Props){
                     buyer:result1.buyer,
                     style:result1.style,
                     so:result1.so,
-                    bundle_no: result1.bundle_no,
-                    bundle_barcode: result1.bundle_barcode,
+                    // bundle_no: result1.bundle_no,
+                    // bundle_barcode: result1.bundle_barcode,
+                    individual_barcode: individualBarcode,
                     size: result1.size,
                     shade: result1.shade,
                     color: result1.color,
-                    quantity: result1.quantity,
+                    // quantity: result1.quantity,
                 };
                 // console.log("Payload sent to second API:", payload);
 
                 // --- Second API call ---
                 postData(
-                    `productions/received-bundles/`,
+                    // `productions/received-bundles/`,
+                    `common/garment-units/`,
                     ip,
                     payload,
-                    (result2:BundleInfo) => {
+                    (result2:IndividualInfo) => {
                         // setSecondData(result2);
                         setItems([
                                 result2,
@@ -76,14 +88,19 @@ export default function WashReceive({items, setItems}: Props){
                             ]);
                         if (result2) {
                             setShowPopup(true);
-                            setSaveBarcode(result2.bundle_barcode)
-                            playSuccess()
+                            setSaveBarcode(result2.individual_barcode)
+                            setAlarm();
                             // setSuccessAlarm(true)
                             // result2.bundle_barcode
                         }
                         console.log("Second API result:", result2);
                     },
                     (error:any) => {
+                        if (error instanceof Error && error.message === "Network Error") {
+                            console.log("Network Error");
+                            setNetworkError("Network Error")
+                            
+                        }
                         setShowErrorPopup(true);
                         console.error("Error in second API:", error.response.data);
                     }
@@ -143,7 +160,9 @@ export default function WashReceive({items, setItems}: Props){
                 onChange={() => {
                     
                     const barcode = barcodeRef.current?.value.trim() || "";
-                    if(barcode.length==19){
+                    if(barcode.length==16
+                        // 19
+                    ){
                         fetchData(barcode);
                         barcodeRef.current!.value = "";
                     }
@@ -196,9 +215,20 @@ export default function WashReceive({items, setItems}: Props){
                             width: 400,
                         }}
                         >
-                        <Typography variant="h6">Bundle Duplicated!!!</Typography>
-                        <Typography>This Bundle is already Received 
-                        </Typography>
+                        {networkError!="" &&(
+                            <Typography variant="h6">{networkError}</Typography>
+                        )}
+                       {networkError==""&&(
+                        <>
+                            {/* <Typography variant="h6">Bundle Duplicated!!!</Typography>
+                                <Typography>This Bundle is already Received 
+                            </Typography> */}
+                            <Typography variant="h6">Piece Duplicated!!!</Typography>
+                                <Typography>This Piece is already Received 
+                            </Typography>
+                        </>
+                             
+                        )}
                         <Button sx={{ mt: 2 }} onClick={() => setShowErrorPopup(false)}>Close</Button>
                         </Box>
                     </Box>

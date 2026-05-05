@@ -87,7 +87,7 @@ export default function Navbar() {
     
     { primary: "Brush In", to: "/brushin" },
     {primary: "Brush QC", to: "/brushqc" },
-    { primary: "Brush Output", to: "/brushoutput" },
+    { primary: "Brush QC Pass", to: "/brushoutput" },
 
     { primary: "Laser Brush In", to: "/laserbrushin" },
     {primary:"Laser Brush QC", to:"/laserbrushqc"},

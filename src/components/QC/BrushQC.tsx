@@ -24,6 +24,10 @@ import { ip } from "../../ip";
 import type BatchStageHistory from "../../TypeAnnotations/BatchStageHistory";
 import type BatchBundle from "../../TypeAnnotations/BatchBundle";
 import type BatchBundles from "../../TypeAnnotations/BatchInstance";
+import type IndividualInOut from "../../TypeAnnotations/IndividualInOut";
+import { data } from "react-router-dom";
+import type IndividualInfo from "../../TypeAnnotations/IndividualInfo";
+import success from "../../assets/success.mp3"
 
 interface IndividualMeta{
   id:number,
@@ -63,9 +67,14 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
   },
 }));
 export default function BrushQC() {
+   const successAudio = new Audio(success);
+   const setAlarm = () => {
+        successAudio.currentTime = 0; // restart if already playing
+        successAudio.play();
+    };
   const individualBarcodeRef = React.useRef<HTMLInputElement>(null);
   const rejectReasons=WhiskerRejectReasons;
-   const [rows, setRows] = React.useState<IndividualMeta[]>([]);
+   const [rows, setRows] = React.useState<any[]>([]);
   const [rejectField,setRejectField]=React.useState<boolean>(false);
   const [reason,setReason]=React.useState<string>("");
   const [rejectPop,setRejectPop]=useState<boolean>(false)
@@ -267,7 +276,7 @@ export default function BrushQC() {
                   </TableHead>
                           <TableBody>
                           {rows.map((row) => (
-                            <StyledTableRow key={row.id} >
+                            <StyledTableRow key={row.individual_barcode} >
                               <StyledTableCell>{row.mpo}</StyledTableCell>
                               <StyledTableCell align="center">{row.individual_barcode}</StyledTableCell>
                               <StyledTableCell align="center">{row.marker}</StyledTableCell>
@@ -377,165 +386,108 @@ export default function BrushQC() {
             <Box sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}>
               <Button sx={{ background: "blue", color: "white" }} onClick={() => {
 
-                // const bundleBarcode='8220'+invbarcode.substring(0, 12)+'001';
-                // getData<BatchBundles[]>(
-                //   `productions/batch-bundles/`,
-                //   ip,
-                //   {},
-                //   {},
-                //   (data: BatchBundles[]) => {
-                //       if(data.length > 0){
-                //           const batchbundleInfo = data.find(bundle => bundle.received.bundle_barcode === bundleBarcode);
-                //           const batchCheckId=batchbundleInfo?.batch_id
-                //           if(batchCheckId){
-                //             getData<BatchStageHistory[]>(
-                //               `productions/batch-stage-history/`,
-                //               ip,
-                //               {},
-                //               {batch:batchCheckId},
-                //               (historyData: BatchStageHistory[]) => {
-                //                 const brushStage = historyData.find(stage => stage.stage === "Brush");
-                //                 if(brushStage?.closed_by!=null){
-                //                     setRejectError("This piece cannot be rejected as Brush stage is already closed for this batch.");
-                //                     setRejectPop(false);
-                //                     setReason("");
-                //                     setReasonDisplay("");
-                //                     return
-                //                 }
-                //                 postData<RejectionReason>(
-                //                     "productions/rejections/",
-                //                     ip,
-                //                     {
-                //                       individual_barcode: invbarcode,
-                //                       stage: "Brush",
-                //                       reason: reason,
-                //                     },
-                //                     (data) => {
-                //                       console.log("Rejection recorded:", data);
 
-                //                       setRejectPop(false);
-                //                       setReason("");
-                //                       setReasonDisplay("");
 
-                //                       getData<RejectionReason[]>(
-                //                         "productions/rejections/",
-                //                         ip,
-                //                         {},
-                //                         { batch: data.batch },
-                //                         (rejectedData: RejectionReason[]) => {
-
-                //                           const tempRows = rejectedData
-                //                             .filter(item => item.id === data.id) // keep only current rejection
-                //                             .map(item => ({
-                //                               id: item.id,
-                //                               individual_barcode: item.individual_barcode,
-                //                               mpo: item.details?.mpo,
-                //                               marker: item.details?.marker,
-                //                               size: item.details?.size,
-                //                               color: item.details?.color,
-                //                               shade: item.details?.shade,
-                //                               rejected_at: item.stage,
-                //                               reason: item.reason,
-                //                             }));
-
-                //                           setRows(prevRows => [...tempRows, ...prevRows]);
-                //                         }
-                //                       );
-                //                     },
-                //                     (error: any) => {
-                //                       console.error("Error recording rejection:", error);
-
-                //                       const errorMsg =
-                //                         error?.response?.data?.individual_barcode?.[0] ||
-                //                         error?.response?.data?.[0] ||
-                //                         "Something went wrong";
-
-                //                       setRejectError(errorMsg);
-                //                       setReason("");
-                //                       setReasonDisplay("");
-                //                       setRejectPop(false);
-                //                     }
-                                    
-                //                 )
-                //               }
-                //             )
-                //           }
-                //           else{
-                //             setRejectError("No batch found for this piece, cannot proceed with rejection.");
-                //             setRejectPop(false);
-                //             setReason("");
-                //             setReasonDisplay("");
-                //             // return
-                //           }
-                //       }
-                    
-                      
-                //   }
-                // )
-                // getData<BatchInstance>(
-
-                // )
-                // getData<BatchStageHistory>(
-                //   // 
-                //   `productions/batch-stage-history/`,
-                //   ip,
-                //   // {},
-                // )
-                postData<RejectionReason>(
-                  "productions/rejections/",
+                postData<IndividualInOut>(
+                  `dry-process/tracking-histories/`,
                   ip,
-                  {
-                    individual_barcode: invbarcode,
-                    stage: "Brush",
-                    reason: reason,
+                   {
+                    garment_unit: invbarcode,
+                    stage: "brush",
+                    action: "rejected", //in or out or rejected
+                    rejection_reason:reason
                   },
-                  (data) => {
+                  (data:IndividualInOut)=>{
                     console.log("Rejection recorded:", data);
-
+                    setAlarm();
                     setRejectPop(false);
                     setReason("");
                     setReasonDisplay("");
-
-                    getData<RejectionReason[]>(
-                      "productions/rejections/",
+                    getData<IndividualInfo>(
+                      `common/garment-units/${invbarcode}/`,
                       ip,
                       {},
-                      { batch: data.batch },
-                      (rejectedData: RejectionReason[]) => {
+                      { },
+                      (rejectedData: IndividualInfo) => {
+                          let temp = {
+                            rejected_at: data.stage,
+                            reason: data.rejection_reason,
+                            ...rejectedData
+                          };
 
-                        const tempRows = rejectedData
-                          .filter(item => item.id === data.id) // keep only current rejection
-                          .map(item => ({
-                            id: item.id,
-                            individual_barcode: item.individual_barcode,
-                            mpo: item.details?.mpo,
-                            marker: item.details?.marker,
-                            size: item.details?.size,
-                            color: item.details?.color,
-                            shade: item.details?.shade,
-                            rejected_at: item.stage,
-                            reason: item.reason,
-                          }));
-
-                         setRows(prevRows => [...tempRows, ...prevRows]);
+                          setRows(prevRows => [temp, ...prevRows]);
                       }
                     );
                   },
-                  (error: any) => {
+                   (error: any) => {
                     console.error("Error recording rejection:", error);
 
                     const errorMsg =
                       error?.response?.data?.individual_barcode?.[0] ||
                       error?.response?.data?.[0] ||
-                      "Something went wrong";
+                      "Already Rejected";
 
                     setRejectError(errorMsg);
                     setReason("");
                     setReasonDisplay("");
                     setRejectPop(false);
                   }
-                  
                 )
+                // postData<RejectionReason>(
+                //   "productions/rejections/",
+                //   ip,
+                //   {
+                //     individual_barcode: invbarcode,
+                //     stage: "Brush",
+                //     reason: reason,
+                //   },
+                //   (data) => {
+                //     console.log("Rejection recorded:", data);
+
+                //     setRejectPop(false);
+                //     setReason("");
+                //     setReasonDisplay("");
+
+                //     getData<RejectionReason[]>(
+                //       "productions/rejections/",
+                //       ip,
+                //       {},
+                //       { batch: data.batch },
+                //       (rejectedData: RejectionReason[]) => {
+
+                //         const tempRows = rejectedData
+                //           .filter(item => item.id === data.id) // keep only current rejection
+                //           .map(item => ({
+                //             id: item.id,
+                //             individual_barcode: item.individual_barcode,
+                //             mpo: item.details?.mpo,
+                //             marker: item.details?.marker,
+                //             size: item.details?.size,
+                //             color: item.details?.color,
+                //             shade: item.details?.shade,
+                //             rejected_at: item.stage,
+                //             reason: item.reason,
+                //           }));
+
+                //          setRows(prevRows => [...tempRows, ...prevRows]);
+                //       }
+                //     );
+                //   },
+                //   (error: any) => {
+                //     console.error("Error recording rejection:", error);
+
+                //     const errorMsg =
+                //       error?.response?.data?.individual_barcode?.[0] ||
+                //       error?.response?.data?.[0] ||
+                //       "Something went wrong";
+
+                //     setRejectError(errorMsg);
+                //     setReason("");
+                //     setReasonDisplay("");
+                //     setRejectPop(false);
+                //   }
+                  
+                // )
               }}>
                 Yes
               </Button>
@@ -557,15 +509,15 @@ export default function BrushQC() {
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  bgcolor: "rgba(0,0,0,0.5)", // dark overlay
+                  // bgcolor: "rgba(0,0,0,0.5)", // dark overlay
                   }}
               >
                   <Box
                   sx={{
-                      bgcolor: "rgba(202, 29, 29, 0.5)", // light red background for error
+                      bgcolor: "white", // light red background for error
                       p: 4,
                       borderRadius: 2,
-                      color: "white", // red text for error
+                      color: "red", // red text for error
                       width: 400,
                   }}
                   >

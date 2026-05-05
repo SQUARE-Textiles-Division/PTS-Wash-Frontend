@@ -5,12 +5,16 @@ import TableCell, { tableCellClasses } from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
+import type { TableRowProps } from '@mui/material/TableRow';
+import { useVirtualizer } from "@tanstack/react-virtual";
 import Paper from '@mui/material/Paper';
 import type BundleInfo from '../TypeAnnotations/BundleInfo';
 import { tbCellColor,tbRowColor } from './Colors/Colors';
+import React from 'react';
+import type IndividualInfo from '../TypeAnnotations/IndividualInfo';
 
 interface Props {
-    rows: BundleInfo[];
+    rows: IndividualInfo[];
 }
 
 
@@ -24,14 +28,14 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
   },
   [`&.${tableCellClasses.body}`]: {
     fontSize: 14,
-    lineHeight:0.9,
+    lineHeight:0.6,
     padding: '4px 6px',
     
     // paddingRight:'50px'
   },
 }));
 
-const StyledTableRow = styled(TableRow)(({ theme }) => ({
+const StyledTableRow = styled(TableRow)<TableRowProps>(({ theme }) => ({
   // height: '5px', 
   '&:nth-of-type(odd)': {
     backgroundColor: tbRowColor
@@ -45,11 +49,44 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 
 
 
+// const Row = React.memo(({ index, style, data }: any) => {
+//   const row = data[index];
+
+//   return (
+//     <StyledTableRow style={style} key={row.bundle_barcode}>
+//       <StyledTableCell>{row.mpo}</StyledTableCell>
+//       <StyledTableCell align="center">{row.buyer}</StyledTableCell>
+//       <StyledTableCell align="center">{row.style}</StyledTableCell>
+//       <StyledTableCell align="center">{row.so}</StyledTableCell>
+//       <StyledTableCell align="center">{row.bundle_barcode}</StyledTableCell>
+//       <StyledTableCell align="center">{row.bundle_no}</StyledTableCell>
+//       <StyledTableCell align="center">{row.marker}</StyledTableCell>
+//       <StyledTableCell align="center">{row.size}</StyledTableCell>
+//       <StyledTableCell align="center">{row.shade}</StyledTableCell>
+//       <StyledTableCell align="center">{row.color}</StyledTableCell>
+//       <StyledTableCell align="center">{row.quantity}</StyledTableCell>
+//     </StyledTableRow>
+//   );
+// });
 
 export default function ReceivedBundles({ rows }: Props) {
+
+
+  const parentRef = React.useRef<HTMLDivElement | null>(null);
+
+  // 🔥 Virtualizer
+  const rowVirtualizer = useVirtualizer({
+    count: rows.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 3, // row height
+    overscan: 20
+  });
+
+  const virtualRows = rowVirtualizer.getVirtualItems();
   return (
       <TableContainer
         component={Paper}
+        ref={parentRef}
         elevation={0}
         sx={{
           maxHeight: 480,          // vertical scrollbar
@@ -69,27 +106,67 @@ export default function ReceivedBundles({ rows }: Props) {
           sx={{
             '& .MuiTableCell-root':{
                 borderBottom:'none'
-            }
+            },
             
           }}
         >
-        <TableHead>
-          <TableRow >
+        <TableHead> 
+          <TableRow component="div">
             <StyledTableCell>MPO</StyledTableCell>
             <StyledTableCell align="center">Buyer</StyledTableCell>
             <StyledTableCell align="center">Style</StyledTableCell>
             <StyledTableCell align="center">Sales Order</StyledTableCell>
-             <StyledTableCell align="center">Bundle Barcode</StyledTableCell>
-            <StyledTableCell align="center">Bundle No</StyledTableCell>
+             {/* <StyledTableCell align="center">Bundle Barcode</StyledTableCell> */}
+             <StyledTableCell align="center">Individual Barcode</StyledTableCell>
+            {/* <StyledTableCell align="center">Bundle No</StyledTableCell> */}
             <StyledTableCell align="center">Marker No</StyledTableCell>
             <StyledTableCell align="center">Size</StyledTableCell>
             <StyledTableCell align="center">Shade</StyledTableCell>
             <StyledTableCell align="center">Color</StyledTableCell>
-            <StyledTableCell align="center">Quantity</StyledTableCell>
+            {/* <StyledTableCell align="center">Quantity</StyledTableCell> */}
             {/* <StyledTableCell align="center">Status</StyledTableCell> */}
           </TableRow>
         </TableHead>
-        <TableBody>
+        <TableBody
+          component="div"
+          style={{
+            position: "relative",
+            height: rowVirtualizer.getTotalSize()
+          }}
+        >
+          {virtualRows.map((virtualRow) => {
+            const row = rows[virtualRow.index];
+
+            return (
+              <StyledTableRow
+                component="div" 
+                key={row.individual_barcode}
+                style={{
+                  // position: "absolute",
+                  top: 0,
+                  transform: `translateY(${virtualRow.start}px)`,
+                  width: "100%",
+                }}
+              >
+                <StyledTableCell component="th" scope="row">
+                    {row.mpo}
+                </StyledTableCell>
+                <StyledTableCell align="center">{row.buyer}</StyledTableCell>
+                <StyledTableCell align="center">{row.style}</StyledTableCell>
+                <StyledTableCell align="center">{row.so}</StyledTableCell>
+                {/* <StyledTableCell align="center">{row.bundle_barcode}</StyledTableCell> */}
+                 <StyledTableCell align="center">{row.individual_barcode}</StyledTableCell>
+                {/* <StyledTableCell align="center">{row.bundle_no}</StyledTableCell> */}
+                <StyledTableCell align="center">{row.marker}</StyledTableCell>
+                <StyledTableCell align="center">{row.size}</StyledTableCell>
+                <StyledTableCell align="center">{row.shade}</StyledTableCell>
+                <StyledTableCell align="center">{row.color}</StyledTableCell>
+                {/* <StyledTableCell align="center">{row.quantity}</StyledTableCell> */}
+              </StyledTableRow>
+            );
+          })}
+        </TableBody>
+        {/* <TableBody>
           {rows.map((row) => (
             <StyledTableRow key={`${row.mpo}-${row.bundle_no}-${row.size}-${row.shade}-${row.color}-${row.quantity}`}>
               <StyledTableCell component="th" scope="row">
@@ -106,10 +183,20 @@ export default function ReceivedBundles({ rows }: Props) {
               <StyledTableCell align="center">{row.shade}</StyledTableCell>
               <StyledTableCell align="center">{row.color}</StyledTableCell>
               <StyledTableCell align="center">{row.quantity}</StyledTableCell>
-                {/* <StyledTableCell align="center">{row.status}</StyledTableCell> */}
-            </StyledTableRow>
-          ))}
-        </TableBody>
+                <StyledTableCell align="center">{row.status}</StyledTableCell>
+           </StyledTableRow> */}
+          {/* ))}
+        </TableBody>  */}
+         {/* 🔥 Virtualized Body */}
+        {/* <List
+          height={420}              // table height - header
+          itemCount={rows.length}
+          itemSize={40}             // MUST match row height
+          width="100%"
+          itemData={rows}
+        >
+          {Row}
+        </List> */}
       </Table>
     </TableContainer>
   );

@@ -11,7 +11,7 @@ import {
   Modal
 } from "@mui/material";
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
-import { useRef, useState, useMemo } from "react";
+import { useRef, useState, useMemo, useEffect } from "react";
 import { getData,postData,patchData } from "./genericApiService";
 import type Planning from '../TypeAnnotations/BatchInstance'
 import type RouteSteps from "../TypeAnnotations/BatchInstance";
@@ -19,15 +19,25 @@ import React from "react";
 import { ip, ptsip } from "../ip";
 
 
+// const ALL_STAGES = [
+//   "Whisker",
+//   "Laser Whisker",
+//   "Brush",
+//   "Laser Brush",
+//   "Wrinkle",
+//   "Tag",
+//   "Tie"
+// ];
+
 const ALL_STAGES = [
-  "Whisker",
-  "Laser Whisker",
-  "Brush",
-  "Laser Brush",
-  "Wrinkle",
-  "Tag",
-  "Tie"
-];
+  "whisker",
+  "laser_whisker",
+  "brush",
+  "laser_brush",
+  "wrinkle",
+  "tag",
+  "tie"
+]
 
 export default function PlanningComponent() {
   const [saved,setSaved]=useState(false)
@@ -63,6 +73,11 @@ export default function PlanningComponent() {
 //     [selectedStages, stageBeingEdited]
 //   );
   const availableStagesToEdit=ALL_STAGES
+// useEffect(() => {
+//   if (activeStep >= selectedStages.length) {
+//     setActiveStep(1);
+//   }
+// }, [selectedStages]);
   /* ------------------ MPO CHECK ------------------ */
  const fetchMpo = (mpo: string) => {
   if (!mpo) {
@@ -275,9 +290,9 @@ const handleReplaceStage = (newStage: string) => {
 
           )} */}
          {selectedStages.length > 0 && (
-              <Stepper activeStep={activeStep} nonLinear={true} sx={{position:'fixed',top:250,left:300, width: 990 }}>
+              <Stepper  nonLinear={true} sx={{position:'fixed',top:250,left:300, width: 990 }}>
               {selectedStages.map((stage) => (
-                <Step key={stage} completed={false} disabled={false}>
+                <Step key={stage} active={true} completed={false} disabled={false}>
                   <StepLabel
                     onClick={(e) => handleStepClick(e, stage)}
                     sx={{
@@ -285,6 +300,7 @@ const handleReplaceStage = (newStage: string) => {
                       userSelect: "none",
                       "&:hover": { color: "#1976d2" },
                       color: "inherit", // prevent MUI from graying it out
+
                     }}
                   >
                     <Typography
@@ -423,7 +439,7 @@ const handleReplaceStage = (newStage: string) => {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                bgcolor: "rgba(148, 131, 131, 0.5)", // dark overlay
+                // bgcolor: "rgba(148, 131, 131, 0.5)", // dark overlay
               }}
             >
                 <Box

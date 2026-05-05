@@ -2,10 +2,11 @@ import React, { useState } from "react";
 import type BundleInfo from "../TypeAnnotations/BundleInfo";
 import WashReceive from "./WashReceive";
 import ReceivedBundles from "./ReceivedBundles";
+import type IndividualInfo from "../TypeAnnotations/IndividualInfo";
 
 
 export default function WashReceivePass(){
-    const [items, setItems] = useState<BundleInfo[]>([]);
+    const [items, setItems] = useState<IndividualInfo[]>([]);
      return (
             <div style={
             {

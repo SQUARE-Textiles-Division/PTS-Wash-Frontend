@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev":"vite --host --port 5173",
+    "dev": "vite --host --port 5173",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
@@ -16,6 +16,7 @@
     "@fontsource/inter": "^5.2.8",
     "@mui/icons-material": "^7.3.7",
     "@mui/material": "^7.3.7",
+    "@tanstack/react-virtual": "^3.13.24",
     "axios": "^1.13.2",
     "bootstrap": "^5.3.8",
     "qrcode.react": "^4.2.0",
