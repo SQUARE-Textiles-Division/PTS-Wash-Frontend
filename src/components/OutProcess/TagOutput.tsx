@@ -72,8 +72,8 @@ export default function TagOutput() {
   const [scanned,setScanned]=useState<any>()
   const [finalrejcnt,setFinalRejCnt]=useState<number>(0)
   const [currentStage, setCurrentStage] = useState("");
-   const [scannedIndividual,setScannedIndividual]=useState<any[]>([])
-    const [individualBarCode,setIndividualBarCode]=useState<string>("")
+  const [scannedIndividual,setScannedIndividual]=useState<any[]>([])
+  const [individualBarCode,setIndividualBarCode]=useState<string>("")
  useEffect(() => {
     if (stages.length > 0) {
       // setCompleted(stages.map(() => false));
