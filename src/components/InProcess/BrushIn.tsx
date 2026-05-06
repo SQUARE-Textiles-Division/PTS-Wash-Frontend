@@ -27,7 +27,7 @@ import type RejectionReason from '../../TypeAnnotations/RejectionReason';
 import type BatchStageHistory from '../../TypeAnnotations/BatchStageHistory';
 import type IndividualInOut from '../../TypeAnnotations/IndividualInOut';
 import type IndividualInfo from '../../TypeAnnotations/IndividualInfo';
-
+import success from "../../assets/success.mp3"
 // import { postData } from './genericApiService';
 // import Typography from '@mui/material/Typography';
 
@@ -61,6 +61,11 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 }));
 
 export default function BrushIn() {
+  const successAudio = new Audio(success);
+  const setAlarm = () => {
+      successAudio.currentTime = 0; // restart if already playing
+      successAudio.play();
+  };
   const parentRef = React.useRef<HTMLDivElement | null>(null);
   const [stages,setStages]=useState<string[]>([])
   const [activeStep, setActiveStep] = React.useState(0); // step that is currently clickable
@@ -310,6 +315,7 @@ useEffect(() => {
               ]);
             //  console.log('scannedIndividual',scannedIndividual)
             setIndividualBarCode(infoResult.individual_barcode)
+            setAlarm();
 
             }
           )
