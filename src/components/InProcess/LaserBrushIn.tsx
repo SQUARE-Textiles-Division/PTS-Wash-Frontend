@@ -20,9 +20,13 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import { tbCellColor, tbRowColor } from '../Colors/Colors';
+import DoneAllIcon from '@mui/icons-material/DoneAll';
 import { ip } from '../../ip';
 import type RejectionReason from '../../TypeAnnotations/RejectionReason';
 import type BatchStageHistory from '../../TypeAnnotations/BatchStageHistory';
+import type IndividualInOut from '../../TypeAnnotations/IndividualInOut';
+import type IndividualInfo from '../../TypeAnnotations/IndividualInfo';
+
 // import { postData } from './genericApiService';
 // import Typography from '@mui/material/Typography';
 
@@ -30,17 +34,24 @@ import type BatchStageHistory from '../../TypeAnnotations/BatchStageHistory';
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
     // backgroundColor: theme.palette.common.black,
+    // backgroundColor: '#485e68',
     backgroundColor: tbCellColor,
-    color: tbRowColor
+    lineHeight:0.5,
+    color: "white",
   },
   [`&.${tableCellClasses.body}`]: {
     fontSize: 14,
+    lineHeight:0.6,
+    padding: '4px 6px',
+    
+    // paddingRight:'50px'
   },
 }));
 
 const StyledTableRow = styled(TableRow)(({ theme }) => ({
+  // height: '5px', 
   '&:nth-of-type(odd)': {
-    backgroundColor: theme.palette.action.hover,
+    backgroundColor: tbRowColor
   },
   // hide last border
   '&:last-child td, &:last-child th': {
@@ -55,6 +66,8 @@ export default function LaserBrushIn() {
   const [errorLog,setErrorLog]=useState<string>('')
   const [scanned,setScanned]=useState<any>()
   const [finalrejcnt,setFinalRejCnt]=useState<number>(0)
+   const [scannedIndividual,setScannedIndividual]=useState<any[]>([])
+    const [individualBarCode,setIndividualBarCode]=useState<string>("")
   
   // console.log(completed)
   // cos
@@ -245,27 +258,90 @@ useEffect(() => {
       }
   };
 
+  const individualQRCodeRef=useRef<HTMLInputElement>(null);
+   const Process = (individualQRCode:string) => {
+        if (!individualQRCode) {
+          console.warn("No Individual QRCode entered");
+          return;
+        }
+        // getData<IndividualInfo>(
+  
+        // )
+        // postData<>
+        postData<IndividualInOut>(
+          `dry-process/tracking-histories/`,
+          ip,
+          {
+            garment_unit: individualQRCode,
+            stage: "laser brush",
+            action: "in", //in or out or rejected
+          },
+          (result: IndividualInOut) => {
+            console.log("Success:", result);
+            // getData<IndividualInfo>(
+            getData<IndividualInfo>(
+              `common/garment-units/${individualQRCode}/`,
+              ip,
+              {},
+              {},
+              (infoResult: IndividualInfo) => {
+                console.log("Garment Info:", infoResult);
+                setScannedIndividual((prev) => [
+                  infoResult,
+                  ...prev,
+                ]);
+              //  console.log('scannedIndividual',scannedIndividual)
+              setIndividualBarCode(infoResult.individual_barcode)
+  
+              }
+            )
+  
+            // Optionally, you can update the UI or state here based on the result
+          },
+          (error: any) => {
+            console.error("Error:", error.response.data);
+            // setErrorLog(error.response.data[0]);
+            if(error.response.data.non_field_errors){
+                setErrorLog(error.response.data.non_field_errors[0]);
+            }
+            else if(error.response.data.garment_unit){
+              setErrorLog(error.response.data.garment_unit);
+            }
+          }
+  
+        )
+    }
+  
   return (
       <Box sx={{ width: '100%', mx: 'auto' }}>
         {/* TextField for QR Scan */}
         <TextField
-          label="Scan Batch QRCode Here"
-          fullWidth
+          label="Scan Individual QRCode Here"
+          // fullWidth
           autoFocus
-          inputRef={batchQRCoderef}
+          // inputRef={batchQRCoderef}
+          inputRef={individualQRCodeRef}
           onChange={() => {
-              const batchQRCode = batchQRCoderef.current?.value.trim() || "";
-              if(batchQRCode.length==14){
-                fetchPlan(batchQRCode);
-                batchQRCoderef.current!.value = "";
-                    // barcodeRef.current!.value = ""}
-              }
+              // const batchQRCode = batchQRCoderef.current?.value.trim() || "";
+              // if(batchQRCode.length==14){
+              //   fetchPlan(batchQRCode);
+              //   batchQRCoderef.current!.value = "";
+              //       // barcodeRef.current!.value = ""}
+              // }
+            const individualQRCode = individualQRCodeRef.current?.value.trim() || "";
+            if (individualQRCode.length === 16) {
+                Process(individualQRCode);
+              individualQRCodeRef.current!.value = "";
+            }
           }}
           sx={{
+            position:'fixed',
+            top:75,
+            left:225,
             // position:"sticky",
             // mt:5,
-            mb: 5,
-            width:500,
+            // mb: 5,
+            // width:500,
             "& .MuiOutlinedInput-root": {
               "&.Mui-focused fieldset": {
                 borderColor: "#485e68",
@@ -278,7 +354,25 @@ useEffect(() => {
             },
           }}
         />
+        {individualBarCode!="" && (
+                  // setSuccessAlarm(null)
+                      <div
+                          style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 5,
+                              position:'fixed',
+                              top:80,
+                              right:80
+                              // marginTop:'150px'
+                          }}
+                      >
+                          <DoneAllIcon style={{ color: "green", fontSize: 18 }} />
+                          <p style={{ fontSize:18,fontWeight:'bold' }}>Successfully Brush In {individualBarCode}</p>
+                      </div>
 
+                  )
+              }
         {/* Stepper */}
         {stages.length>0 &&(
             <Stepper activeStep={activeStep} orientation="horizontal"
@@ -366,17 +460,22 @@ useEffect(() => {
             ✅ All steps completed - you're finished
           </Typography>
         )}
-        {scanned!=null&&(
+        {/* {scanned!=null&&( */}
+
               <TableContainer
                   component={Paper}
                   elevation={0}
                   sx={{
-                    // maxHeight: 200,          // vertical scrollbar
+                    maxHeight: 480,            // vertical scrollbar
                     overflowX: "auto",       // horizontal scrollbar
                     overflowY: "auto",
-                    border:'none',
+                
                     // marginLeft:'200px',
-                    maxWidth:1100
+                    left:225,
+                    maxWidth: 1000,
+                    border:"none",
+                    position:'fixed',
+                    top:140
                   }}
                >
                   <Table
@@ -388,17 +487,19 @@ useEffect(() => {
                   >
                   <TableHead>
                     <TableRow>
-                      <StyledTableCell>BatchQRCode</StyledTableCell>
+                       <StyledTableCell align="center">Individual Barcode</StyledTableCell>
                       <StyledTableCell align="center">MPO</StyledTableCell>
+                       <StyledTableCell align="center">Marker</StyledTableCell>
                       <StyledTableCell align="center">Buyer</StyledTableCell>
                       <StyledTableCell align="center">Style</StyledTableCell>
+                      <StyledTableCell align="center">Sales Order</StyledTableCell>
                       <StyledTableCell align="center">Size</StyledTableCell>
-                      <StyledTableCell align="center">Shades</StyledTableCell>
+                      <StyledTableCell align="center">Shade</StyledTableCell>
                       <StyledTableCell align="center">Color</StyledTableCell>
-                      <StyledTableCell align="center">Total Quantity</StyledTableCell>
+                      {/* <StyledTableCell align="center">Total Quantity</StyledTableCell> */}
                     </TableRow>
                   </TableHead>
-                  <TableBody>
+                  {/* <TableBody>
                       <StyledTableRow >
                         <StyledTableCell component="th" scope="row">
                           {scanned.BatchQRCode}
@@ -411,10 +512,43 @@ useEffect(() => {
                        <StyledTableCell align="center">{scanned.Color}</StyledTableCell>
                        <StyledTableCell align="center">{scanned.Total_Quantity-finalrejcnt}</StyledTableCell>
                       </StyledTableRow>
+                  </TableBody> */}
+                   <TableBody
+                    style={{
+                      position: "relative",
+                      // height: rowVirtualizer.getTotalSize()
+                    }}
+                  >
+                    {scannedIndividual.map((row) => (
+                      
+                        <StyledTableRow
+                          key={row.individual_barcode}
+                          style={{
+                            // position: "absolute",
+                            // top: 0,
+                            // transform: `translateY(${virtualRow.start}px)`,
+                            // width: "100%",
+                          }}
+                        >
+                           <StyledTableCell align="center">{row.individual_barcode}</StyledTableCell>
+                          <StyledTableCell align="center">
+                              {row.mpo}
+                          </StyledTableCell>
+                          <StyledTableCell align="center">
+                              {row.marker}
+                          </StyledTableCell>
+                          <StyledTableCell align="center">{row.buyer}</StyledTableCell>
+                          <StyledTableCell align="center">{row.style}</StyledTableCell>
+                          <StyledTableCell align="center">{row.so}</StyledTableCell>
+                          <StyledTableCell align="center">{row.size}</StyledTableCell>
+                          <StyledTableCell align="center">{row.shade}</StyledTableCell>
+                          <StyledTableCell align="center">{row.color}</StyledTableCell>
+                        </StyledTableRow>
+                      ))}
                   </TableBody>
                 </Table>
             </TableContainer>
-        )}
+        {/* )} */}
     </Box>
   );
 }
