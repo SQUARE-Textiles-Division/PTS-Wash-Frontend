@@ -283,6 +283,9 @@ useEffect(() => {
           else if(error.response.data.stage){
               setErrorLog(error.response.data.stage);
             }
+            else if(error.response.data.stage){
+              setErrorLog(error.response.data.stage);
+            }
         }
 
       )

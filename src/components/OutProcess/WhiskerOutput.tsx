@@ -279,6 +279,9 @@ export default function WhiskerOutput() {
             else if(error.response.data.garment_unit){
               setErrorLog(error.response.data.garment_unit);
             }
+            else if(error.response.data.stage){
+              setErrorLog(error.response.data.stage);
+            }
           }
   
         )
