@@ -111,7 +111,9 @@ export default function ReceivedBundles({ rows }: Props) {
           }}
         >
         <TableHead> 
-          <TableRow component="div">
+          <TableRow 
+          // component="div"
+          >
             <StyledTableCell>MPO</StyledTableCell>
             <StyledTableCell align="center">Buyer</StyledTableCell>
             <StyledTableCell align="center">Style</StyledTableCell>
@@ -128,7 +130,7 @@ export default function ReceivedBundles({ rows }: Props) {
           </TableRow>
         </TableHead>
         <TableBody
-          component="div"
+          // component="div"
           style={{
             position: "relative",
             height: rowVirtualizer.getTotalSize()
@@ -139,7 +141,7 @@ export default function ReceivedBundles({ rows }: Props) {
 
             return (
               <StyledTableRow
-                component="div" 
+                // component="div" 
                 key={row.individual_barcode}
                 style={{
                   // position: "absolute",

@@ -106,8 +106,17 @@ export default function WashReceive({items, setItems}: Props){
                     }
                 );
             },
-            (error) => {
-                setSewingError(true)
+            (error:any) => {
+                if (error instanceof Error && error.message === "Network Error") {
+                    console.log("Network Error");
+                    setNetworkError("Network Error")
+                    setShowErrorPopup(true);
+                }
+                            
+                else{
+                    setSewingError(true)
+                }       
+                
                 console.error("Error in first API:", error);
             }
         );

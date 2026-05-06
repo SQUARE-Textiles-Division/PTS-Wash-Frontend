@@ -70,7 +70,7 @@ export default function TagIn() {
   const [scanned,setScanned]=useState<any>()
   const [finalrejcnt,setFinalRejCnt]=useState<number>(0)
   const [scannedIndividual,setScannedIndividual]=useState<any[]>([])
-    const [individualBarCode,setIndividualBarCode]=useState<string>("")
+  const [individualBarCode,setIndividualBarCode]=useState<string>("")
   // console.log(completed)
   // cos
   useEffect(() => {
