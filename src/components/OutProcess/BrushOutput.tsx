@@ -27,6 +27,7 @@ import type BatchStageHistory from '../../TypeAnnotations/BatchStageHistory';
 import type RejectionReason from '../../TypeAnnotations/RejectionReason';
 import type IndividualInOut from '../../TypeAnnotations/IndividualInOut';
 import type IndividualInfo from '../../TypeAnnotations/IndividualInfo';
+import success from '../../assets/success.mp3';
 // import { postData } from './genericApiService';
 // import Typography from '@mui/material/Typography';
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
@@ -57,6 +58,11 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
   },
 }));
 export default function BrushOutput() {
+  const successAudio =new Audio(success)
+  const setAlarm = () => {
+      successAudio.currentTime = 0; // restart if already playing
+      successAudio.play();
+  };
   const [stages,setStages]=useState<string[]>([])
   const [activeStep, setActiveStep] = React.useState(0); // step that is currently clickable
   const [completed, setCompleted] = React.useState<boolean[]>(stages.map(() => false)); 
@@ -259,6 +265,7 @@ export default function BrushOutput() {
                 ]);
               //  console.log('scannedIndividual',scannedIndividual)
               setIndividualBarCode(infoResult.individual_barcode)
+              setAlarm();
   
               }
             )
@@ -539,7 +546,7 @@ export default function BrushOutput() {
                   component={Paper}
                   elevation={0}
                   sx={{
-                    // maxHeight: 200,          // vertical scrollbar
+                    maxHeight: 480,          // vertical scrollbar
                     overflowX: "auto",       // horizontal scrollbar
                     overflowY: "auto",
                     // marginLeft:'200px',
