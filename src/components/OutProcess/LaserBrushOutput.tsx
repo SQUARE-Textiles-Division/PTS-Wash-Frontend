@@ -300,10 +300,10 @@ export default function LaserBrushOutput() {
               //       // barcodeRef.current!.value = ""}
               // }
                const individualQRCode = individualQRCodeRef.current?.value.trim() || "";
-            if (individualQRCode.length === 16) {
-                Process(individualQRCode);
-              individualQRCodeRef.current!.value = "";
-            }
+              if (individualQRCode.length === 16) {
+                  Process(individualQRCode);
+                individualQRCodeRef.current!.value = "";
+              }
           }}
           sx={{
             position:'fixed',
