@@ -474,11 +474,16 @@ export default function LaserWhiskerIn() {
                   component={Paper}
                   elevation={0}
                   sx={{
-                    // maxHeight: 200,          // vertical scrollbar
+                    maxHeight: 480,            // vertical scrollbar
                     overflowX: "auto",       // horizontal scrollbar
                     overflowY: "auto",
+                
                     // marginLeft:'200px',
-                    maxWidth:1100
+                    left:225,
+                    maxWidth: 1000,
+                    border:"none",
+                    position:'fixed',
+                    top:140
                   }}
                >
                   <Table

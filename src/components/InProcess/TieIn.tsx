@@ -23,23 +23,33 @@ import { tbCellColor, tbRowColor } from '../Colors/Colors';
 import { ip } from '../../ip';
 import type RejectionReason from '../../TypeAnnotations/RejectionReason';
 import type BatchStageHistory from '../../TypeAnnotations/BatchStageHistory';
+import type IndividualInOut from '../../TypeAnnotations/IndividualInOut';
+import type IndividualInfo from '../../TypeAnnotations/IndividualInfo';
+import success from "../../assets/success.mp3"
 // import { postData } from './genericApiService';
 // import Typography from '@mui/material/Typography';
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
     // backgroundColor: theme.palette.common.black,
+    // backgroundColor: '#485e68',
     backgroundColor: tbCellColor,
-    color: tbRowColor
+    lineHeight:0.5,
+    color: "white",
   },
   [`&.${tableCellClasses.body}`]: {
     fontSize: 14,
+    lineHeight:0.6,
+    padding: '4px 6px',
+    
+    // paddingRight:'50px'
   },
 }));
 
 const StyledTableRow = styled(TableRow)(({ theme }) => ({
+  // height: '5px', 
   '&:nth-of-type(odd)': {
-    backgroundColor: theme.palette.action.hover,
+    backgroundColor: tbRowColor
   },
   // hide last border
   '&:last-child td, &:last-child th': {

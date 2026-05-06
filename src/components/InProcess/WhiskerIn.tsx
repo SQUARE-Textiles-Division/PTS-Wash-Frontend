@@ -68,8 +68,8 @@ export default function LaserWhiskerIn() {
   const [errorLog,setErrorLog]=useState<string>('')
   const [scanned,setScanned]=useState<any>()
   const [finalrejcnt,setFinalRejCnt]=useState<number>(0)
-   const [scannedIndividual,setScannedIndividual]=useState<any[]>([])
-    const [individualBarCode,setIndividualBarCode]=useState<string>("")
+  const [scannedIndividual,setScannedIndividual]=useState<any[]>([])
+  const [individualBarCode,setIndividualBarCode]=useState<string>("")
   // console.log(completed)
   // cos
 useEffect(() => {
@@ -267,58 +267,58 @@ useEffect(() => {
       }
   };
   const individualQRCodeRef=useRef<HTMLInputElement>(null);
-    const Process = (individualQRCode:string) => {
-        if (!individualQRCode) {
-          console.warn("No Individual QRCode entered");
-          return;
-        }
-        // getData<IndividualInfo>(
-  
-        // )
-        // postData<>
-        postData<IndividualInOut>(
-          `dry-process/tracking-histories/`,
-          ip,
-          {
-            garment_unit: individualQRCode,
-            stage: "whisker",
-            action: "in", //in or out or rejected
-          },
-          (result: IndividualInOut) => {
-            console.log("Success:", result);
-            // getData<IndividualInfo>(
-            getData<IndividualInfo>(
-              `common/garment-units/${individualQRCode}/`,
-              ip,
-              {},
-              {},
-              (infoResult: IndividualInfo) => {
-                console.log("Garment Info:", infoResult);
-                setScannedIndividual((prev) => [
-                  infoResult,
-                  ...prev,
-                ]);
-              //  console.log('scannedIndividual',scannedIndividual)
-              setIndividualBarCode(infoResult.individual_barcode)
-              setAlarm();
-              }
-            )
-  
-            // Optionally, you can update the UI or state here based on the result
-          },
-          (error: any) => {
-            console.error("Error:", error.response.data);
-            // setErrorLog(error.response.data[0]);
-            if(error.response.data.non_field_errors){
-                setErrorLog(error.response.data.non_field_errors[0]);
+  const Process = (individualQRCode:string) => {
+      if (!individualQRCode) {
+        console.warn("No Individual QRCode entered");
+        return;
+      }
+      // getData<IndividualInfo>(
+
+      // )
+      // postData<>
+      postData<IndividualInOut>(
+        `dry-process/tracking-histories/`,
+        ip,
+        {
+          garment_unit: individualQRCode,
+          stage: "whisker",
+          action: "in", //in or out or rejected
+        },
+        (result: IndividualInOut) => {
+          console.log("Success:", result);
+          // getData<IndividualInfo>(
+          getData<IndividualInfo>(
+            `common/garment-units/${individualQRCode}/`,
+            ip,
+            {},
+            {},
+            (infoResult: IndividualInfo) => {
+              console.log("Garment Info:", infoResult);
+              setScannedIndividual((prev) => [
+                infoResult,
+                ...prev,
+              ]);
+            //  console.log('scannedIndividual',scannedIndividual)
+            setIndividualBarCode(infoResult.individual_barcode)
+            setAlarm();
             }
-            else if(error.response.data.garment_unit){
-              setErrorLog(error.response.data.garment_unit);
-            }
+          )
+
+          // Optionally, you can update the UI or state here based on the result
+        },
+        (error: any) => {
+          console.error("Error:", error.response.data);
+          // setErrorLog(error.response.data[0]);
+          if(error.response.data.non_field_errors){
+              setErrorLog(error.response.data.non_field_errors[0]);
           }
-  
-        )
-    }
+          else if(error.response.data.garment_unit){
+            setErrorLog(error.response.data.garment_unit);
+          }
+        }
+
+      )
+  }
   return (
       <Box sx={{ width: '100%', mx: 'auto' }}>
         {/* TextField for QR Scan */}
@@ -472,12 +472,16 @@ useEffect(() => {
               <TableContainer
                   component={Paper}
                   sx={{
-                    // maxHeight: 200,          // vertical scrollbar
+                   maxHeight: 480,            // vertical scrollbar
                     overflowX: "auto",       // horizontal scrollbar
                     overflowY: "auto",
-                    border:'none',
+                
                     // marginLeft:'200px',
-                    maxWidth:1100
+                    left:225,
+                    maxWidth: 1000,
+                    border:"none",
+                    position:'fixed',
+                    top:140
                   }}
                >
                   <Table
