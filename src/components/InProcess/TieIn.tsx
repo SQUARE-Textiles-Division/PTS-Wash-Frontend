@@ -59,7 +59,7 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 }));
 
 export default function TieIn() {
-   const successAudio = new Audio(success);
+  const successAudio = new Audio(success);
   const setAlarm = () => {
       successAudio.currentTime = 0; // restart if already playing
       successAudio.play();
@@ -71,7 +71,7 @@ export default function TieIn() {
   const [scanned,setScanned]=useState<any>()
   const [finalrejcnt,setFinalRejCnt]=useState<number>(0)
   const [scannedIndividual,setScannedIndividual]=useState<any[]>([])
-    const [individualBarCode,setIndividualBarCode]=useState<string>("")
+  const [individualBarCode,setIndividualBarCode]=useState<string>("")
   // console.log(completed)
   // cos
   useEffect(() => {
@@ -262,58 +262,58 @@ export default function TieIn() {
       }
   };
   const individualQRCodeRef=useRef<HTMLInputElement>(null);
-    const Process = (individualQRCode:string) => {
-        if (!individualQRCode) {
-          console.warn("No Individual QRCode entered");
-          return;
-        }
-        // getData<IndividualInfo>(
-  
-        // )
-        // postData<>
-        postData<IndividualInOut>(
-          `dry-process/tracking-histories/`,
-          ip,
-          {
-            garment_unit: individualQRCode,
-            stage: "tie",
-            action: "in", //in or out or rejected
-          },
-          (result: IndividualInOut) => {
-            console.log("Success:", result);
-            // getData<IndividualInfo>(
-            getData<IndividualInfo>(
-              `common/garment-units/${individualQRCode}/`,
-              ip,
-              {},
-              {},
-              (infoResult: IndividualInfo) => {
-                console.log("Garment Info:", infoResult);
-                setScannedIndividual((prev) => [
-                  infoResult,
-                  ...prev,
-                ]);
-              //  console.log('scannedIndividual',scannedIndividual)
-              setIndividualBarCode(infoResult.individual_barcode)
-              setAlarm();
-              }
-            )
-  
-            // Optionally, you can update the UI or state here based on the result
-          },
-          (error: any) => {
-            console.error("Error:", error.response.data);
-            // setErrorLog(error.response.data[0]);
-            if(error.response.data.non_field_errors){
-                setErrorLog(error.response.data.non_field_errors[0]);
+  const Process = (individualQRCode:string) => {
+      if (!individualQRCode) {
+        console.warn("No Individual QRCode entered");
+        return;
+      }
+      // getData<IndividualInfo>(
+
+      // )
+      // postData<>
+      postData<IndividualInOut>(
+        `dry-process/tracking-histories/`,
+        ip,
+        {
+          garment_unit: individualQRCode,
+          stage: "tie",
+          action: "in", //in or out or rejected
+        },
+        (result: IndividualInOut) => {
+          console.log("Success:", result);
+          // getData<IndividualInfo>(
+          getData<IndividualInfo>(
+            `common/garment-units/${individualQRCode}/`,
+            ip,
+            {},
+            {},
+            (infoResult: IndividualInfo) => {
+              console.log("Garment Info:", infoResult);
+              setScannedIndividual((prev) => [
+                infoResult,
+                ...prev,
+              ]);
+            //  console.log('scannedIndividual',scannedIndividual)
+            setIndividualBarCode(infoResult.individual_barcode)
+            setAlarm();
             }
-            else if(error.response.data.garment_unit){
-              setErrorLog(error.response.data.garment_unit);
-            }
+          )
+
+          // Optionally, you can update the UI or state here based on the result
+        },
+        (error: any) => {
+          console.error("Error:", error.response.data);
+          // setErrorLog(error.response.data[0]);
+          if(error.response.data.non_field_errors){
+              setErrorLog(error.response.data.non_field_errors[0]);
           }
-  
-        )
-    }
+          else if(error.response.data.garment_unit){
+            setErrorLog(error.response.data.garment_unit);
+          }
+        }
+
+      )
+  }
   return (
       <Box sx={{ width: '100%', mx: 'auto' }}>
         {/* TextField for QR Scan */}
@@ -322,6 +322,7 @@ export default function TieIn() {
           // fullWidth
           autoFocus
           // inputRef={batchQRCoderef}
+          inputRef={individualQRCodeRef}
           onChange={() => {
               // const batchQRCode = batchQRCoderef.current?.value.trim() || "";
               // if(batchQRCode.length==14){
