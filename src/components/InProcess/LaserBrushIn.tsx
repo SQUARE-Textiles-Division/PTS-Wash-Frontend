@@ -376,7 +376,7 @@ useEffect(() => {
                           }}
                       >
                           <DoneAllIcon style={{ color: "green", fontSize: 18 }} />
-                          <p style={{ fontSize:18,fontWeight:'bold' }}>Successfully Brush In {individualBarCode}</p>
+                          <p style={{ fontSize:18,fontWeight:'bold' }}>Successfully Laser Brush In {individualBarCode}</p>
                       </div>
 
                   )

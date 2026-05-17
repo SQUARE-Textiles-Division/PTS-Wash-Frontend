@@ -338,7 +338,7 @@ export default function TieOutput() {
                               }}
                           >
                               <DoneAllIcon style={{ color: "green", fontSize: 18 }} />
-                              <p style={{ fontSize:18,fontWeight:'bold' }}>Successfully Brush Completed {individualBarCode}</p>
+                              <p style={{ fontSize:18,fontWeight:'bold' }}>Successfully Tie Completed {individualBarCode}</p>
                           </div>
 
                       )

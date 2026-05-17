@@ -79,11 +79,11 @@ export default function Navbar() {
 
     { primary: "Whisker In", to: "/whiskerin" },
     { primary: "Whisker QC", to: "/whiskerqc" },
-    { primary: "Whisker Output", to: "/whiskeroutput" },
+    { primary: "Whisker QC Pass", to: "/whiskeroutput" },
 
     { primary: "Laser Whisker In", to: "/laserwhiskerin" },
     {primary:"Laser Whisker QC", to:"/laserwhiskerqc"},
-    { primary: "Laser Whisker Output", to: "/laserwhiskeroutput" },
+    { primary: "Laser Whisker QC Pass", to: "/laserwhiskeroutput" },
     
     { primary: "Brush In", to: "/brushin" },
     {primary: "Brush QC", to: "/brushqc" },
@@ -91,19 +91,19 @@ export default function Navbar() {
 
     { primary: "Laser Brush In", to: "/laserbrushin" },
     {primary:"Laser Brush QC", to:"/laserbrushqc"},
-    { primary: "Laser Brush Output", to: "/laserbrushoutput" },
+    { primary: "Laser Brush QC Pass", to: "/laserbrushoutput" },
 
     { primary: "Wrinkle In", to: "/wrinklein" },
     { primary: "Wrinkle QC", to: "/wrinkleqc" },
-    { primary: "Wrinkle Output", to: "/wrinkleoutput" },
+    { primary: "Wrinkle QC Pass", to: "/wrinkleoutput" },
 
     { primary: "Tag In", to: "/tagin" },
     { primary: "Tag QC", to: "/tagqc" },
-    { primary: "Tag Output", to: "/tagoutput" },
+    { primary: "Tag QC Pass", to: "/tagoutput" },
     
     { primary: "Tie Input", to: "/tiein" },
     { primary: "Tie QC", to: "/tieqc" },
-    { primary: "Tie Output", to: "/tieoutput" },
+    { primary: "Tie QC Pass", to: "/tieoutput" },
     
   ];
 

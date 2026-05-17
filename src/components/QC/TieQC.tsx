@@ -70,6 +70,7 @@ export default function TieQC() {
       successAudio.currentTime = 0; // restart if already playing
       successAudio.play();
   };
+  const [suceessSaved,setSuccessSaved]=useState<boolean>(false)
   const individualBarcodeRef = React.useRef<HTMLInputElement>(null);
   const rejectReasons=WhiskerRejectReasons;
    const [rows, setRows] = React.useState<any[]>([]);
@@ -133,7 +134,37 @@ export default function TieQC() {
         onChange={() => {
           const inv = individualBarcodeRef.current?.value.trim() || "";
           if (inv.length == 16) {
-            setinvbarcode(inv);
+            // setinvbarcode(inv);
+             getData<IndividualInfo>(
+              `common/garment-units/${inv}/`,
+              ip,
+              {},
+              {},
+              (infores:IndividualInfo)=>{
+                  console.log("Garment Info:", infores);
+                //  let temp={
+                //   infores
+                //  }
+                  if(infores.status!='tie_in'){
+                    setRejectError("Not Allowed")
+                    
+                  }
+                  else{
+                      setinvbarcode(inv);
+                      let temp={
+                        rejected_at:'tie',
+                        ...infores
+                      }
+                      setRows(prevRows => [temp, ...prevRows]);
+
+                  }
+                  
+              },
+              (error:any)=>{
+                  setRejectError(error.response.data.detail)
+              }
+
+            )
             setDelBarCode("")
             setRejectField(true);
             individualBarcodeRef.current!.value = "";
@@ -182,7 +213,12 @@ export default function TieQC() {
               label="Reject Reason"
               onChange={(e: SelectChangeEvent) => {const selectedActual = e.target.value;
                   setReason(selectedActual);
-
+                  setRows(prevRows =>
+                    prevRows.map(row => ({
+                      ...row,
+                      reason: selectedActual
+                    }))
+                  );
                   // Find the display name
                   const selectedItem = rejectReasons.find((item) => item.actual === selectedActual);
                   setReasonDisplay(selectedItem?.display || "");
@@ -281,8 +317,48 @@ export default function TieQC() {
                               <StyledTableCell align="center">{row.size}</StyledTableCell>
                               <StyledTableCell align="center">{row.shade}</StyledTableCell>
                               <StyledTableCell align="center">{row.color}</StyledTableCell>
-                              <StyledTableCell align="center"><b>{row.rejected_at.toUpperCase()}</b></StyledTableCell>
-                              <StyledTableCell align="center"><b style={{color:"red"}}>{row.reason.toUpperCase()}</b></StyledTableCell>
+                              <StyledTableCell align="center"><b>{row.rejected_at?.toUpperCase?.()}</b></StyledTableCell>
+                              {/* <StyledTableCell align="center"><b style={{color:"red"}}>{row.reason.toUpperCase()}</b></StyledTableCell> */}
+                              <StyledTableCell align="center">
+                                <FormControl
+                                  sx={{
+                                    width: 150,
+                                    "& .MuiInputBase-root": {
+                                      height: 23
+                                    }
+                                  }}
+                                  size="small"
+                                >
+                                  <Select
+                                    value={row.reason || ""}
+                                    displayEmpty
+                                    onChange={(e: SelectChangeEvent) => {
+                                      const selectedActual = e.target.value;
+
+                                      setRows(prevRows =>
+                                        prevRows.map(r =>
+                                          r.individual_barcode=== row.individual_barcode
+                                            ? {
+                                                ...r,
+                                                reason: selectedActual
+                                              }
+                                            : r
+                                        )
+                                      );
+                                    }}
+                                  >
+                                    <MenuItem value="">
+                                      <em>Select Reason</em>
+                                    </MenuItem>
+
+                                    {rejectReasons.map((item) => (
+                                      <MenuItem key={item.actual} value={item.actual}>
+                                        {item.display}
+                                      </MenuItem>
+                                    ))}
+                                  </Select>
+                                </FormControl>
+                              </StyledTableCell>
                               <StyledTableCell align="center">
                                 <DeleteForeverIcon
                                     color='error' 
@@ -383,36 +459,36 @@ export default function TieQC() {
 
             <Box sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}>
               <Button sx={{ background: "blue", color: "white" }} onClick={() => {
-                postData<IndividualInOut>(
-                    `dry-process/tracking-histories/`,
+                 const rowIndandReason=[]
+                  for(const row of rows){
+                    // console.log(row.reason)
+                    rowIndandReason.push({
+                      "individual_barcode":row.individual_barcode,
+                      "rejection_reason":row.reason
+                    })
+                  }
+                  console.log(rowIndandReason)
+  
+                  postData<IndividualInOut[]>(
+                    // `dry-process/tracking-histories/`,
+                      `dry-process/rejections/`,
                     ip,
                       {
-                      garment_unit: invbarcode,
+                      // garment_unit: invbarcode,
+                      garment_units:rowIndandReason,
                       stage: "tie",
-                      action: "rejected", //in or out or rejected
-                      rejection_reason:reason
+                      // action: "rejected", //in or out or rejected
+                      // rejection_reason:reason
                     },
-                    (data:IndividualInOut)=>{
+                    (data:IndividualInOut[])=>{
                       console.log("Rejection recorded:", data);
                       setAlarm();
                       setRejectPop(false);
                       setReason("");
                       setReasonDisplay("");
-                      getData<IndividualInfo>(
-                        `common/garment-units/${invbarcode}/`,
-                        ip,
-                        {},
-                        { },
-                        (rejectedData: IndividualInfo) => {
-                            let temp = {
-                              rejected_at: data.stage,
-                              reason: data.rejection_reason,
-                              ...rejectedData
-                            };
-  
-                            setRows(prevRows => [temp, ...prevRows]);
-                        }
-                      );
+                      setRows([])
+                      setSuccessSaved(true)
+                      
                     },
                       (error: any) => {
                       console.error("Error recording rejection:", error);
@@ -420,14 +496,60 @@ export default function TieQC() {
                       const errorMsg =
                         error?.response?.data?.individual_barcode?.[0] ||
                         error?.response?.data?.[0] ||
-                        "Already Rejected";
+                        "Something went wrong";
   
                       setRejectError(errorMsg);
                       setReason("");
                       setReasonDisplay("");
+                      setRows([])
                       setRejectPop(false);
                     }
                   )
+                // postData<IndividualInOut>(
+                //     `dry-process/tracking-histories/`,
+                //     ip,
+                //       {
+                //       garment_unit: invbarcode,
+                //       stage: "tie",
+                //       action: "rejected", //in or out or rejected
+                //       rejection_reason:reason
+                //     },
+                //     (data:IndividualInOut)=>{
+                //       console.log("Rejection recorded:", data);
+                //       setAlarm();
+                //       setRejectPop(false);
+                //       setReason("");
+                //       setReasonDisplay("");
+                //       getData<IndividualInfo>(
+                //         `common/garment-units/${invbarcode}/`,
+                //         ip,
+                //         {},
+                //         { },
+                //         (rejectedData: IndividualInfo) => {
+                //             let temp = {
+                //               rejected_at: data.stage,
+                //               reason: data.rejection_reason,
+                //               ...rejectedData
+                //             };
+  
+                //             setRows(prevRows => [temp, ...prevRows]);
+                //         }
+                //       );
+                //     },
+                //       (error: any) => {
+                //       console.error("Error recording rejection:", error);
+  
+                //       const errorMsg =
+                //         error?.response?.data?.individual_barcode?.[0] ||
+                //         error?.response?.data?.[0] ||
+                //         "Something went wrong";
+  
+                //       setRejectError(errorMsg);
+                //       setReason("");
+                //       setReasonDisplay("");
+                //       setRejectPop(false);
+                //     }
+                //   )
                 // postData<RejectionReason>(
                 //   "productions/rejections/",
                 //   ip,
@@ -493,6 +615,38 @@ export default function TieQC() {
           </Box>
         </Box>
       </Modal>
+
+        <Modal open={suceessSaved} onClose={() => setSuccessSaved(false)}>
+                <Box
+                    sx={{
+                    position: "fixed", // ← changed from absolute
+                    top: 0,
+                    left: 0,
+                    width: "100vw",
+                    height: "100vh",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    bgcolor: "rgba(0, 0, 0, 0.07)", // dark overlay
+                    }}
+                >
+                    <Box
+                    sx={{
+                        bgcolor: "white", // light red background for error
+                        p: 4,
+                        borderRadius: 2,
+                        color: "green", // red text for error
+                        width: 400,
+                    }}
+                    >
+                    <Typography variant="h6">Sucessfully Saved</Typography>
+                    {/* <Typography>Already batches are allocated according to this plan */}
+                    {/* </Typography> */}
+                    <Button sx={{ mt: 2 }} onClick={() => setSuccessSaved(false)}>Close</Button>
+                    </Box>
+                </Box>
+            </Modal>
+
       <Modal open={rejectError!=""} onClose={() => setRejectError("")}>
               <Box
                   sx={{
@@ -504,15 +658,15 @@ export default function TieQC() {
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  bgcolor: "rgba(0,0,0,0.5)", // dark overlay
+                  // bgcolor: "rgba(0,0,0,0.5)", // dark overlay
                   }}
               >
                   <Box
                   sx={{
-                      bgcolor: "rgba(202, 29, 29, 0.5)", // light red background for error
+                      bgcolor: "white", // light red background for error
                       p: 4,
                       borderRadius: 2,
-                      color: "white", // red text for error
+                      color: "red", // red text for error
                       width: 400,
                   }}
                   >

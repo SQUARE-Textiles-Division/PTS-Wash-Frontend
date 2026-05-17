@@ -339,7 +339,7 @@ export default function LaserWhiskerOutput() {
                                       }}
                                   >
                                       <DoneAllIcon style={{ color: "green", fontSize: 18 }} />
-                                      <p style={{ fontSize:18,fontWeight:'bold' }}>Successfully Brush Completed {individualBarCode}</p>
+                                      <p style={{ fontSize:18,fontWeight:'bold' }}>Successfully Laser Whisker Completed {individualBarCode}</p>
                                   </div>
         
                               )

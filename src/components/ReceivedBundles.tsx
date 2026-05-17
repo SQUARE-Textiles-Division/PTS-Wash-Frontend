@@ -129,7 +129,7 @@ export default function ReceivedBundles({ rows }: Props) {
             {/* <StyledTableCell align="center">Status</StyledTableCell> */}
           </TableRow>
         </TableHead>
-        <TableBody
+        {/* <TableBody
           // component="div"
           style={{
             position: "relative",
@@ -157,48 +157,37 @@ export default function ReceivedBundles({ rows }: Props) {
                 <StyledTableCell align="center">{row.style}</StyledTableCell>
                 <StyledTableCell align="center">{row.so}</StyledTableCell>
                 {/* <StyledTableCell align="center">{row.bundle_barcode}</StyledTableCell> */}
-                 <StyledTableCell align="center">{row.individual_barcode}</StyledTableCell>
+                 {/* <StyledTableCell align="center">{row.individual_barcode}</StyledTableCell>
                 {/* <StyledTableCell align="center">{row.bundle_no}</StyledTableCell> */}
-                <StyledTableCell align="center">{row.marker}</StyledTableCell>
-                <StyledTableCell align="center">{row.size}</StyledTableCell>
-                <StyledTableCell align="center">{row.shade}</StyledTableCell>
-                <StyledTableCell align="center">{row.color}</StyledTableCell>
+                {/* <StyledTableCell align="center">{row.marker}</StyledTableCell> */}
+                {/* <StyledTableCell align="center">{row.size}</StyledTableCell> */}
+                {/* <StyledTableCell align="center">{row.shade}</StyledTableCell> */}
+                {/* <StyledTableCell align="center">{row.color}</StyledTableCell>  */}
                 {/* <StyledTableCell align="center">{row.quantity}</StyledTableCell> */}
-              </StyledTableRow>
-            );
-          })}
-        </TableBody>
-        {/* <TableBody>
+              {/* </StyledTableRow> */}
+            {/* ); */}
+          {/* })} */}
+        {/* </TableBody> */}
+        <TableBody>
           {rows.map((row) => (
-            <StyledTableRow key={`${row.mpo}-${row.bundle_no}-${row.size}-${row.shade}-${row.color}-${row.quantity}`}>
+            <StyledTableRow key={`${row.individual_barcode}`}>
               <StyledTableCell component="th" scope="row">
                 {row.mpo}
               </StyledTableCell>
               <StyledTableCell align="center">{row.buyer}</StyledTableCell>
               <StyledTableCell align="center">{row.style}</StyledTableCell>
               <StyledTableCell align="center">{row.so}</StyledTableCell>
-              <StyledTableCell align="center">{row.bundle_barcode}</StyledTableCell>
-              <StyledTableCell align="center">{row.bundle_no}</StyledTableCell>
+              <StyledTableCell align="center">{row.individual_barcode}</StyledTableCell>
               
               <StyledTableCell align="center">{row.marker}</StyledTableCell>
               <StyledTableCell align="center">{row.size}</StyledTableCell>
               <StyledTableCell align="center">{row.shade}</StyledTableCell>
               <StyledTableCell align="center">{row.color}</StyledTableCell>
-              <StyledTableCell align="center">{row.quantity}</StyledTableCell>
-                <StyledTableCell align="center">{row.status}</StyledTableCell>
-           </StyledTableRow> */}
-          {/* ))}
-        </TableBody>  */}
-         {/* 🔥 Virtualized Body */}
-        {/* <List
-          height={420}              // table height - header
-          itemCount={rows.length}
-          itemSize={40}             // MUST match row height
-          width="100%"
-          itemData={rows}
-        >
-          {Row}
-        </List> */}
+
+   
+           </StyledTableRow>)
+          )}
+          </TableBody>
       </Table>
     </TableContainer>
   );
