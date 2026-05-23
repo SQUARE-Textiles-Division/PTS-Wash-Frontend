@@ -13,6 +13,7 @@ import { tbCellColor, tbRowColor } from "../Colors/Colors";
 import type { Machine } from "../../TypeAnnotations/Machine";
 import type { ProcessFirstWash } from "../../TypeAnnotations/ProcessFirstWash";
 import { all } from "axios";
+import NumberSpinner from "../NumberSpinner";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -50,6 +51,7 @@ export default function DryerTumbleIn(){
     const [processError,setProcessError]=useState("");
     const [hourError,setHourError]=useState(false)
     const [minError,setMinError]=useState(false)
+    const [hourminError,setHourMinError]=useState(false)
     const[showErrorPopup,setShowErrorPopup]=useState(false);
     const batchqrcoderef=useRef<HTMLInputElement>(null);
     const [machine,setMachine]=useState(0);
@@ -89,10 +91,10 @@ export default function DryerTumbleIn(){
         //     console.warn("No Machine Selected")
         // }
         // --- First API call (washing scan) ---
-        const str=batchcode
-        const index = str.indexOf("W1");      // find position of ":"
-        let batchId = str.substring(index + 2);
-        const batchIdNum = parseInt(batchId, 10);
+        // const str=batchcode
+        // const index = str.indexOf("W1");      // find position of ":"
+        // let batchId = str.substring(index + 2);
+        const batchIdNum = batchcode;
         console.log(batchIdNum)
         const tempBatchDetail:any=[]
         let hourStr=''
@@ -132,9 +134,9 @@ export default function DryerTumbleIn(){
                         'Shade':result.batch.shade,
                         'Color':result.batch.color,
                         'Buyer':result.batch.buyer,
-                        'BatchNumber':result.batch.id,
+                        'BatchQRCode':result.batch.id,
                         'Quantity':result.batch.total_quantity,
-                        'Machine':result.machine.machine_number
+                        'Machine':result.machine
                     }
                 )
                 // for(const batchObj of sourceBatches){
@@ -202,9 +204,9 @@ export default function DryerTumbleIn(){
             (error:any)=>{
                 console.log(error.response.data)
                 let msg=""
-                for(const obj of error.response.data){
-                    msg+=obj;
-                }
+                Object.entries(error.response.data).forEach(([key, value]:any) => {
+                    msg+=value[0]
+                });
 
                 // if
 
@@ -300,7 +302,20 @@ export default function DryerTumbleIn(){
                             </Select>
                         </FormControl> */}
                         <FormControl fullWidth>
-                            <InputLabel id="demo-simple-select-label">Set Hour</InputLabel>
+                            <Typography variant="body2" >
+                                Set Hour
+                            </Typography>
+                            
+                            <NumberSpinner
+                                size="small"
+                                min={0}
+                                max={24}
+                                customSize={20}
+                                disabled={false}
+                                value={hour}
+                                onValueChange={(value:any) => setHour(value ?? 0)}
+                            />
+                            {/* <InputLabel id="demo-simple-select-label">Set Hour</InputLabel>
                             <Select
                             labelId="demo-simple-select-label"
                             id="demo-simple-select"
@@ -312,10 +327,23 @@ export default function DryerTumbleIn(){
                             {hours.map((hour) => (
                                 <MenuItem key={hour} value={hour}>{hour}</MenuItem>
                             ))}
-                            </Select>
+                            </Select> */}
                         </FormControl>
                         <FormControl fullWidth>
-                            <InputLabel id="demo-simple-select-label">Set Minute</InputLabel>
+
+                            <Typography variant="body2" >
+                                Set Minute
+                            </Typography>
+                                <NumberSpinner
+                                size="small"
+                                min={0}
+                                max={59}
+                                customSize={20}
+                                disabled={false}
+                                value={min}
+                                onValueChange={(value:any) => setMin(value ?? 0)}
+                            />
+                            {/* <InputLabel id="demo-simple-select-label">Set Minute</InputLabel>
                             <Select
                             labelId="demo-simple-select-label"
                             id="demo-simple-select"
@@ -327,7 +355,7 @@ export default function DryerTumbleIn(){
                             {mins.map((min) => (
                                 <MenuItem key={min} value={min}>{min}</MenuItem>
                             ))}
-                            </Select>
+                            </Select> */}
                         </FormControl>
                     </Box>
                 <TextField
@@ -346,16 +374,21 @@ export default function DryerTumbleIn(){
                     //     batchqrcoderef.current!.value = "";
                     //     return
                     // }
-                    if(hour==0){
-                        setHourError(true)
+                    if(hour==0 && min==0){
+                        setHourMinError(true)
                          batchqrcoderef.current!.value = "";
                         return
                     }
-                     if(min==0){
-                        setMinError(true)
-                        batchqrcoderef.current!.value = "";
-                        return
-                    }
+                    // if(hour==0){
+                    //     setHourError(true)
+                    //      batchqrcoderef.current!.value = "";
+                    //     return
+                    // }
+                    //  if(min==0){
+                    //     setMinError(true)
+                    //     batchqrcoderef.current!.value = "";
+                    //     return
+                    // }
                     const batchcode = batchqrcoderef.current?.value.trim() || "";
                     if(batchcode.length>=15){
                         fetchData(batchcode,machine);
@@ -427,7 +460,7 @@ export default function DryerTumbleIn(){
                     <TableHead>
                       <TableRow>
                         {/* <StyledTableCell align="center">MPO</StyledTableCell> */}
-                        <StyledTableCell align="center">BatchNumber(First Wash)</StyledTableCell>
+                        <StyledTableCell align="center">BatchQRCode(First Wash)</StyledTableCell>
                         <StyledTableCell align="center">Buyer</StyledTableCell>
                         {/* <StyledTableCell align="center">Style</StyledTableCell> */}
                         {/* <StyledTableCell align="center">Sales Order</StyledTableCell> */}
@@ -447,10 +480,10 @@ export default function DryerTumbleIn(){
                       {batchdetails
                             .map((row) => (
                                 <StyledTableRow
-                                key={`${row.Buyer}-${row.Color}-${row.Shade}-${row.BatchNumber}-${row.Quantity}`}
+                                key={`${row.Buyer}-${row.Color}-${row.Shade}-${row.BatchQRCode}-${row.Quantity}`}
                                 >
                                 {/* <StyledTableCell align="center">{row.MPO}</StyledTableCell> */}
-                                <StyledTableCell align="center">{row.BatchNumber}</StyledTableCell>
+                                <StyledTableCell align="center">{row.BatchQRCode}</StyledTableCell>
                                 <StyledTableCell align="center">{row.Buyer}</StyledTableCell>
                                 {/* <StyledTableCell align="center">{row.Style}</StyledTableCell> */}
                                 {/* <StyledTableCell align="center">{row.SO}</StyledTableCell> */}
@@ -459,7 +492,7 @@ export default function DryerTumbleIn(){
                                 {/* <StyledTableCell align="center">{row.BatchQRCode}</StyledTableCell> */}
                                 
                                 <StyledTableCell align="center">{row.Shade}</StyledTableCell>  
-                                 <StyledTableCell align="center">4</StyledTableCell>  
+                                 <StyledTableCell align="center">{row.Machine}</StyledTableCell>  
                                 <StyledTableCell align="center">{row.Quantity}</StyledTableCell>
                                 </StyledTableRow>
                             ))}
@@ -567,6 +600,36 @@ export default function DryerTumbleIn(){
                         </Box>
                     </Box>
                 </Modal>
+                <Modal open={hourminError} onClose={() => setShowPopup(false)}>
+                    <Box
+                        sx={{
+                        position: "fixed", // ← changed from absolute
+                        top: 0,
+                        left: 0,
+                        width: "100vw",
+                        height: "100vh",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        // bgcolor: "rgba(0,0,0,0.5)", // dark overlay
+                        }}
+                    >
+                        <Box
+                        sx={{
+                            bgcolor: "white", // light red background for error
+                            p: 4,
+                            borderRadius: 2,
+                            color: "red", // red text for error
+                            width: 400,
+                        }}
+                        >
+                        <Typography variant="h6">Set Hour/Minute First</Typography>
+            
+                        {/* </Typography> */}
+                        <Button sx={{ mt: 2 }} onClick={() => setHourMinError(false)}>Close</Button>
+                        </Box>
+                    </Box>
+                </Modal>
                 <Modal open={processError!=""} onClose={() => setProcessError("")}>
                     <Box
                         sx={{
@@ -578,15 +641,15 @@ export default function DryerTumbleIn(){
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        bgcolor: "rgba(0,0,0,0.5)", // dark overlay
+                        // bgcolor: "rgba(0,0,0,0.5)", // dark overlay
                         }}
                     >
                         <Box
                         sx={{
-                            bgcolor: "rgba(202, 29, 29, 0.5)", // light red background for error
+                            bgcolor: "white", // light red background for error
                             p: 4,
                             borderRadius: 2,
-                            color: "white", // red text for error
+                            color: "red", // red text for error
                             width: 400,
                         }}
                         >

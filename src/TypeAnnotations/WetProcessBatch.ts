@@ -1,23 +1,25 @@
 
     export default interface WetProcessBatch {
-        id: number;
+        id: string,
         buyer: string,
         color: string,
-        shade: string;
+        shade: string,
         stage: string,
         type: string,
-        created_at: string;
-        created_by: string;
-        total_quantity: number;
-        status: any;
+        status: string,
+        total_quantity: number,
+        total_rewash_quantity: number,
+        total_rejection_quantity: number,
+        created_at: string,
+        operator: string,
         sources: 
         {
             id: number,
-            source: {
-                mpo: string,
-                style: string,
-                so: string
-            },
-            quantity: number
-        }[],
+            mpo : string,
+            style: string,
+            so: string,
+            quantity: number,
+            rewash_quantity: number,
+            rejection_quantity: number
+        }[]
     }

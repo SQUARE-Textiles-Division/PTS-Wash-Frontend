@@ -62,10 +62,10 @@ export default function DryerOvenOut(){
             return;
         }
         // First API call (washing scan) ---
-        const str=batchcode
-        const index = str.indexOf("W1");      // find position of ":"
-        let batchId = str.substring(index + 2);
-        const batchIdNum = parseInt(batchId, 10);
+        // const str=batchcode
+        // const index = str.indexOf("W1");      // find position of ":"
+        // let batchId = str.substring(index + 2);
+        const batchIdNum = batchcode;  // Remove non-digit characters to get the batch ID number
         // console.log(batchIdNum)
         const tempBatchDetail:any=[]
         // let getId=0
@@ -99,9 +99,9 @@ export default function DryerOvenOut(){
                                 'Shade':result.batch.shade,
                                 'Color':result.batch.color,
                                 'Buyer':result.batch.buyer,
-                                'BatchNumber':result.batch.id,
+                                'BatchQRCode':result.batch.id,
                                 'Quantity':result.batch.total_quantity,
-                                'Machine':result.machine.machine_number
+                                'Machine':result.machine
                             }
                         )
         
@@ -111,11 +111,10 @@ export default function DryerOvenOut(){
                     },
                     (error:any)=>{
                         console.log(error.response.data)
-                        let msg=error.response.data[0]
-                        // if
-                        for(const obj of error.response.data){
-                            msg+=obj;
-                        }
+                        let msg=""
+                        Object.entries(error.response.data).forEach(([key, value]:any) => {
+                            msg+=value[0]
+                        });
                         setProcessError(msg)   
                         
                     }
@@ -240,7 +239,7 @@ export default function DryerOvenOut(){
                          
                     <TableHead>
                       <TableRow>
-                        <StyledTableCell align="center">BatchNumber(First Wash)</StyledTableCell>
+                        <StyledTableCell align="center">BatchQRCode(First Wash)</StyledTableCell>
                         <StyledTableCell align="center">Buyer</StyledTableCell>
                         {/* <StyledTableCell align="center">Style</StyledTableCell> */}
                         {/* <StyledTableCell align="center">Sales Order</StyledTableCell> */}
@@ -260,10 +259,10 @@ export default function DryerOvenOut(){
                        {batchdetails
                             .map((row) => (
                                 <StyledTableRow
-                                key={`${row.Buyer}-${row.Color}-${row.Shade}-${row.BatchNumber}-${row.Quantity}`}
+                                key={`${row.Buyer}-${row.Color}-${row.Shade}-${row.BatchQRCode}-${row.Quantity}`}
                                 >
                                 {/* <StyledTableCell align="center">{row.MPO}</StyledTableCell> */}
-                                <StyledTableCell align="center">{row.BatchNumber}</StyledTableCell>
+                                <StyledTableCell align="center">{row.BatchQRCode}</StyledTableCell>
                                 <StyledTableCell align="center">{row.Buyer}</StyledTableCell>
                                 {/* <StyledTableCell align="center">{row.Style}</StyledTableCell> */}
                                 {/* <StyledTableCell align="center">{row.SO}</StyledTableCell> */}
@@ -272,7 +271,7 @@ export default function DryerOvenOut(){
                                 {/* <StyledTableCell align="center">{row.BatchQRCode}</StyledTableCell> */}
                                 
                                 <StyledTableCell align="center">{row.Shade}</StyledTableCell>  
-                                 <StyledTableCell align="center">4</StyledTableCell>  
+                                 <StyledTableCell align="center">{row.Machine}</StyledTableCell>  
                                 <StyledTableCell align="center">{row.Quantity}</StyledTableCell>
                                 </StyledTableRow>
                             ))}
@@ -298,15 +297,15 @@ export default function DryerOvenOut(){
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        bgcolor: "rgba(0,0,0,0.5)", // dark overlay
+                        // bgcolor: "rgba(0,0,0,0.5)", // dark overlay
                         }}
                     >
                         <Box
                         sx={{
-                            bgcolor: "rgba(202, 29, 29, 0.5)", // light red background for error
+                            bgcolor: "white", // light red background for error
                             p: 4,
                             borderRadius: 2,
-                            color: "white", // red text for error
+                            color: "red", // red text for error
                             width: 400,
                         }}
                         >

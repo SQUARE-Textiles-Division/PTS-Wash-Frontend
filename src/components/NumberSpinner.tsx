@@ -49,7 +49,7 @@ export default function NumberSpinner({
               },
             },
             '& .MuiInputBase-root': {
-                height: 20  ,
+                height: {customSize}  ,
                 // minHeight: 0,
                 padding: 0
               },
@@ -103,7 +103,7 @@ export default function NumberSpinner({
                   borderRight: '0px',
                 },
                 "&.MuiButtonBase-root":{
-                  height:20
+                  height:{customSize}
                 }
 
                 // height:`${customSize}px`
@@ -155,7 +155,7 @@ export default function NumberSpinner({
                   borderLeft: '0px',
                 },
                  "&.MuiButtonBase-root":{
-                  height:20
+                  height:{customSize}
                 }
               }}
             />

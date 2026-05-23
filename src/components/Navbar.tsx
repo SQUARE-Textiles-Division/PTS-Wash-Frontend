@@ -74,7 +74,7 @@ export default function Navbar() {
 };
   const DryProcessItemContent: MenuItem[] = [
     { primary: "Planning", to: "/planning" },
-    { primary: "Create Batch", to: "/createbatch" },
+    // { primary: "Create Batch", to: "/createbatch" },
     { primary: "QC Update", to: "/qceditdel" },
 
     { primary: "Whisker In", to: "/whiskerin" },
@@ -111,8 +111,8 @@ export default function Navbar() {
     {
       primary:"First Wash",
       children:[
-        { primary: "Create Batch (Without Dry)", to: "/batchdry" },
-        { primary: "Create Batch (With Dry)", to: "/batchwithdry" },
+        { primary: "Create Batch", to: "/batchdry" },
+        // { primary: "Create Batch (With Dry)", to: "/batchwithdry" },
         
         { primary: "Load",
           children: [

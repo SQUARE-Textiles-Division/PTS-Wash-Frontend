@@ -62,10 +62,10 @@ export default function HydroOut(){
             return;
         }
         // First API call (washing scan) ---
-        const str=batchcode
-        const index = str.indexOf("W1");      // find position of ":"
-        let batchId = str.substring(index + 2);
-        const batchIdNum = parseInt(batchId, 10);
+        // const str=batchcode
+        // const index = str.indexOf("W1");      // find position of ":"
+        // let batchId = str.substring(index + 2);
+        const batchIdNum = batchcode
         // console.log(batchIdNum)
         const tempBatchDetail:any=[]
         // let getId=0
@@ -99,9 +99,9 @@ export default function HydroOut(){
                                 'Shade':result.batch.shade,
                                 'Color':result.batch.color,
                                 'Buyer':result.batch.buyer,
-                                'BatchNumber':result.batch.id,
+                                'BatchQRCode':result.batch.id,
                                 'Quantity':result.batch.total_quantity,
-                                'Machine':result.machine.machine_number
+                                'Machine':result.machine
                             }
                         )
         
@@ -112,9 +112,9 @@ export default function HydroOut(){
                     (error:any)=>{
                         console.log(error.response.data)
                         let msg=""
-                        for(const obj of error.response.data){
-                            msg+=obj;
-                        }
+                        Object.entries(error.response.data).forEach(([key, value]:any) => {
+                            msg+=value[0]
+                        });
 
                         // if
 
@@ -242,7 +242,7 @@ export default function HydroOut(){
                          
                     <TableHead>
                       <TableRow>
-                        <StyledTableCell align="center">BatchNumber(First Wash)</StyledTableCell>
+                        <StyledTableCell align="center">BatchQRCode</StyledTableCell>
                         <StyledTableCell align="center">Buyer</StyledTableCell>
                         {/* <StyledTableCell align="center">Style</StyledTableCell> */}
                         {/* <StyledTableCell align="center">Sales Order</StyledTableCell> */}
@@ -262,10 +262,10 @@ export default function HydroOut(){
                        {batchdetails
                             .map((row) => (
                                 <StyledTableRow
-                                key={`${row.Buyer}-${row.Color}-${row.Shade}-${row.BatchNumber}-${row.Quantity}`}
+                                key={`${row.Buyer}-${row.Color}-${row.Shade}-${row.BatchQRCode}-${row.Quantity}`}
                                 >
                                 {/* <StyledTableCell align="center">{row.MPO}</StyledTableCell> */}
-                                <StyledTableCell align="center">{row.BatchNumber}</StyledTableCell>
+                                <StyledTableCell align="center">{row.BatchQRCode}</StyledTableCell>
                                 <StyledTableCell align="center">{row.Buyer}</StyledTableCell>
                                 {/* <StyledTableCell align="center">{row.Style}</StyledTableCell> */}
                                 {/* <StyledTableCell align="center">{row.SO}</StyledTableCell> */}
@@ -274,7 +274,7 @@ export default function HydroOut(){
                                 {/* <StyledTableCell align="center">{row.BatchQRCode}</StyledTableCell> */}
                                 
                                 <StyledTableCell align="center">{row.Shade}</StyledTableCell>  
-                                 <StyledTableCell align="center">4</StyledTableCell>  
+                                 <StyledTableCell align="center">{row.Machine}</StyledTableCell>  
                                 <StyledTableCell align="center">{row.Quantity}</StyledTableCell>
                                 </StyledTableRow>
                             ))}

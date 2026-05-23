@@ -23,6 +23,7 @@ import { useReactToPrint } from "react-to-print";
 import type FirstWashBatchDirectCreate from "../../TypeAnnotations/FirstWashBatchDirectCreate";
 import type FirstWashBatch from "../../TypeAnnotations/WetProcessBatch";
 import type WetProcessBatch from "../../TypeAnnotations/WetProcessBatch";
+import type IndividualInfo from "../../TypeAnnotations/IndividualInfo";
 
 // interface Props {
 //     items: BundleInfo[];
@@ -38,7 +39,7 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
   },
   [`&.${tableCellClasses.body}`]: {
     fontSize: 14,
-    lineHeight:0.9,
+    lineHeight:0.6,
     padding: '4px 6px',
   },
 }));
@@ -70,8 +71,10 @@ export default function BatchCreateDirect(){
     const [alarm,setAlarm]=useState<boolean>(false);
     const [errorMessage,setErrorMessage]=useState<string>("");  
     const barcodeRef=useRef<HTMLInputElement>(null);
+    const individualBarcodeRef=useRef<HTMLInputElement>(null);
     const [itemId,setItemId]=useState<number[]>([]);
-    const [items, setItems] = useState<BundleInfo[]>([]);
+    // const [items, setItems] = useState<BundleInfo[]>([]);
+    const [items, setItems] = useState<IndividualInfo[]>([]);
     const [qrData, setQrData] = useState<any | null>(null);
 
     
@@ -107,80 +110,142 @@ export default function BatchCreateDirect(){
     }, [items]);
     // const[item,setItemss]=useState<BundleInfo[]>([...items]);
     
-    const fetchData = (barcode: string) => {
-        if (!barcode) {
+    // const fetchData = (barcode: string) => {
+    //     if (!barcode) {
+    //         console.warn("No Barcode entered");
+    //         return;
+    //     }
+
+    //     // --- First API call (washing scan) ---
+    //     getData<BundleInfo>(
+    //         `washing/${barcode}/`,
+    //         ptsip,
+    //         {}, // body, if needed
+    //         {},
+    //         (result1:BundleInfo) => {
+    //             getData<BatchBundle>(
+    //                 `productions/received-bundles/scan`,
+    //                 ip,
+    //                 {},
+    //                 {
+    //                     mpo:result1.mpo,
+    //                     marker:result1.marker?.trim(),
+    //                     bundle_no:result1.bundle_no,
+    //                  },
+    //                 (result2:BatchBundle) => {
+    //                     let isDuplicate = false;
+    //                     let sameShade=true;
+    //                     // setSecondData(result2);
+    //                     for(let i=0;i<items.length;i++){
+    //                         console.log("Checking item:", items[i], "against", result2);
+    //                         if(items[i].id==result2.id){
+    //                             console.log("Duplicate found:", items[i]);
+    //                             // setItems([...items])
+    //                             isDuplicate=true;
+    //                             // break;
+    //                         }
+    //                         if(items[i].shade!=result2.shade || items[i].buyer!=result2.buyer || items[i].color!=result2.color){
+    //                             sameShade=false;
+    //                             break;
+    //                         }
+    //                         // else{
+    //                         //     setItemId([...itemId,result2.id]);
+    //                         // }
+    //                     }
+    //                     if(!sameShade){
+    //                         setAlarm(true);
+    //                         return;
+    //                     }
+    //                     if(!isDuplicate && sameShade){
+    //                         // setItemId([...itemId,result2.id]);
+    //                         setItems([
+    //                                 result2,
+    //                                 ...items,
+    //                             ]); 
+    //                             setItemId([...itemId,result2.id]);
+    //                     }
+    //                     if (result2) {
+    //                         setShowPopup(true);
+    //                         setSaveBarcode(result2.bundle_barcode)
+    //                     }
+    //                     console.log("Second API result:", result2);
+    //                 },
+    //                 (error:any) => {
+    //                     setShowErrorPopup(true);
+    //                     setErrorMessage(error.response.data)
+    //                     console.error("Error in second API:", error.response.data);
+    //                 }
+    //             );
+    //         },
+    //         (error:any) => {
+    //             console.error("Error in first API:", error.response.data.error);
+    //             setInvalideBundleError(error.response.data.error);
+    //         }
+    //     );
+    // };
+
+
+    
+    const fetchDataPiece = (indivbarcode: string) => {
+        if (!indivbarcode) {
             console.warn("No Barcode entered");
             return;
         }
 
         // --- First API call (washing scan) ---
-        getData<BundleInfo>(
-            `washing/${barcode}/`,
-            ptsip,
-            {}, // body, if needed
+
+        getData<IndividualInfo>(
+            `common/garment-units/${indivbarcode}/`,
+            ip,
             {},
-            (result1:BundleInfo) => {
-                getData<BatchBundle>(
-                    `productions/received-bundles/scan`,
-                    ip,
-                    {},
-                    {
-                        mpo:result1.mpo,
-                        marker:result1.marker?.trim(),
-                        bundle_no:result1.bundle_no,
-                     },
-                    (result2:BatchBundle) => {
-                        let isDuplicate = false;
-                        let sameShade=true;
-                        // setSecondData(result2);
-                        for(let i=0;i<items.length;i++){
-                            console.log("Checking item:", items[i], "against", result2);
-                            if(items[i].id==result2.id){
-                                console.log("Duplicate found:", items[i]);
-                                // setItems([...items])
-                                isDuplicate=true;
-                                // break;
-                            }
-                            if(items[i].shade!=result2.shade || items[i].buyer!=result2.buyer || items[i].color!=result2.color){
-                                sameShade=false;
-                                break;
-                            }
-                            // else{
-                            //     setItemId([...itemId,result2.id]);
-                            // }
-                        }
-                        if(!sameShade){
-                            setAlarm(true);
-                            return;
-                        }
-                        if(!isDuplicate && sameShade){
-                            // setItemId([...itemId,result2.id]);
-                            setItems([
-                                    result2,
-                                    ...items,
-                                ]); 
-                                setItemId([...itemId,result2.id]);
-                        }
-                        if (result2) {
-                            setShowPopup(true);
-                            setSaveBarcode(result2.bundle_barcode)
-                        }
-                        console.log("Second API result:", result2);
-                    },
-                    (error:any) => {
-                        setShowErrorPopup(true);
-                        setErrorMessage(error.response.data)
-                        console.error("Error in second API:", error.response.data);
+            {},
+            (result1:IndividualInfo) => {
+                let isDuplicate = false;
+                let sameShade=true;
+                for(let i=0;i<items.length;i++){
+                    console.log("Checking item:", items[i], "against", result1);
+                    if(items[i].individual_barcode==result1.individual_barcode){
+                        console.log("Duplicate found:", items[i]);
+                        // setItems([...items])
+                        isDuplicate=true;
+                        // break;
                     }
-                );
+                    if(items[i].shade!=result1.shade || items[i].buyer!=result1.buyer || items[i].color!=result1.color){
+                        sameShade=false;
+                        break;
+                    }
+                    // else{
+                    //     setItemId([...itemId,result2.id]);
+                    // }
+                }
+                if(!sameShade){
+                    setAlarm(true);
+                    return;
+                }
+                if(!isDuplicate && sameShade){
+                    // setItemId([...itemId,result2.id]);
+                    setItems([
+                            result1,
+                            ...items,
+                        ]); 
+                        // setItemId([...itemId,result1.id]);
+                }
+                if (result1) {
+                    setShowPopup(true);
+                    setSaveBarcode(result1.individual_barcode)
+                }
+                console.log('First API result:', result1);
             },
             (error:any) => {
-                console.error("Error in first API:", error.response.data.error);
-                setInvalideBundleError(error.response.data.error);
-            }
-        );
-    };
+                setShowErrorPopup(true);
+                if(error.response.data.detail){
+                    setErrorMessage(error.response.data.detail)
+                }
+                console.error("Error in API:", error.response.data.detail);
+             }
 
+        )
+    };
 
 
     return (
@@ -198,16 +263,25 @@ export default function BatchCreateDirect(){
             >
                 <TextField
                 style={{position:'fixed',top:80}}
-                inputRef={barcodeRef}
-                label="Scan Barcode Here"
+                // inputRef={barcodeRef}
+                inputRef={individualBarcodeRef}
+                label="Scan Individual Barcode Here"
                 
                 autoFocus
                 onChange={() => {
                     
-                    const barcode = barcodeRef.current?.value.trim() || "";
-                    if(barcode.length==19){
-                        fetchData(barcode);
-                        barcodeRef.current!.value = "";
+                    // const barcode = barcodeRef.current?.value.trim() || "";
+                    // if(barcode.length==19){
+                    //     fetchData(barcode);
+                    //     barcodeRef.current!.value = "";
+                    // }
+                    // else{
+                    //     setShowPopup(false);
+                    // }
+                    const individualBarcode = individualBarcodeRef.current?.value.trim() || "";
+                    if(individualBarcode.length==16){
+                        fetchDataPiece(individualBarcode);
+                        individualBarcodeRef.current!.value = "";
                     }
                     else{
                         setShowPopup(false);
@@ -273,42 +347,58 @@ export default function BatchCreateDirect(){
                             width: 100,
                         }}
                         onClick={()=>{
-                            console.log("Creating batch with item IDs:", itemId);
+                            // console.log("Creating batch with item IDs:", itemId);
+                            // "buyer": "Puma",
+                            // "color": "blue",
+                            // "shade": "F",
+                            // "stage": "first_wash",
+                            // "type": "normal_wash",
+                            // "input_type": "pieces",
+                            // "input_sources": [
+                            //     {"garment_unit":"2604280014762239"},
+                            //     {"garment_unit": "2604280014761212"}
+                            // ]
                             const payload={
                                 "shade":items[0].shade,
                                 "buyer":items[0].buyer,
                                 "color":items[0].color,
                                 "stage":"first_wash",
                                 "type":"normal_wash",
-                                "sources_input":[] as any
+                                "input_type": "pieces",
+                                "input_sources":[] as any
                             }
                             for(let i=0;i<items.length;i++){
-                                payload.sources_input.push({
-                                    "type":"bundle",
-                                    "id":items[i].id,
-                                    "quantity":items[i].quantity
+                                payload.input_sources.push({
+                                    "garment_unit":items[i].individual_barcode
                                 })
                             }
+                            // for(let i=0;i<items.length;i++){
+                            //     payload.sources_input.push({
+                            //         "type":"bundle",
+                            //         "id":items[i].id,
+                            //         "quantity":items[i].quantity
+                            //     })
+                            // }
                             postData<WetProcessBatch>(
                                 'wet-process/batches/',
                                 ip,
                                 payload,
-                                (data) => {
+                                (data:WetProcessBatch) => {
                                     let date=data.created_at.slice(0, 10).replace(/-/g, "");
-                                    const sourceBundles=data.sources
+                                    const sourcePieces=data.sources
                                     let mpoSet=new Set<string>();
                                     let colorSet=new Set<string>();
                                     let buyerSet=new Set<string>();
                                     let styleSet=new Set<string>();
                                     let soSet=new Set<string>();
                                     // let sizeSet=new Set<string>();
-                                    for(let i=0;i<sourceBundles.length;i++){
-                                        let bundle=sourceBundles[i].source;
-                                        mpoSet.add(bundle.mpo);
+                                    for(let i=0;i<sourcePieces.length;i++){
+                                        let piece=sourcePieces[i];
+                                        mpoSet.add(piece.mpo);
                                         colorSet.add(data.color);
                                         buyerSet.add(data.buyer);
-                                        styleSet.add(bundle.style);
-                                        soSet.add(bundle.so);
+                                        styleSet.add(piece.style);
+                                        soSet.add(piece.so);
                                         // sizeSet.add(data.);
                                     }
                                     
@@ -329,7 +419,7 @@ export default function BatchCreateDirect(){
                                     setItemId([]);
                                 },
                                 (error:any) => {
-                                    console.log(({"scanned_bundles":itemId}));
+                                    // console.log(({"scanned_bundles":itemId}));
                                     setPlanningError(error.response.data);
                                     console.error("Error creating batch:", error.response.data);
                                 }
@@ -374,30 +464,29 @@ export default function BatchCreateDirect(){
                         <StyledTableCell align="center">Buyer</StyledTableCell>
                         <StyledTableCell align="center">Style</StyledTableCell>
                         <StyledTableCell align="center">Sales Order</StyledTableCell>
-                        <StyledTableCell align="center">Bundle Barcode</StyledTableCell>
-                        <StyledTableCell align="center">Bundle No</StyledTableCell>
+                        {/* <StyledTableCell align="center">Bundle Barcode</StyledTableCell> */}
+                        <StyledTableCell align="center">Individual Barcode</StyledTableCell>
+                        {/* <StyledTableCell align="center">Bundle No</StyledTableCell> */}
                         <StyledTableCell align="center">Marker No</StyledTableCell>
                         <StyledTableCell align="center">Size</StyledTableCell>
                         <StyledTableCell align="center">Shade</StyledTableCell>
                         <StyledTableCell align="center">Color</StyledTableCell>
-                        <StyledTableCell align="center">Quantity</StyledTableCell>
+                        {/* <StyledTableCell align="center">Quantity</StyledTableCell> */}
                         </TableRow>
                     </TableHead>
 
                     <TableBody>
                         {items.map((row) => (
-                        <StyledTableRow key={`${row.mpo}-${row.bundle_no}`}>
+                        <StyledTableRow key={`${row.individual_barcode}`}>
                             <StyledTableCell>{row.mpo}</StyledTableCell>
                             <StyledTableCell align="center">{row.buyer}</StyledTableCell>
                             <StyledTableCell align="center">{row.style}</StyledTableCell>
                             <StyledTableCell align="center">{row.so}</StyledTableCell>
-                            <StyledTableCell align="center">{row.bundle_barcode}</StyledTableCell>
-                            <StyledTableCell align="center">{row.bundle_no}</StyledTableCell>
+                            <StyledTableCell align="center">{row.individual_barcode}</StyledTableCell>
                             <StyledTableCell align="center">{row.marker}</StyledTableCell>
                             <StyledTableCell align="center">{row.size}</StyledTableCell>
                             <StyledTableCell align="center">{row.shade}</StyledTableCell>
                             <StyledTableCell align="center">{row.color}</StyledTableCell>
-                            <StyledTableCell align="center">{row.quantity}</StyledTableCell>
                         </StyledTableRow>
                         ))}
                     </TableBody>
@@ -409,8 +498,8 @@ export default function BatchCreateDirect(){
                                         ref={printRef}
                                         elevation={5}
                                         sx={{
-                                        alignContent: "right",
-                                        mt: 3,
+                                        // alignContent: "right",
+                                        mt: 25,
                                         px: 2,
                                         pt:1,
                                         pb:1,
@@ -421,8 +510,9 @@ export default function BatchCreateDirect(){
                                     >
                 
                                         <QRCodeCanvas
-                                        value={`W822${qrData.date}W1${String(qrData.id).padStart(7, '0')}`}
-                                        size={200}
+                                        // value={`W822${qrData.date}W1${String(qrData.id).padStart(7, '0')}`}
+                                        value={qrData.id}
+                                        size={100}
                                         level="H"
                                         />
                 
@@ -432,7 +522,8 @@ export default function BatchCreateDirect(){
                                             fontSize: 12,
                                             mb: 2
                                         }}>
-                                            {`W822${qrData.date}W1${String(qrData.id).padStart(7, '0')}`}
+                                            {/* {`W822${qrData.date}W1${String(qrData.id).padStart(7, '0')}`} */}
+                                            {qrData.id}
                                         </Typography>
                                         <Typography variant="body2">
                                             <b>Total Quantity:</b> {qrData.total_items}
@@ -483,15 +574,15 @@ export default function BatchCreateDirect(){
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        bgcolor: "rgba(0,0,0,0.5)", // dark overlay
+                        // bgcolor: "rgba(0,0,0,0.5)", // dark overlay
                         }}
                     >
                         <Box
                         sx={{
-                            bgcolor: "rgba(202, 29, 29, 0.5)", // light red background for error
+                            bgcolor: "white", 
                             p: 4,
                             borderRadius: 2,
-                            color: "white", // red text for error
+                            color: "red", // red text for error
                             width: 400,
                         }}
                         >
@@ -546,15 +637,15 @@ export default function BatchCreateDirect(){
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        bgcolor: "rgba(0,0,0,0.5)", // dark overlay
+                        // bgcolor: "", // dark overlay
                         }}
                     >
                         <Box
                         sx={{
-                            bgcolor: "rgba(202, 29, 29, 0.5)", // light red background for error
+                            bgcolor: "white", // light red background for error
                             p: 4,
                             borderRadius: 2,
-                            color: "white", // red text for error
+                            color: "red", // red text for error
                             width: 400,
                         }}
                         >
@@ -579,15 +670,15 @@ export default function BatchCreateDirect(){
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        bgcolor: "rgba(0,0,0,0.5)", // dark overlay
+                        // bgcolor: "rgba(0,0,0,0.5)", // dark overlay
                         }}
                     >
                         <Box
                         sx={{
-                            bgcolor: "rgba(202, 29, 29, 0.5)", // light red background for error
+                            bgcolor: "white", // light red background for error
                             p: 4,
                             borderRadius: 2,
-                            color: "white", // red text for error
+                            color: "red", // red text for error
                             width: 400,
                         }}
                         >

@@ -1,33 +1,28 @@
 export default interface FirstWashBatchDirectCreate
 {
-    id: number,
+    id: string,
+    buyer: string,
+    color: string,
     shade: string,
-    created_at: string,
-    created_by: string,
+    stage: string,
+    type: string,
+    status: string,
     total_quantity: number,
-    status: any,
-    source_batches: any[],
-    source_bundles: 
+    total_rewash_quantity: number,
+    total_rejection_quantity: number,
+    created_at: string,
+    operator: string,
+    sources: 
         {
-            bundle: {
-                id:number,
-                so: string,
-                mpo: string,
-                buyer: string,
-                style: string,
-                marker: string,
-                bundle_no: number,
-                bundle_barcode: string,
-                size: string,
-                shade: string,
-                color: string,
-                quantity: number,
-                received_at: string,
-                received_by: string,
-                status: string
-            },
-            quantity: number
-        }[],
+            id: number,
+            mpo: string,
+            style: string,
+            so: string,
+            quantity: number,
+            rewash_quantity: number,
+            rejection_quantity: number
+        }[]
+    
 }
 
 

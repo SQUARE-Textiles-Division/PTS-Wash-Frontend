@@ -13,6 +13,7 @@ import { tbCellColor, tbRowColor } from "../Colors/Colors";
 import type { Machine } from "../../TypeAnnotations/Machine";
 import type { ProcessFirstWash } from "../../TypeAnnotations/ProcessFirstWash";
 import { all } from "axios";
+import NumberSpinner from "../NumberSpinner";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -50,6 +51,7 @@ export default function LoadStart(){
     const [processError,setProcessError]=useState("");
     const [hourError,setHourError]=useState(false)
     const [minError,setMinError]=useState(false)
+    const [hourminError,setHourMinError]=useState(false)
     const[showErrorPopup,setShowErrorPopup]=useState(false);
     const batchqrcoderef=useRef<HTMLInputElement>(null);
     const [machine,setMachine]=useState(0);
@@ -67,7 +69,7 @@ export default function LoadStart(){
             {},
             {},
             (res) => {
-                res.filter(item => item.machine_number !== 4);
+                // res.filter(item => item.machine_number !== 4);
                 setMachines(res.map(m => m.machine_number));
             }
         );
@@ -90,10 +92,11 @@ export default function LoadStart(){
             console.warn("No Machine Selected")
         }
         // --- First API call (washing scan) ---
-        const str=batchcode
-        const index = str.indexOf("W1");      // find position of ":"
-        let batchId = str.substring(index + 2);
-        const batchIdNum = parseInt(batchId, 10);
+        // const str=batchcode
+        // const index = str.indexOf("W1");      // find position of ":"
+        // let batchId = str.substring(index + 2);
+        // const batchIdNum = parseInt(batchId, 10);
+        const batchIdNum=batchcode
         console.log(batchIdNum)
         const tempBatchDetail:any=[]
         let hourStr=''
@@ -132,7 +135,7 @@ export default function LoadStart(){
                         'Shade':result.batch.shade,
                         'Color':result.batch.color,
                         'Buyer':result.batch.buyer,
-                        'BatchNumber':result.batch.id,
+                        'BatchQRCode':result.batch.id,
                         'Quantity':result.batch.total_quantity,
                         'Machine':result.machine.machine_number
                     }
@@ -300,8 +303,12 @@ export default function LoadStart(){
                             </Select>
                         </FormControl>
                         <FormControl fullWidth>
-                            <InputLabel id="demo-simple-select-label">Set Hour</InputLabel>
-                            <Select
+                            {/* <InputLabel id="demo-simple-select-label">Set Hour</InputLabel> */}
+                            <Typography variant="body2" >
+                                Set Hour
+                            </Typography>
+
+                            {/* <Select
                             labelId="demo-simple-select-label"
                             id="demo-simple-select"
                             // value={age}
@@ -312,11 +319,24 @@ export default function LoadStart(){
                             {hours.map((hour) => (
                                 <MenuItem key={hour} value={hour}>{hour}</MenuItem>
                             ))}
-                            </Select>
+                            </Select> */}
+                            <NumberSpinner
+                                size="small"
+                                min={0}
+                                max={24}
+                                customSize={20}
+                                disabled={false}
+                                value={hour}
+                                onValueChange={(value:any) => setHour(value ?? 0)}
+                            />
                         </FormControl>
                         <FormControl fullWidth>
-                            <InputLabel id="demo-simple-select-label">Set Minute</InputLabel>
-                            <Select
+                            <Typography variant="body2" >
+                                Set Minute
+                            </Typography>
+
+                            {/* <InputLabel id="demo-simple-select-label">Set Minute</InputLabel> */}
+                            {/* <Select
                             labelId="demo-simple-select-label"
                             id="demo-simple-select"
                             // value={age}
@@ -327,7 +347,16 @@ export default function LoadStart(){
                             {mins.map((min) => (
                                 <MenuItem key={min} value={min}>{min}</MenuItem>
                             ))}
-                            </Select>
+                            </Select> */}
+                            <NumberSpinner
+                                size="small"
+                                min={0}
+                                max={59}
+                                customSize={20}
+                                disabled={false}
+                                value={min}
+                                onValueChange={(value:any) => setMin(value ?? 0)}
+                            />
                         </FormControl>
                     </Box>
                 <TextField
@@ -346,16 +375,16 @@ export default function LoadStart(){
                         batchqrcoderef.current!.value = "";
                         return
                     }
-                    if(hour==0){
-                        setHourError(true)
-                         batchqrcoderef.current!.value = "";
-                        return
-                    }
-                     if(min==0){
-                        setMinError(true)
+                    if(hour==0 && min==0){
+                        setHourMinError(true)
                         batchqrcoderef.current!.value = "";
                         return
                     }
+                    //  if(min==0){
+                    //     setMinError(true)
+                    //     batchqrcoderef.current!.value = "";
+                    //     return
+                    // }
                     const batchcode = batchqrcoderef.current?.value.trim() || "";
                     if(batchcode.length>=15){
                         fetchData(batchcode,machine);
@@ -427,7 +456,7 @@ export default function LoadStart(){
                     <TableHead>
                       <TableRow>
                         {/* <StyledTableCell align="center">MPO</StyledTableCell> */}
-                        <StyledTableCell align="center">BatchNumber(First Wash)</StyledTableCell>
+                        <StyledTableCell align="center">BatchQRCode(First Wash)</StyledTableCell>
                         <StyledTableCell align="center">Buyer</StyledTableCell>
                         {/* <StyledTableCell align="center">Style</StyledTableCell> */}
                         {/* <StyledTableCell align="center">Sales Order</StyledTableCell> */}
@@ -447,10 +476,10 @@ export default function LoadStart(){
                       {batchdetails
                             .map((row) => (
                                 <StyledTableRow
-                                key={`${row.Buyer}-${row.Color}-${row.Shade}-${row.BatchNumber}-${row.Quantity}`}
+                                key={`${row.Buyer}-${row.Color}-${row.Shade}-${row.BatchQRCode}-${row.Quantity}`}
                                 >
                                 {/* <StyledTableCell align="center">{row.MPO}</StyledTableCell> */}
-                                <StyledTableCell align="center">{row.BatchNumber}</StyledTableCell>
+                                <StyledTableCell align="center">{row.BatchQRCode}</StyledTableCell>
                                 <StyledTableCell align="center">{row.Buyer}</StyledTableCell>
                                 {/* <StyledTableCell align="center">{row.Style}</StyledTableCell> */}
                                 {/* <StyledTableCell align="center">{row.SO}</StyledTableCell> */}
@@ -486,15 +515,15 @@ export default function LoadStart(){
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        bgcolor: "rgba(0,0,0,0.5)", // dark overlay
+                        // bgcolor: "rgba(0,0,0,0.5)", // dark overlay
                         }}
                     >
                         <Box
                         sx={{
-                            bgcolor: "rgba(202, 29, 29, 0.5)", // light red background for error
+                            bgcolor: "white", // light red background for error
                             p: 4,
                             borderRadius: 2,
-                            color: "white", // red text for error
+                            color: "red", // red text for error
                             width: 400,
                         }}
                         >
@@ -507,7 +536,7 @@ export default function LoadStart(){
                 </Modal>
                 
 
-                 <Modal open={hourError} onClose={() => setShowPopup(false)}>
+                 {/* <Modal open={hourError} onClose={() => setShowPopup(false)}>
                     <Box
                         sx={{
                         position: "fixed", // ← changed from absolute
@@ -532,12 +561,12 @@ export default function LoadStart(){
                         >
                         <Typography variant="h6">Set Hour First</Typography>
             
-                        {/* </Typography> */}
-                        <Button sx={{ mt: 2 }} onClick={() => setHourError(false)}>Close</Button>
-                        </Box>
-                    </Box>
-                </Modal>
-                <Modal open={minError} onClose={() => setShowPopup(false)}>
+                    //     {/* </Typography> */}
+                    {/* //     <Button sx={{ mt: 2 }} onClick={() => setHourError(false)}>Close</Button> */}
+                    {/* //     </Box> */}
+                    {/* // </Box> */}
+                {/* </Modal>  */}
+                <Modal open={hourminError} onClose={() => setShowPopup(false)}>
                     <Box
                         sx={{
                         position: "fixed", // ← changed from absolute
@@ -548,22 +577,22 @@ export default function LoadStart(){
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        bgcolor: "rgba(0,0,0,0.5)", // dark overlay
+                        // bgcolor: "rgba(0,0,0,0.5)", // dark overlay
                         }}
                     >
                         <Box
                         sx={{
-                            bgcolor: "rgba(202, 29, 29, 0.5)", // light red background for error
+                            bgcolor: "white", // light red background for error
                             p: 4,
                             borderRadius: 2,
-                            color: "white", // red text for error
+                            color: "red", // red text for error
                             width: 400,
                         }}
                         >
-                        <Typography variant="h6">Set Minute First</Typography>
+                        <Typography variant="h6">Set Hour/Minute First</Typography>
             
                         {/* </Typography> */}
-                        <Button sx={{ mt: 2 }} onClick={() => setMinError(false)}>Close</Button>
+                        <Button sx={{ mt: 2 }} onClick={() => setHourMinError(false)}>Close</Button>
                         </Box>
                     </Box>
                 </Modal>
@@ -578,15 +607,15 @@ export default function LoadStart(){
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        bgcolor: "rgba(0,0,0,0.5)", // dark overlay
+                        // bgcolor: "rgba(0,0,0,0.5)", // dark overlay
                         }}
                     >
                         <Box
                         sx={{
-                            bgcolor: "rgba(202, 29, 29, 0.5)", // light red background for error
+                            bgcolor: "white", // light red background for error
                             p: 4,
                             borderRadius: 2,
-                            color: "white", // red text for error
+                            color: "red", // red text for error
                             width: 400,
                         }}
                         >

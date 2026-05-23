@@ -28,6 +28,14 @@ export interface BatchForFirstWash {
   rejection_count:number, 
   total_quantity:number
 }
+  // "id",
+  // "buyer",
+  // "color",
+  // "shade",
+  // "stage",
+  // "type",
+  // "rejection_count",
+  // "total_quantity",
 export interface ProcessFirstWash {
   id: number;
   batch: BatchForFirstWash;
@@ -42,3 +50,17 @@ export interface ProcessFirstWash {
   unload_finish: string | null;
   unload_finished_by: string | null;
 }
+
+
+//  "id",
+//   "batch",
+//   "machine",
+//   "standard_time",
+//   "loading_start",
+//   "loading_started_by",
+//   "loading_finish",
+//   "loading_finished_by",
+//   "process_finish",
+//   "process_finished_by",
+//   "unload_finish",
+//   "unload_finished_by",

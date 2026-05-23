@@ -469,7 +469,7 @@ export default function BrushQC() {
                 for(const row of rows){
                   // console.log(row.reason)
                   rowIndandReason.push({
-                    "individual_barcode":row.individual_barcode,
+                    "garment_unit":row.individual_barcode,
                     "rejection_reason":row.reason
                   })
                 }
@@ -481,7 +481,7 @@ export default function BrushQC() {
                   ip,
                    {
                     // garment_unit: invbarcode,
-                    garment_units:rowIndandReason,
+                    rejection_items:rowIndandReason,
                     stage: "brush",
                     // action: "rejected", //in or out or rejected
                     // rejection_reason:reason
