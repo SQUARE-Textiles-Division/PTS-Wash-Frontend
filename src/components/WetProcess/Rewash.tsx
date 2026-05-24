@@ -717,7 +717,7 @@ import type WetProcessBatch from "../../TypeAnnotations/WetProcessBatch";
                             // height:'30px',
                             "& .MuiInputBase-root": {
                                  height: 20, // total height
-                                 width:'80px'
+                                 width:'120px'
                                 //  width:20
                             },
                             "& .MuiFormLabel-root":{

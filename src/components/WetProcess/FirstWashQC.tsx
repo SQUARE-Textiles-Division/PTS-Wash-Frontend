@@ -690,7 +690,7 @@ export default function FirstWashQC(){
                                         fontWeight:'bold',
                                         "& .MuiInputBase-root": {
                                                 height: 20, // total height
-                                                width:'80px'
+                                                width:'120px'
                                         },
                                         "& .MuiFormLabel-root":{
                                             lineHeight:1,
