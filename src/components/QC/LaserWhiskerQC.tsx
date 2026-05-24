@@ -86,28 +86,31 @@ export default function LaserWhiskerQC() {
   const [delbarcode,setDelBarCode]=React.useState<string>("")
   // const [del]
 
-  const handleDelete=(id:number)=>{
-    delData<RejectionReason>(
-      `productions/rejections/${id}/`,
-      ip,
-      {},
-      {stage: "Laser Whisker"},
-      (data) => {
-        console.log("Rejection deleted:", data);
-        const delObj=rows.filter((row)=>row.id==id)
-        setDelBarCode(delObj[0].individual_barcode)
-        setinvbarcode("")
-        // delObj.individual_barcode
-        const updatedRows = rows.filter((row) => row.id !== id);
-        setRows(updatedRows);
-        setDeletePop(false);
-        setDeleteId(0)
-      },
-       (error:any)=>{
-        console.log('Err',error.response.data[0])
-        setDeleteError(error.response.data[0])
-      }
-    )
+  const handleDelete=(individual_barcode:string)=>{
+    const itemFiltered=rows.filter((row)=>row.individual_barcode!=individual_barcode)
+    console.log("Item to delete:", itemFiltered);
+    setRows(itemFiltered)
+    // delData<RejectionReason>(
+    //   `productions/rejections/${id}/`,
+    //   ip,
+    //   {},
+    //   {stage: "Laser Whisker"},
+    //   (data) => {
+    //     console.log("Rejection deleted:", data);
+    //     const delObj=rows.filter((row)=>row.id==id)
+    //     setDelBarCode(delObj[0].individual_barcode)
+    //     setinvbarcode("")
+    //     // delObj.individual_barcode
+    //     const updatedRows = rows.filter((row) => row.id !== id);
+    //     setRows(updatedRows);
+    //     setDeletePop(false);
+    //     setDeleteId(0)
+    //   },
+    //    (error:any)=>{
+    //     console.log('Err',error.response.data[0])
+    //     setDeleteError(error.response.data[0])
+    //   }
+    // )
   }
   return (
     <Box
@@ -153,7 +156,11 @@ export default function LaserWhiskerQC() {
                       setinvbarcode(inv);
                       let temp={
                         rejected_at:'laser_whisker',
+                        reason:"",
                         ...infores
+                      }
+                      if(reason!=""){
+                        temp.reason=reason
                       }
                       setRows(prevRows => [temp, ...prevRows]);
 
@@ -195,7 +202,7 @@ export default function LaserWhiskerQC() {
 
       {/* Reject Reason Dropdown */}
       {rejectField && (
-        <Box sx={{  position:'fixed' ,gap:2, display:'flex', flexDirection:'row', alignItems:'flex-start',justifyContent:'center',top:80,left:500 }}>
+        <Box sx={{  position:'fixed' ,gap:2, display:'flex', flexDirection:'row', alignItems:'flex-start',justifyContent:'center',top:80,left:600 }}>
           {/* <Typography variant="h6" gutterBottom>
             Reject Reasons
           </Typography> */}
@@ -369,8 +376,9 @@ export default function LaserWhiskerQC() {
                                  
                                     onClick={()=>{
                                       console.log("Delete clicked for id:", row.id);
-                                      setDeletePop(true);
-                                      setDeleteId(row.id);
+                                        // setDeletePop(true);
+                                        // setDeleteId(row.id);
+                                        handleDelete(row.individual_barcode)
                                     }}
                                   >
                                 </DeleteForeverIcon>
@@ -415,7 +423,8 @@ export default function LaserWhiskerQC() {
                       justifyContent:'space-between'
                     }}>
                         <Button sx={{ mt: 2 ,background:'red',color:'white'}}
-                            onClick={()=>handleDelete(deleteId)}>Delete</Button>
+                            // onClick={()=>handleDelete(deleteId)}
+                            >Delete</Button>
                          <Button sx={{ mt: 2 ,background:'green',color:'white'}} onClick={() => {setDeletePop(false);setDeleteId(0);}}>Cancel</Button>
                     </div>
                     

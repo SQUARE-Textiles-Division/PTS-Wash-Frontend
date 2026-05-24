@@ -278,7 +278,7 @@ useEffect(() => {
           ip,
           {
             garment_unit: individualQRCode,
-            stage: "laser brush",
+            stage: "laser_brush",
             action: "in", //in or out or rejected
           },
           (result: IndividualInOut) => {

@@ -308,16 +308,27 @@ useEffect(() => {
         },
         (error: any) => {
           console.error("Error:", error.response.data);
-          // setErrorLog(error.response.data[0]);
-          if(error.response.data.non_field_errors){
-              setErrorLog(error.response.data.non_field_errors[0]);
-          }
-          else if(error.response.data.garment_unit){
-            setErrorLog(error.response.data.garment_unit);
-          }
-          else if(error.response.data.stage){
-            setErrorLog(error.response.data.stage);
-          }
+          // // setErrorLog(error.response.data[0]);
+          // if(error.response.data.non_field_errors){
+          //     setErrorLog(error.response.data.non_field_errors[0]);
+          // }
+          // else if(error.response.data.garment_unit){
+          //   setErrorLog(error.response.data.garment_unit);
+          // }
+          // else if(error.response.data.stage){
+          //   setErrorLog(error.response.data.stage);
+          // }
+          let msg = "";
+
+          Object.entries(error.response.data).forEach(([key, value]: any) => {
+              if (Array.isArray(value)) {
+                  msg += value[0] + "\n";
+              } else {
+                  msg += value + "\n";
+              }
+          });
+
+          setErrorLog(msg);
         }
 
       )

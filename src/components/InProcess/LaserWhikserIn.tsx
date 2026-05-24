@@ -282,7 +282,7 @@ export default function LaserWhiskerIn() {
           ip,
           {
             garment_unit: individualQRCode,
-            stage: "laser whisker",
+            stage: "laser_whisker",
             action: "in", //in or out or rejected
           },
           (result: IndividualInOut) => {

@@ -5,6 +5,7 @@ import { Box, CssBaseline, AppBar, Toolbar, Drawer, List, ListItem, ListItemButt
 import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
 import { tbCellColor } from "./Colors/Colors";
 import logo from '../assets/PTS Wash Logo.png'
+import { MenuText } from "../MenuText";
 
 type MenuItem = {
   primary: string;
@@ -111,49 +112,49 @@ export default function Navbar() {
     {
       primary:"First Wash",
       children:[
-        { primary: "Create Batch", to: "/batchdry" },
+        { primary: "Create Batch", to: "/firstwash/createbatch" },
         // { primary: "Create Batch (With Dry)", to: "/batchwithdry" },
         
         { primary: "Load",
           children: [
-            { primary: "Load Start", to: "/loadstart" },
-            { primary: "Load Finish & Process Start", to: "/loadfinish" },
+            { primary: "Load Start", to: "/firstwash/loadstart" },
+            { primary: "Load Finish & Process Start", to: "/firstwash/loadfinish" },
           ],
         },
         { primary: "Unload",
           // to: "",
           children: [
-            { primary: "Process Finish & Unload Start", to: "/processfinish" },
-            { primary: "UnLoad Finish", to: "/unloadfinish" },
+            { primary: "Process Finish & Unload Start", to: "/firstwash/processfinish" },
+            { primary: "UnLoad Finish", to: "/firstwash/unloadfinish" },
           ],
         },
         { primary: "Hydro",
           // to: "",
           children: [
-            { primary: "Hydro In", to: "/hydroin" },
-            { primary: "Hydro Out", to: "/hydroout" },
+            { primary: "Hydro In", to: "/firstwash/hydroin" },
+            { primary: "Hydro Out", to: "/firstwash/hydroout" },
           ],
         },
         {
           primary: "Dryer",
           children: [
-            { primary: "Dryer Conveyor In", to: "/dryerconveyorin" },
-            { primary: "Dryer Conveyor Out", to: "/dryerconveyorout" },
-            { primary: "Dryer Oven In", to: "/dryerovenin" },
-            { primary: "Dryer Oven Out", to: "/dryerovenout" },
-            { primary: "Dryer Tumble In", to: "/dryertumblein" },
-            { primary: "Dryer Tumble Out", to: "/dryertumbleout" },
+            { primary: "Dryer Conveyor In", to: "/firstwash/dryerconveyorin" },
+            { primary: "Dryer Conveyor Out", to: "/firstwash/dryerconveyorout" },
+            { primary: "Dryer Oven In", to: "/firstwash/dryerovenin" },
+            { primary: "Dryer Oven Out", to: "/firstwash/dryerovenout" },
+            { primary: "Dryer Tumble In", to: "/firstwash/dryertumblein" },
+            { primary: "Dryer Tumble Out", to: "/firstwash/dryertumbleout" },
           
           ],
         },
-        {primary: "First Wash QC",to:"/firstwashqc"},
+        {primary: "QC",to:"/firstwashqc"},
       ]
     },
 
     {
       primary:"Rewash",
       children:[
-        { primary: "Create Batch", to: "/rewashcreatebatch" },
+        { primary: "Create Batch", to: "/firstwash/rewashcreatebatch" },
         
         // { primary: "Load",
         //   children: [
@@ -274,22 +275,22 @@ export default function Navbar() {
       setItemContent(DryProcessItemContent);
     } 
     else if (
-      location.pathname.startsWith("/batchdry") ||
-      location.pathname.startsWith("/batchwithdry") ||
-      location.pathname.startsWith("/hydroin") ||
-      location.pathname.startsWith("/hydroout")||
-      location.pathname.startsWith("/loadstart")||
-      location.pathname.startsWith("/loadfinish")||
-      location.pathname.startsWith("/processfinish")||
-      location.pathname.startsWith("/unloadfinish")||
-      location.pathname.startsWith("/dryerconveyorin")||
-      location.pathname.startsWith("/dryerconveyorout")||
-      location.pathname.startsWith("/dryerovenin")||
-      location.pathname.startsWith("/dryerovenout")||
-      location.pathname.startsWith("/dryertumblein")||
-      location.pathname.startsWith("/dryertumbleout")||
+      location.pathname.startsWith("/firstwash/createbatch") ||
+      // location.pathname.startsWith("/batchwithdry") ||
+      location.pathname.startsWith("/firstwash/hydroin") ||
+      location.pathname.startsWith("/firstwash/hydroout")||
+      location.pathname.startsWith("/firstwash/loadstart")||
+      location.pathname.startsWith("/firstwash/loadfinish")||
+      location.pathname.startsWith("/firstwash/processfinish")||
+      location.pathname.startsWith("/firstwash/unloadfinish")||
+      location.pathname.startsWith("/firstwash/dryerconveyorin")||
+      location.pathname.startsWith("/firstwash/dryerconveyorout")||
+      location.pathname.startsWith("/firstwash/dryerovenin")||
+      location.pathname.startsWith("/firstwash/dryerovenout")||
+      location.pathname.startsWith("/firstwash/dryertumblein")||
+      location.pathname.startsWith("/firstwash/dryertumbleout")||
       location.pathname.startsWith("/firstwashqc")||
-      location.pathname.startsWith("/rewashcreatebatch")
+      location.pathname.startsWith("/firstwash/rewashcreatebatch")
     ) {
       setDryProcess(false);
       setItemContent(WetProcessItemContent);
@@ -327,7 +328,7 @@ export default function Navbar() {
       window.open("/planning", "_blank")
     }
     else{
-      window.open("/batchdry", "_blank")
+      window.open("/firstwash/createbatch", "_blank")
     }
   };
   return (
@@ -358,7 +359,11 @@ export default function Navbar() {
               objectFit:'contain',
             }}>
             </Box>
-
+            <Box sx={{  fontWeight:600 }}>
+              <p style={{ fontSize:30 ,textDecoration: "none", color: "#485e68"  }}>
+                {MenuText({ text: location.pathname })}
+              </p>
+            </Box>
           <Box sx={{ display: "flex", gap: 2, alignItems: "center",fontWeight:600 }}>
             <p
               // onClick={() => navigate("/washreceive")}

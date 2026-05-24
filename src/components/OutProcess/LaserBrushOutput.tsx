@@ -245,7 +245,7 @@ export default function LaserBrushOutput() {
           ip,
           {
             garment_unit: individualQRCode,
-            stage: "laser brush",
+            stage: "laser_brush",
             action: "out", //in or out or rejected
           },
           (result: IndividualInOut) => {

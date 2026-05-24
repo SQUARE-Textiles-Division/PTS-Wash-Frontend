@@ -247,7 +247,14 @@ export default function BatchCreateDirect(){
         )
     };
 
-
+    const handleRemoveItem = (individual_barcode: string) => {
+        const updatedItems = items.filter(item => item.individual_barcode !== individual_barcode);
+        setItems(updatedItems);
+        // const removedItem = items.find(item => item.individual_barcode === individual_barcode);
+        // if (removedItem) {
+        //     setItemId(itemId.filter(id => id !== removedItem.id));
+        // }
+    }
     return (
             <Box
                 sx={{
@@ -339,7 +346,9 @@ export default function BatchCreateDirect(){
                     >
                         <Button variant="contained"
                         sx={{
-                            mt:20,
+                            // mt:20,
+                            position:'fixed',
+                            top:610,
                             backgroundColor: "#485e68",
                             '&:hover': {
                                 backgroundColor: '#37474f',
@@ -436,7 +445,7 @@ export default function BatchCreateDirect(){
                 <TableContainer
                     component={Paper}
                     sx={{
-                    maxHeight: 250,          // vertical scrollbar
+                    maxHeight: 480,          // vertical scrollbar
                     overflowX: "auto",       // horizontal scrollbar
                     overflowY: "auto",
                     maxWidth: 1150,
@@ -471,6 +480,7 @@ export default function BatchCreateDirect(){
                         <StyledTableCell align="center">Size</StyledTableCell>
                         <StyledTableCell align="center">Shade</StyledTableCell>
                         <StyledTableCell align="center">Color</StyledTableCell>
+                        <StyledTableCell align="center">Remove</StyledTableCell>
                         {/* <StyledTableCell align="center">Quantity</StyledTableCell> */}
                         </TableRow>
                     </TableHead>
@@ -487,6 +497,24 @@ export default function BatchCreateDirect(){
                             <StyledTableCell align="center">{row.size}</StyledTableCell>
                             <StyledTableCell align="center">{row.shade}</StyledTableCell>
                             <StyledTableCell align="center">{row.color}</StyledTableCell>
+                            <StyledTableCell align="center">
+                                <Button
+                                    sx={{
+                                        width: '30px',
+                                        height: '20px',
+                                        // padding: '4px',
+                                        backgroundColor: '#e53935',
+                                        '&:hover': {
+                                            backgroundColor: '#b71c1c',
+                                        },
+                                    }}
+                                    variant="contained"
+                                    color="error"
+                                    onClick={() => handleRemoveItem(row.individual_barcode)}
+                                >
+                                    Remove
+                                </Button>
+                            </StyledTableCell>
                         </StyledTableRow>
                         ))}
                     </TableBody>

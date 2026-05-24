@@ -116,6 +116,71 @@ import type WetProcessBatch from "../../TypeAnnotations/WetProcessBatch";
         
         const [shadeWarn,setShadeWarn]=useState(false)
         
+        const fetchAggregateData=()=>{
+                getData<WetProcessBatch[]>(
+                    `wet-process/batches`,
+                    ip,
+                    {},
+                    {stage:'first_wash'},
+                    (result:WetProcessBatch[])=>{
+                        let shadeSet = new Set<string>();
+                        // let rewashList=[]
+                        const mpoMetaMap = new Map();
+                        const mpoQtyMap= new Map();
+                        const rewashmpoQtyMap=new Map();
+                        for(let i=0;i<result.length;i++){
+                                for (const source of result[i].sources) {
+                                const mapKey = `${source.mpo}-${result[i].color}-${result[i].shade}`;
+                                const value = `${source.mpo}-${source.style}-${source.so}-${result[i].buyer}-${result[i].color}-${result[i].shade}`;
+
+                                mpoMetaMap.set(mapKey, mpoMetaMap.get(mapKey) || value);
+
+                                mpoQtyMap.set(
+                                    mapKey,
+                                    (mpoQtyMap.get(mapKey) || 0) + source.rewash_quantity
+                                );
+
+                                if (result[i].type === "rewash") {
+                                    rewashmpoQtyMap.set(
+                                        mapKey,
+                                        (rewashmpoQtyMap.get(mapKey) || 0) + source.quantity
+                                    );
+                                }
+                            }
+                        }
+                        
+                        let newRewashList=[]
+                        for(const [key,val] of mpoMetaMap){
+                           const quantity =
+                            (mpoQtyMap.get(key) || 0) -
+                            (rewashmpoQtyMap.get(key) || 0);
+                            const [mpo, style, so, buyer, color, shade] = val.split("-");
+                            newRewashList.push({
+                                mpo,
+                                style,
+                                so,
+                                buyer,
+                                color,
+                                shade,
+                                quantity
+                            })
+                        }
+                        setRewashBatchList(newRewashList)
+                    },
+                    (error:any)=>{
+                        console.log('Error fetching batches:', error.response.data)
+                        console.log(error.response.data)
+                        let msg=""
+                        Object.entries(error.response.data).forEach(([key, value]:any) => {
+                            msg+=value[0]
+                        });
+                        setErrorLog(msg)
+                    }
+                )
+        }
+
+
+
         const fetchPrimary=()=>{
 
                 getData<WetProcessBatchMeta[]>(
@@ -210,7 +275,8 @@ import type WetProcessBatch from "../../TypeAnnotations/WetProcessBatch";
                 )
         }
         useEffect(() => {
-            fetchPrimary();
+            // fetchPrimary();
+            fetchAggregateData();
         }, [batchCard]);
 
 
@@ -245,11 +311,11 @@ import type WetProcessBatch from "../../TypeAnnotations/WetProcessBatch";
                 }));
             // console.log('Quantity changed for BatchNumber:', row.BatchNumber, 'New Quantity:', value);
             setSelectedRows(prev => {
-                const exists = prev.find(item => item.mpo==row.mpo  && item.style==row.style && item.so==row.so && item.buyer==row.buyer && item.color==row.color && item.shade==row.shade);
+                const exists = prev.find(item => item.mpo==row.mpo   && item.color==row.color && item.shade==row.shade);
                 if (exists) {
                     console.log(exists)
                     return prev.map(item =>
-                        item.mpo==row.mpo && item.color==row.color && item.shade==row.shade && item.style==row.style && item.so==row.so && item.buyer==row.buyer
+                        item.mpo==row.mpo && item.color==row.color && item.shade==row.shade 
                         ? { ...item, quantity: value }
                         : item
                     )
@@ -291,7 +357,8 @@ import type WetProcessBatch from "../../TypeAnnotations/WetProcessBatch";
             color: "",
             stage:"",
             type:"",
-            sources_input:[]
+            input_type:"aggregate",
+            input_sources:[]
         }
         //    const batchQtyList=[]
         payload.shade=selectedRows[0].shade
@@ -302,7 +369,7 @@ import type WetProcessBatch from "../../TypeAnnotations/WetProcessBatch";
         //    const preShade=payload.shade
         //    const prevBatch={batch:selectedRows[0].BatchNumber,quantity:selectedRows[0].Quantity}
         for(let i=0;i<selectedRows.length;i++){
-                payload.sources_input.push({type:"internal",mpo:selectedRows[i].mpo,style:selectedRows[i].style,so:selectedRows[i].so,quantity:selectedRows[i].quantity})
+                payload.input_sources.push({mpo:selectedRows[i].mpo,style:selectedRows[i].style,so:selectedRows[i].so,quantity:selectedRows[i].quantity})
         }
 
         console.log('Payload for First Wash Batch Creation:', payload)
@@ -339,6 +406,7 @@ import type WetProcessBatch from "../../TypeAnnotations/WetProcessBatch";
             payload,
             (result:WetProcessBatch)=>{
                 setBatchCard(prev => !prev)
+                console.log(batchCard)
                 const qrInfo={
                     id:result.id,
                     buyer:"",
@@ -346,20 +414,20 @@ import type WetProcessBatch from "../../TypeAnnotations/WetProcessBatch";
                     so:"",
                     shade:"",
                     quantity:0,
-                    date:"",
+                    // date:"",
                     // size:"",
                     color:""
                 }
-                let date=result.created_at.slice(0, 10).replace(/-/g, "");
-                qrInfo.date=date.substring(2,4)
+                // let date=result.created_at.slice(0, 10).replace(/-/g, "");
+                // qrInfo.date=date.substring(2,4)
                 qrInfo.buyer=storeMeta.buyer.join(", ")
                 qrInfo.color=storeMeta.color.join(", ")
                 // qrInfo.size=storeMeta.size.join(", ")
                 qrInfo.shade=storeMeta.shade
-                qrInfo.quantity=0
-                for(const obj of result.sources){
-                    qrInfo.quantity+=obj.quantity
-                }
+                qrInfo.quantity=result.total_quantity
+                // for(const obj of result.sources){
+                //     qrInfo.quantity+=obj.quantity
+                // }
 
                 // qrInfo.quantity=result.total_quantity
                 
@@ -372,12 +440,18 @@ import type WetProcessBatch from "../../TypeAnnotations/WetProcessBatch";
                     }));
                 }
                 setSelectedRows([]) 
+                // setBatchCard(true)
                 // console.log(payload.batch_source)
                 console.log('Batch created successfully:', result) 
 
             },
             (error: any)=>{
                 console.log('Error creating batch:', error.response.data)
+                // console.log(error.response.data)
+                //                 let msg=""
+                //                 Object.entries(error.response.data).forEach(([key, value]:any) => {
+                //                     msg+=value[0]
+                //                 });
                 // console.log('Error creating batch:', err.response.data)
                 const data = error.response?.data;
                 if (typeof data?.shade === 'string') {
@@ -392,20 +466,20 @@ import type WetProcessBatch from "../../TypeAnnotations/WetProcessBatch";
                 else if (typeof data?.type === 'string') {
                     setErrorLog(data.type);
                 }
-                else if (typeof data?.sources_input?.[0]?.type?.[0] === 'string') {
-                    setErrorLog(data.sources_input[0].type[0]);
+                else if (typeof data?.input_sources?.[0]?.type?.[0] === 'string') {
+                    setErrorLog(data.input_sources[0].type[0]);
                 }
-                else if (typeof data?.sources_input?.[0]?.mpo?.[0] === 'string') {
-                    setErrorLog(data.sources_input[0].mpo[0]);
+                else if (typeof data?.input_sources?.[0]?.mpo?.[0] === 'string') {
+                    setErrorLog(data.input_sources[0].mpo[0]);
                 }
-                else if (typeof data?.sources_input?.[0]?.style?.[0] === 'string') {
-                    setErrorLog(data.sources_input[0].style[0]);
+                else if (typeof data?.input_sources?.[0]?.style?.[0] === 'string') {
+                    setErrorLog(data.input_sources[0].style[0]);
                 }
-                else if (typeof data?.sources_input?.[0]?.so?.[0] === 'string') {
-                    setErrorLog(data.sources_input[0].so[0]);
+                else if (typeof data?.input_sources?.[0]?.so?.[0] === 'string') {
+                    setErrorLog(data.input_sources[0].so[0]);
                 }
-                else if (typeof data?.sources_input?.[0]?.quantity?.[0] === 'string') {
-                    setErrorLog(data.sources_input[0].quantity[0]);
+                else if (typeof data?.input_sources?.[0]?.quantity?.[0] === 'string') {
+                    setErrorLog(data.input_sources[0].quantity[0]);
                 }
             }
             )
@@ -442,15 +516,16 @@ import type WetProcessBatch from "../../TypeAnnotations/WetProcessBatch";
             elevation={0}
             sx={{
             top:80,
+            left:320,
             position:'fixed',
             // position: "fixed",
             // top:85,
             // left: 0,
             right: 0,
-            maxHeight: 250,          // vertical scrollbar
+            maxHeight: 550,          // vertical scrollbar
             overflowX: "auto",       // horizontal scrollbar
             overflowY: "auto",
-            marginLeft:'250px',
+            // marginLeft:'250px',
             // marginRight:'70px',
             maxWidth: 1100,
             border:"none",
@@ -815,7 +890,7 @@ import type WetProcessBatch from "../../TypeAnnotations/WetProcessBatch";
                             max={row?.quantity ?? 1}
                             // disabled={!selectedRows.some(item => item.mpo==row.mpo && item.style==row.style && item.so==row.so && item.buyer==row.buyer && item.color==row.color && item.shade==row.shade)}
                             // value={selectedRows.quantity ?? 0} 
-                            customSize={5}
+                            customSize={15}
                             disabled={isDisabled}
                             value={displayValue}
                             onValueChange={(value) => handleQuantityChange(row, value ?? 0)}
@@ -837,7 +912,7 @@ import type WetProcessBatch from "../../TypeAnnotations/WetProcessBatch";
             </TableBody>
         </Table>
         </TableContainer>
-        <Button variant="contained"  onClick={handleCreateBatch} sx={{ mt:2,background:tbCellColor}}>Create Batch</Button>
+        <Button variant="contained"  onClick={handleCreateBatch} sx={{ position:'fixed',top:650,background:tbCellColor}}>Create Batch</Button>
 
         <div style={{marginLeft:"150px"}}>
             {qrData && (
@@ -858,7 +933,8 @@ import type WetProcessBatch from "../../TypeAnnotations/WetProcessBatch";
                         >
 
                             <QRCodeCanvas
-                            value={`RW822${qrData.date}W1${String(qrData.id).padStart(7, '0')}`}
+                            // value={`RW822${qrData.date}W1${String(qrData.id).padStart(7, '0')}`}
+                            value={qrData.id}
                             size={100}
                             level="H"
                             />
@@ -869,7 +945,8 @@ import type WetProcessBatch from "../../TypeAnnotations/WetProcessBatch";
                                 fontSize: 12,
                                 mb: 2
                             }}>
-                                {`RW822${qrData.date}W1${String(qrData.id).padStart(7, '0')}`}
+                                {qrData.id}
+                                {/* {`RW822${qrData.date}W1${String(qrData.id).padStart(7, '0')}`} */}
                             </Typography>
                             <Typography variant="body2">
                                 <b>Total Quantity:</b> {qrData.quantity}

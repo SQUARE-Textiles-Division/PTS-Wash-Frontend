@@ -4,9 +4,9 @@ export default interface BatchSourceEntry {
     color:string,
     stage: string,
     type: string,
-    sources_input:
+    input_type:string,
+    input_sources:
     {
-        type: string,
         mpo: string,
         style: string,
         so: string,

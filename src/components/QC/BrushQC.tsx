@@ -88,28 +88,34 @@ export default function BrushQC() {
   const [delbarcode,setDelBarCode]=React.useState<string>("")
   // const [del]
 
-  const handleDelete=(id:number)=>{
-    delData<RejectionReason>(
-      `productions/rejections/${id}/`,
-      ip,
-      {},
-      {stage: "Brush"},
-      (data) => {
-        console.log("Rejection deleted:", data);
-        const delObj=rows.filter((row)=>row.id==id)
-        setDelBarCode(delObj[0].individual_barcode)
-        setinvbarcode("")
-        // delObj.individual_barcode
-        const updatedRows = rows.filter((row) => row.id !== id);
-        setRows(updatedRows);
-        setDeletePop(false);
-        setDeleteId(0)
-      },
-       (error:any)=>{
-        console.log('Err',error.response.data[0])
-        setDeleteError(error.response.data[0])
-      }
-    )
+  const handleDelete=(individual_barcode:string)=>{
+
+    const itemFiltered=rows.filter((row)=>row.individual_barcode!=individual_barcode)
+    console.log("Item to delete:", itemFiltered);
+    setRows(itemFiltered)
+
+    // delData<RejectionReason>(
+    //   `productions/rejections/${id}/`,
+    //   ip,
+    //   {},
+    //   {stage: "Brush"},
+    //   (data) => {
+    //     console.log("Rejection deleted:", data);
+    //     const delObj=rows.filter((row)=>row.id==id)
+    //     setDelBarCode(delObj[0].individual_barcode)
+    //     setinvbarcode("")
+    //     // delObj.individual_barcode
+    //     const updatedRows = rows.filter((row) => row.id !== id);
+    //     setRows(updatedRows);
+    //     setDeletePop(false);
+    //     setDeleteId(0)
+    //   },
+    //    (error:any)=>{
+    //     console.log('Err',error.response.data[0])
+    //     setDeleteError(error.response.data[0])
+    //   }
+    // )
+
   }
   return (
     <Box
@@ -155,7 +161,11 @@ export default function BrushQC() {
                           setinvbarcode(inv);
                           let temp={
                             rejected_at:'brush',
+                            reason:"",
                             ...infores
+                          }
+                          if(reason!=""){
+                            temp.reason=reason
                           }
                           setRows(prevRows => [temp, ...prevRows]);
 
@@ -200,7 +210,7 @@ export default function BrushQC() {
 
       {/* Reject Reason Dropdown */}
       {rejectField && (
-        <Box sx={{  position:'fixed' ,gap:2, display:'flex', flexDirection:'row', alignItems:'flex-start',justifyContent:'center',top:80,left:500 }}>
+        <Box sx={{  position:'fixed' ,gap:2, display:'flex', flexDirection:'row', alignItems:'flex-start',justifyContent:'center',top:80,left:600 }}>
           {/* <Typography variant="h6" gutterBottom>
             Reject Reasons
           </Typography> */}
@@ -281,7 +291,7 @@ export default function BrushQC() {
           component={Paper}
           elevation={0}
           sx={{
-            maxHeight: 400,          // vertical scrollbar
+            maxHeight: 480,          // vertical scrollbar
             overflowX: "auto",       // horizontal scrollbar
             overflowY: "auto",
             border:'none',
@@ -368,13 +378,14 @@ export default function BrushQC() {
                                     color='error' 
                                     sx={{
                                       
-                                      fontSize:14
+                                      fontSize:16
                                     }}
                                  
                                     onClick={()=>{
                                       console.log("Delete clicked for id:", row.id);
-                                      setDeletePop(true);
-                                      setDeleteId(row.id);
+                                      // setDeletePop(true);
+                                      // setDeleteId(row.individual_barcode);
+                                      handleDelete(row.individual_barcode)
                                     }}
                                   >
                                 </DeleteForeverIcon>
@@ -385,7 +396,7 @@ export default function BrushQC() {
               </Table>
         </TableContainer>
       {/* Modal */}
-        <Modal open={deletePop && deleteId !== 0} onClose={() => {setDeletePop(false);setDeleteId(0);}}>
+        {/* <Modal open={deletePop && deleteId !== 0} onClose={() => {setDeletePop(false);setDeleteId(0);}}>
                   <Box
                     sx={{
                       position: "fixed",
@@ -414,7 +425,7 @@ export default function BrushQC() {
                       
                     {/* <Typography>Already batches are allocated according to this plan */}
                     {/* </Typography> */}
-                    <div style={{
+                    {/* <div style={{
                       display:'flex',
                       justifyContent:'space-between'
                     }}>
@@ -424,8 +435,8 @@ export default function BrushQC() {
                     </div>
                     
                     </Box>
-                </Box>
-          </Modal>
+                </Box> */}
+          {/* </Modal>  */}
       <Modal open={rejectPop} onClose={() => setRejectPop(false)}>
         <Box
           sx={{

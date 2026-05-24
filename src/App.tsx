@@ -58,23 +58,23 @@ function App() {
       <Routes >
         {/* <Route path="/" /> */}
         <Route path="/planning" element={<Planning />} />
-        <Route path='/hydroin' element={<HydroIn/>}/>
-        <Route path='/hydroout' element={<HydroOut/>}/>
-        <Route path='/loadstart' element={<LoadStart/>}/>
-        <Route path='/loadfinish' element={<LoadFinish/>}/>
+        <Route path='/firstwash/hydroin' element={<HydroIn/>}/>
+        <Route path='/firstwash/hydroout' element={<HydroOut/>}/>
+        <Route path='/firstwash/loadstart' element={<LoadStart/>}/>
+        <Route path='/firstwash/loadfinish' element={<LoadFinish/>}/>
         <Route path='/firstwashqc' element={<FirstWashQC/>}/>
-        <Route path='/rewashcreatebatch' element={<Rewash/>}/>
+        <Route path='/firstwash/rewashcreatebatch' element={<Rewash/>}/>
         
-        <Route path='/processfinish' element={<ProcessFinish/>}/>
-        <Route path='/unloadfinish' element={<UnloadFinish/>}/>
-        <Route path="/dryerconveyorin" element={<DryerConveyorIn/>}/>
-        <Route path="/dryerconveyorout" element={<DryerConveyorOut/>}/>
-        <Route path='/dryertumblein' element={<DryerTumbleIn/>}/>
-        <Route path='/dryerovenin' element={<DryerOvenIn/>}/>
-        <Route path='/dryerovenout' element={<DryerOvenOut/>}/>
-        <Route path='dryertumbleout' element={<DryerTumbleOut/>}/>
-        <Route path='/batchwithdry' element={<BatchCreateDry/>}/>
-        <Route path='/batchdry' element={<BatchCreateDirect/>}/>
+        <Route path='/firstwash/processfinish' element={<ProcessFinish/>}/>
+        <Route path='/firstwash/unloadfinish' element={<UnloadFinish/>}/>
+        <Route path="/firstwash/dryerconveyorin" element={<DryerConveyorIn/>}/>
+        <Route path="/firstwash/dryerconveyorout" element={<DryerConveyorOut/>}/>
+        <Route path='/firstwash/dryertumblein' element={<DryerTumbleIn/>}/>
+        <Route path='/firstwash/dryerovenin' element={<DryerOvenIn/>}/>
+        <Route path='/firstwash/dryerovenout' element={<DryerOvenOut/>}/>
+        <Route path='/firstwash/dryertumbleout' element={<DryerTumbleOut/>}/>
+        {/* <Route path='/firstwash/batchwithdry' element={<BatchCreateDry/>}/> */}
+        <Route path='/firstwash/createbatch' element={<BatchCreateDirect/>}/>
 
 
 

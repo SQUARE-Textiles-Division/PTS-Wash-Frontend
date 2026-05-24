@@ -1,4 +1,4 @@
-import { Box, Button, FormControl, InputLabel, MenuItem, Modal, Paper, Select, styled, Table, TableBody, TableCell, tableCellClasses, TableContainer, TableHead, TableRow, TextField, Typography, type SelectChangeEvent } from "@mui/material";
+import { Box, Button, Checkbox, FormControl, InputLabel, MenuItem, Modal, Paper, Select, styled, Table, TableBody, TableCell, tableCellClasses, TableContainer, TableHead, TableRow, TextField, Typography, type SelectChangeEvent } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 import { getData, patchData, postData } from "../genericApiService";
 import { washlog } from "../../endpoints";
@@ -6,14 +6,17 @@ import { ip } from "../../ip";
 import { tbCellColor, tbRowColor } from "../Colors/Colors";
 import DoneAllIcon from '@mui/icons-material/DoneAll';
 import React from "react";
-import { WhiskerRejectReasons } from "../RejectionReasons/WhiskerRejectReasons";
+// import { WhiskerRejectReasons } from "../RejectionReasons/WhiskerRejectReasons";
+import {WetRejectReasons} from "../RejectionReasons/WetRejectReasons"
 // import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 // import type FirstWashRejection from "../../TypeAnnotations/WetWashRejection";
 import type BundleInfo from "../../TypeAnnotations/BundleInfo";
 import NumberSpinner from "../NumberSpinner";
 // import type FetchFirstWash from "../../TypeAnnotations/WetProcessBatchMeta";
-import type WetProcessBatchMeta from "../../TypeAnnotations/WetProcessBatchMeta";
+// import type WetProcessBatchMeta from "../../TypeAnnotations/WetProcessBatchMeta";
+import type WetProcessBatch from "../../TypeAnnotations/WetProcessBatch";
 import type WetWashRejection from "../../TypeAnnotations/WetWashRejection";
+import type IndividualInfo from "../../TypeAnnotations/IndividualInfo";
 // import NumberField from './components/NumberField';
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
@@ -61,35 +64,42 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 //         "status": null
 //     }
 type RejPayload={
-    individual_barcode:string,
-    reason:string
+    // individual_barcode:string,
+    // reason:string
+    garment_unit:string,
+    rejection_reason:string
 }
 type FetchBatchMeta={
-    id:number,
+    id:string,
     buyer:string,
     shade:string,
     color:string,
+    qty:number,
     rej_qty:number ,
     ok_qty:number,
     total_rewash:number
 }
 type FetchBatchDetails={
-    id:number,
-    mpo:string,
-    style:string,
-    so:string,
-    quantity:number,
-    rewash_quantity:number,
-    add:boolean
+    id: number,
+    mpo : string,
+    style: string,
+    so: string,
+    quantity: number,
+    rewash_quantity: number,
+    rejection_quantity: number
+    // add:boolean
 }
 export default function FirstWashQC(){
+
+
+
     const individualBarcodeRef = React.useRef<HTMLInputElement>(null);
     const [invbarcode,setinvbarcode]=React.useState<string>("");
     const batchqrcoderef=useRef<HTMLInputElement>(null);
     const [fetchedBatch,setfetchedBatch]=useState<FetchBatchMeta|null>(null)
     const [fetchedBatchDetails, setFetchedBatchDetails] = useState<FetchBatchDetails[]>([]);
     const [reason,setReason]=React.useState<string>("");
-    const rejectReasons=WhiskerRejectReasons;
+    const rejectReasons=WetRejectReasons;
     // const [addOnBatch,setAddOnBatch]=useState<{id:number,add:boolean}>()
     const [reasonDisplay,setReasonDisplay]=React.useState<string>("");
     const [rejectPop,setRejectPop]=useState<boolean>(false)
@@ -100,7 +110,7 @@ export default function FirstWashQC(){
     const [rejectField,setRejectField]=React.useState<boolean>(false);
     const [deleteId, setDeleteId] = React.useState<number>(0);
     // const [batchtype,setBatchType]=useState<string>("")
-    const [batchId,setBatchId]=useState<number>(0)
+    const [batchId,setBatchId]=useState<string>("")
     const [rejectDone,setRejectDone]=useState<boolean>(false)
     const [batchqr,setBatchQR]=useState<string>("")
     const [indivScanned,setIndivScanned]=useState<boolean>(false)
@@ -110,17 +120,70 @@ export default function FirstWashQC(){
     const [shade,setShade]=useState<string>("")
     const [diffPop,setDiffPop]=useState<boolean>(false)
     const [activeId, setActiveId] = useState<number|null>(null);
+    const [selectedSources, setSelectedSources] = useState<{batch_source:number, rewash_quantity:number}[]>([]);
+    const [filter, setFilter] = useState({
+        MPO: "",
+        Style: "",
+        SO: "",
+    });
+    const [addRewashError,setAddRewashError]=useState<string>("")
+    const [chosenQty, setChosenQty] = useState<Record<number, number|null>>({});
+    // useEffect(()=>{
+    //     fetchData(batchqr)
+    // },[rejectDone,updateDone])
+
+    // useEffect(() => {
+    //     if (indivScanned) {
+    //         fetchRejectedBundle();
+    //     }
+    // }, [indivScanned,invbarcode]);
 
 
-    useEffect(()=>{
-        fetchData(batchqr)
-    },[rejectDone,updateDone])
 
-    useEffect(() => {
-        if (indivScanned) {
-            fetchRejectedBundle();
-        }
-    }, [indivScanned,invbarcode]);
+
+    // const fetchPieceData=(barcode:string)=>{
+    const fetchPieceDetails=(inv:string)=>{
+        getData<IndividualInfo>(
+            `common/garment-units/${inv}`,
+            ip,
+            {},
+            {},
+            (data: IndividualInfo) => {
+                let tempRows: any[] = [];
+
+                tempRows.push({
+                    individual_barcode: data.individual_barcode,
+                    mpo: data.mpo,
+                    color: data.color,
+                    buyer: data.buyer,
+                    shade: data.shade,
+                    size: data.size,
+                    style: data.style,
+                    so: data.so,
+                    rejected_at: 'first wash',
+                    reason: reason,
+                    // saved:false
+                });
+                setRows(prevRows => {
+                    const filteredTemp = tempRows.filter(temp =>
+                        !prevRows.some(prev => prev.individual_barcode === temp.individual_barcode)
+                    );
+
+                    return [...filteredTemp, ...prevRows];
+                });
+                setIndivScanned(true)
+            },
+            (error:any)=>{
+                console.log(error)
+                setRejectError("Invalid Barcode. Please scan a valid individual barcode.")
+                // setRejectPop(true)
+                setIndivScanned(false)
+            }
+        )
+
+    }
+
+
 
     const fetchRejectedBundle = () => {
         let tempStr=invbarcode.slice(0, 12);
@@ -178,66 +241,153 @@ export default function FirstWashQC(){
         // First API call (washing scan) ---
         const str=batchcode
         setBatchQR(batchcode)
-        if(str.length==16 && str[0]=='R')
-            reWash=true
-        else if(str.length==15)
-            firstWash=true
-        const index = str.indexOf("W1");      // find position of ":"
-        let batchId = str.substring(index + 2);
-        const batchIdNum = parseInt(batchId, 10);
-        // const contentType=firstWash?'batchforfirstwash':'batchforrewash'
-        // setBatchType(contentType)
-        getData<WetProcessBatchMeta[]>(
-            washlog,
+        // if(str.length==16 && str[0]=='R')
+        //     reWash=true
+        // else if(str.length==15)
+        //     firstWash=true
+        // const index = str.indexOf("W1");      // find position of ":"
+        // let batchId = str.substring(index + 2);
+        // const batchIdNum = parseInt(batchId, 10);
+        const batchIdNum = batchcode
+
+        getData<WetProcessBatch>(
+            `wet-process/batches/${batchIdNum}`,
             ip,
             {},
-            {
-                batch:batchIdNum
-            },
-            (log:WetProcessBatchMeta[])=>{
-                let rewashQty=0
-                for(const obj of log){
-                    rewashQty+=obj.rewash_quantity
-                }
+            {},
+            (batchData: WetProcessBatch) => {   
                 setfetchedBatch(
                     {
-                        'id':log[0].batch.id,
-                        'buyer':log[0].batch.buyer,
-                        'shade':log[0].batch.shade,
-                        'color':log[0].batch.color,
-                        'rej_qty':log[0].batch.rejection_count,
-                        'ok_qty':log[0].batch.total_quantity-(rewashQty+log[0].batch.rejection_count),
-                        'total_rewash':rewashQty
+                        'id':batchData.id,
+                        'buyer':batchData.buyer,
+                        'shade':batchData.shade,
+                        'color':batchData.color,
+                        'qty':batchData.total_quantity,
+                        'rej_qty':batchData.total_rejection_quantity,
+                        'ok_qty':batchData.total_quantity-(batchData.total_rewash_quantity+batchData.total_rejection_quantity),
+                        'total_rewash':batchData.total_rewash_quantity
                     }
                 )
                 const details=[]
 
-                for(const obj of log){
+                for(const obj of batchData.sources){ 
+                    
                     details.push({
-                        id:obj.source.id,
-                        mpo:obj.source.mpo,
-                        style:obj.source.style,
-                        so:obj.source.so,
-                        quantity:obj.quantity,
-                        rewash_quantity:obj.rewash_quantity,  
-                        add:false,
+                        'id':obj.id,
+                        'mpo':obj.mpo,
+                        'style':obj.style,
+                        'so':obj.so,
+                        'quantity':obj.quantity,
+                        'rewash_quantity':obj.rewash_quantity,  
+                        'rejection_quantity':obj.rejection_quantity,
+                        // 'add':false
                     })
+                    console.log(obj)
                 }
-                
-
                 setFetchedBatchDetails(details)
                 setBatchId(batchIdNum)
                 setIndivScanned(false)
-                setShade(log[0].batch.shade)
-                
-            },
-            (error:any)=>{
-                console.log(error)
+                setShade(batchData.shade)
             }
-            
         )
+        // const contentType=firstWash?'batchforfirstwash':'batchforrewash'
+        // setBatchType(contentType)
+        // getData<WetProcessBatchMeta[]>(
+        //     washlog,
+        //     ip,
+        //     {},
+        //     {
+        //         batch:batchIdNum
+        //     },
+        //     (log:WetProcessBatchMeta[])=>{
+        //         let rewashQty=0
+        //         for(const obj of log){
+        //             rewashQty+=obj.rewash_quantity
+        //         }
+        //         setfetchedBatch(
+        //             {
+        //                 'id':log[0].batch.id,
+        //                 'buyer':log[0].batch.buyer,
+        //                 'shade':log[0].batch.shade,
+        //                 'color':log[0].batch.color,
+        //                 'rej_qty':log[0].batch.rejection_count,
+        //                 'ok_qty':log[0].batch.total_quantity-(rewashQty+log[0].batch.rejection_count),
+        //                 'total_rewash':rewashQty
+        //             }
+        //         )
+        //         const details=[]
+
+        //         for(const obj of log){
+        //             details.push({
+        //                 id:obj.source.id,
+        //                 mpo:obj.source.mpo,
+        //                 style:obj.source.style,
+        //                 so:obj.source.so,
+        //                 quantity:obj.quantity,
+        //                 rewash_quantity:obj.rewash_quantity,  
+        //                 add:false,
+        //             })
+        //         }
+                
+
+        //         setFetchedBatchDetails(details)
+        //         setBatchId(batchIdNum)
+        //         setIndivScanned(false)
+        //         setShade(log[0].batch.shade)
+                
+        //     },
+        //     (error:any)=>{
+        //         console.log(error)
+        //     }
+            
+        // )
 
     }
+     const handleRowSelect = (row: any, checked: boolean) => {
+            if (checked) {
+                // Add row to state with initial Quantity = 0
+                setSelectedSources(prev => [
+                ...prev,
+                { batch_source: row.id, rewash_quantity: 0 },
+                ]);
+            }
+            else {
+                const key =row.id;
+                setChosenQty(prev => ({
+                    ...prev,
+                    [key]: null
+                }));
+                // Remove row from state
+                setSelectedSources(prev =>
+                    prev.filter(item => item.batch_source !== row.id)
+                );
+            }
+    };
+    const handleQuantityChange = (row: any, value: number) => {
+            console.log(value)
+            const key =row.id;
+
+            setChosenQty(prev => ({
+                ...prev,
+                [key]: value
+            }));
+            // console.log('Quantity changed for BatchNumber:', row.BatchNumber, 'New Quantity:', value);
+            setSelectedSources(prev => {
+                const exists = prev.find(item => item.batch_source === row.id);
+                if (exists) {
+                    console.log(exists)
+                    return prev.map(item =>
+                        item.batch_source === row.id
+                        ? { ...item, rewash_quantity: value }
+                        : item
+                    );
+                } 
+                else {
+                // Automatically add row if it doesn’t exist
+                    return [...prev, { batch_source: row.id, rewash_quantity: value }];
+                }
+            });
+        };
      const handleRowReasonChange = (rowInvBar: string, newReason: string) => {
             setRows((prevRows) =>
                 prevRows.map((row) =>
@@ -251,12 +401,13 @@ export default function FirstWashQC(){
                 <TextField
                 
                 style={{outline:"red",
-                    marginLeft:'160px',
+                    // marginLeft:'160px',
                     position:"fixed",
                     display:'flex',
                     
                     // height:20,
                     top:80,
+                    left:250,
                     alignItems:"flex-start",
                 }}
                 inputRef={batchqrcoderef}
@@ -304,21 +455,31 @@ export default function FirstWashQC(){
                 
                {fetchedBatch!=null && ( 
                 
-            <div style={{display:'flex',flexDirection:'column',gap:3,position:'fixed',top:130}}>
+            <div style={{display:'flex',flexDirection:'column',gap:3,position:'fixed',top:130,left:100}}>
 
                     <div style={{marginLeft:'160px'}}>
-                        <p><span style={{color:tbCellColor,fontWeight:"bold"}}>Buyer</span> - 
+                        
+                        <p>
+                         <span style={{color:tbCellColor,fontWeight:"bold"}}>BatchQRCode</span> -
+                          <span style={{fontWeight:"bold"}}>{fetchedBatch.id}</span> -  
+                        <span style={{color:tbCellColor,fontWeight:"bold"}}>Buyer</span> - 
                         <span style={{fontWeight:'bold'}}>{fetchedBatch.buyer} </span> - 
                         <span style={{color:tbCellColor,fontWeight:"bold"}}>Color</span> - 
                         <span style={{fontWeight:'bold'}}>{fetchedBatch.color} </span> - 
-                        <span style={{color:tbCellColor,fontWeight:"bold"}}>Shade</span> - 
-                        <span style={{fontWeight:'bold'}}>{fetchedBatch.shade} </span> - 
-                        <span style={{color:tbCellColor,fontWeight:"bold"}}>Ok Quantity</span> - 
-                        <span style={{fontWeight:'bold'}}>{fetchedBatch.ok_qty} </span> - 
+                        <span style={{color:tbCellColor,fontWeight:"bold"}}>Shade</span> -
+                        <span style={{fontWeight:'bold'}}>{fetchedBatch.shade} </span> 
+                        </p>
+                        <p>
+                        
+                        <span style={{color:tbCellColor,fontWeight:"bold"}}>Total Quantity</span> - 
+                        <span style={{fontWeight:'bold'}}>{fetchedBatch.qty} </span> - 
                         <span style={{color:tbCellColor,fontWeight:"bold"}}>Total Rewash</span> - 
                         <span style={{fontWeight:'bold'}}>{fetchedBatch.total_rewash} </span> - 
                         <span style={{color:tbCellColor,fontWeight:"bold"}}>Rejected Quantity</span> - 
-                        <span style={{fontWeight:'bold'}}>{fetchedBatch.rej_qty} </span> </p>
+                        <span style={{fontWeight:'bold'}}>{fetchedBatch.rej_qty} </span> -
+                        <span style={{color:tbCellColor,fontWeight:"bold"}}>Ok Quantity</span> - 
+                        <span style={{fontWeight:'bold'}}>{fetchedBatch.ok_qty} </span> 
+                        </p>
                     </div>
                     {/* <TableContainer
                             component={Paper}
@@ -369,15 +530,16 @@ export default function FirstWashQC(){
                         </TableContainer> */}
 
                             <TableContainer
-                            component={Paper}
-                            sx={{
-                            maxHeight: 220,          // vertical scrollbar
-                            overflowX: "auto",       // horizontal scrollbar
-                            overflowY: "auto",
-                            maxWidth: 800,
-                            border:'none',
-                            marginLeft:'150px',
-                            position:'relative'
+                                component={Paper}
+                                sx={{
+                                maxHeight: 120,          // vertical scrollbar
+                                overflowX: "auto",       // horizontal scrollbar
+                                overflowY: "auto",
+                                maxWidth: 1000,
+                                border:'none',
+                                marginLeft:'150px',
+                                position:'fixed',
+                                top:200,
                             // marginTop:'20px',
                             // height:'110px'
                             // marginLeft:'100px',
@@ -396,19 +558,181 @@ export default function FirstWashQC(){
                         >
                         <TableHead>
                             <TableRow>
-                            <StyledTableCell align="center">MPO</StyledTableCell>
-                            <StyledTableCell align="center">Style</StyledTableCell>
-                            <StyledTableCell align="center">Sales Order</StyledTableCell>
-                                <StyledTableCell align="center">Original Quantity</StyledTableCell>
-                            
+                            <StyledTableCell align="center"> 
+                                <TextField
+                                            
+                                            sx={{
+                                                background:'white',
+                                                "& .MuiOutlinedInput-root": {
+                                                    "&.Mui-focused fieldset": {
+                                                        // borderColor: "#485e68",  
+                                                        //       // Outline color on focus
+                                                        borderColor:'white'
+                                                    },
+                                                    // "& input": {
+                                                    //     textAlign: "center", // center input text
+                                                    //     padding: "0 8px",
+                                                    // },
+                                                // height:'100%'
+                                                // width:'5px'
+                                                },
+                                                "& .MuiInputLabel-root": {
+                                                    "&.Mui-focused": {
+                                                        color: "black",
+                                                        fontWeight:'bold'               // Label/text color on focus
+                                                    },
+                                                    textAlign: "center",
+                                                    // top:'50%'
+                                                },
+                                                // width: 100,
+                                                fontWeight:'bold',
+                                                "& .MuiInputBase-root": {
+                                                    height: 20, // total height
+                                                    width:'80px'
+                                                },
+                                                "& .MuiFormLabel-root":{
+                                                    lineHeight:1,
+                                                    fontSize:12,
+                                                    left:10,
+                                                    top:-5,
+                                                    fontWeight:'bold'
+                                                    // textAlign:'center'
+                                                }
+                                                // width:'5px'
+                                                // fontSize:
+                                                // height:'30px',
+                                                // textEmphasisColor:'white'
+                                            }}
+                                            autoFocus
+                                            size="small"
+                                            label="MPO"
+                                        
+                                            
+                                            onChange={(e) => {
+                                                const value = e.target.value;
+                                                setFilter((prev) => ({ ...prev, ["MPO"]: value }));
+                                            }}
+                                        >
+
+                                </TextField>
+                            </StyledTableCell>
+                            <StyledTableCell align="center">
+                                <TextField
+                                                    
+                                    sx={{
+                                        background:'white',
+                                        "& .MuiOutlinedInput-root": {
+                                            "&.Mui-focused fieldset": {
+                                                // borderColor: "#485e68",  
+                                                //       // Outline color on focus
+                                                borderColor:'white'
+                                            },
+                                            //  height:'100%'
+                                        },
+                                        "& .MuiInputLabel-root": {
+                                            "&.Mui-focused": {
+                                                color: "black",
+                                                fontWeight:'bold'               // Label/text color on focus
+                                            },
+                                            //  textAlign: "center",
+                                            
+                                        },
+                                        // width: 100,
+                                        fontWeight:'bold',
+                                            "& .MuiInputBase-root": {
+                                                height: 20, // total height
+                                                width:'80px'
+                                            //  width:0
+                                        },
+                                        "& .MuiFormLabel-root":{
+                                            lineHeight:1,
+                                            fontSize:12,
+                                            left:10,
+                                            top:-5,
+                                                fontWeight:'bold'
+                                            // textAlign:'center'
+                                        }
+                                        // textEmphasisColor:'white'
+                                    }}
+                                    autoFocus
+                                    size="small"
+                                    label="Style"
+                                        onChange={(e) => {
+                                        const value = e.target.value;
+                                        setFilter((prev) => ({ ...prev, ["Style"]: value }));
+                                    }}
+                                    
+                                >
+                                </TextField> 
+                            </StyledTableCell>
+                       
+                            <StyledTableCell align="center">
+                                <TextField
+                                                        
+                                    sx={{
+                                        // alignItems:'center',
+                                        background:'white',
+                                        "& .MuiOutlinedInput-root": {
+                                            "&.Mui-focused fieldset": {
+                                                // borderColor: "#485e68",  
+                                                //       // Outline color on focus
+                                                borderColor:'white'
+                                            },
+                                            //  height:'100%'
+                                        },
+                                        "& .MuiInputLabel-root": {
+                                        "&.Mui-focused": {
+                                            color: "black",
+                                            fontWeight:'bold'               // Label/text color on focus
+                                        },
+                                        },
+                                        // width: 100,
+                                        fontWeight:'bold',
+                                        "& .MuiInputBase-root": {
+                                                height: 20, // total height
+                                                width:'80px'
+                                        },
+                                        "& .MuiFormLabel-root":{
+                                            lineHeight:1,
+                                            fontSize:12,
+                                            left:10,
+                                            top:-5,
+                                            fontWeight:'bold'
+                                            // textAlign:'center'
+                                        }
+                                        // textEmphasisColor:'white'
+                                    }}
+                                    autoFocus
+                                    size="small"
+                                    label="Sales Order"
+                                        onChange={(e) => {
+                                        const value = e.target.value;
+                                        setFilter((prev) => ({ ...prev, ["SO"]: value }));
+                                    }}
+                                >
+                                    </TextField> 
+                            </StyledTableCell>
+                            <StyledTableCell align="center">Original Quantity</StyledTableCell>
+                            <StyledTableCell align="center">Rejected</StyledTableCell>
                             <StyledTableCell align="center">Rewash</StyledTableCell>
                             <StyledTableCell align="center">Add Rewash</StyledTableCell>
+                            <StyledTableCell align="center">Select</StyledTableCell>
                         
                             </TableRow>
                         </TableHead>
 
                         <TableBody>
-                            {fetchedBatchDetails.map((batch)=>(
+                            {fetchedBatchDetails.filter(batch => batch.quantity-(batch.rewash_quantity +batch.rejection_quantity) > 0).map((batch)=>
+                            {
+                                const isDisabled = !selectedSources.some(
+                                    item =>
+                                        item.batch_source === batch.id 
+                                );
+                                const key =batch.id;
+
+                                const actualValue =chosenQty[key] ??null; 
+                                const displayValue = isDisabled ? null : actualValue;
+                            return(
                             <StyledTableRow key={batch.id}>
                                 <StyledTableCell align="center">{batch?.mpo}</StyledTableCell>
                                 <StyledTableCell align="center">{batch?.style}</StyledTableCell>
@@ -417,9 +741,30 @@ export default function FirstWashQC(){
                                 
                                
                                 {/* <StyledTableCell align="center">{fetchedBatchDetails?.rejected_quantity}</StyledTableCell>/ */}
+                                <StyledTableCell align="center">{batch?.rejection_quantity }</StyledTableCell>
                                 <StyledTableCell align="center">{batch?.rewash_quantity}</StyledTableCell>
-
+                                 <StyledTableCell align="center">
+                                    <NumberSpinner
+                                    size="small"
+                                    min={1}
+                                    max={batch?.quantity-(batch?.rewash_quantity+batch?.rejection_quantity)}
+                                    customSize={15} // new prop
+                                    disabled={isDisabled}
+                                    value={displayValue}
+                                    onValueChange={(value) =>{console.log(batch?.quantity); handleQuantityChange(batch, value ?? 0)}}
+                                    />
+                                </StyledTableCell>  
                                 <StyledTableCell align="center">
+                                            <Checkbox 
+                                            checked={selectedSources.some(item => item.batch_source === batch.id)}
+                                            onChange={(e, checked) => handleRowSelect(batch, checked)}
+                                            slotProps={{ input: { 'aria-label': 'select-row' } }}
+                                            sx={{
+                                                height:10
+                                            }}
+                                            />
+                                </StyledTableCell>
+                                {/* <StyledTableCell align="center">
                                     {
                                         activeId==batch.id &&
                                         (
@@ -460,25 +805,25 @@ export default function FirstWashQC(){
                                                     onClick={()=>{
                                                         // console.log(fetchedBatch.id)
                                                         // console.log(batch.id,' ',batch.rewash_quantity)
-                                                        patchData<WetProcessBatchMeta>(
-                                                            `wet-process/batch-sources/${batch?.id}/`,
-                                                            ip,
-                                                            {
-                                                                rewash_quantity: (batch?.rewash_quantity ?? 0) + rewashQty
-                                                            },
-                                                            (update:WetProcessBatchMeta)=>{
-                                                                // console.log(update.id)
-                                                                // console.log(batch?.rewash_quantity?? 0 + rewashQty)
-                                                                // console.log(rewashQty)
-                                                                console.log(update)
-                                                                // setAddOn(false)
-                                                                batch.add=false
-                                                                setActiveId(null);
-                                                                // for(const obg
-                                                                // setRewashQty()
-                                                                setUpdateDone(prev => !prev)
-                                                            }
-                                                        )
+                                                        // patchData<WetProcessBatchMeta>(
+                                                        //     `wet-process/batch-sources/${batch?.id}/`,
+                                                        //     ip,
+                                                        //     {
+                                                        //         rewash_quantity: (batch?.rewash_quantity ?? 0) + rewashQty
+                                                        //     },
+                                                        //     (update:WetProcessBatchMeta)=>{
+                                                        //         // console.log(update.id)
+                                                        //         // console.log(batch?.rewash_quantity?? 0 + rewashQty)
+                                                        //         // console.log(rewashQty)
+                                                        //         console.log(update)
+                                                        //         // setAddOn(false)
+                                                        //         batch.add=false
+                                                        //         setActiveId(null);
+                                                        //         // for(const obg
+                                                        //         // setRewashQty()
+                                                        //         setUpdateDone(prev => !prev)
+                                                        //     }
+                                                        // )
                                                         // setAddOn(false)
                                                     }}
                                                 // disabled={!reason}
@@ -509,13 +854,72 @@ export default function FirstWashQC(){
                                     }
                                 
                                 
-                                </StyledTableCell>
-                            </StyledTableRow>
-                            ))}
+                                </StyledTableCell> */}
+                            </StyledTableRow>)
+                            })}
  
                         </TableBody>
                         </Table>
                     </TableContainer>
+                    <Button variant="contained" sx={{ 
+                        
+                        color:'white',
+                        position:'fixed',
+                        left:250,
+                        top:350   
+                    }} 
+                    onClick={()=>{
+                        patchData<WetProcessBatch>(
+                            `wet-process/batches/${batchId}/rewash/`,
+                            ip,
+                            {
+                                sources: selectedSources
+                            },
+                            (updatedBatch:WetProcessBatch)=>{
+                                console.log(updatedBatch)
+                                setSelectedSources([]);
+                                setChosenQty({})
+                                setfetchedBatch((prev)=>prev ? {...prev, ok_qty: updatedBatch.total_quantity-(updatedBatch.total_rewash_quantity+updatedBatch.total_rejection_quantity),rej_qty: updatedBatch.total_rejection_quantity,total_rewash: updatedBatch.total_rewash_quantity} : null)
+                                const details=[]
+                                for(const obj of updatedBatch.sources){ 
+                    
+                                    details.push({
+                                            'id':obj.id,
+                                            'mpo':obj.mpo,
+                                            'style':obj.style,
+                                            'so':obj.so,
+                                            'quantity':obj.quantity,
+                                            'rewash_quantity':obj.rewash_quantity,  
+                                            'rejection_quantity':obj.rejection_quantity,
+                                            // 'add':false
+                                    })
+                                }
+                                setFetchedBatchDetails(details)
+
+                                // setFetchedBatch(prev => prev ? {...prev, ok_qty: 
+                            },
+                            (error:any)=>{
+                                console.log(error.response.data)
+                                let msg=""
+                                Object.entries(error.response.data).forEach(([key, value]:any) => {
+                                    msg+=value[0]
+                                });
+
+                                // if
+
+                                setAddRewashError(msg)   
+                            }
+
+
+                        )
+                        // for(const [key,value] of Object.entries(chosenQty)){
+                        //     console.log(key,' ',value)
+                        // }
+                        // console.log(Object.values(chosenQty).some(val => val === null|| val === undefined))
+                    }}
+                    disabled={selectedSources.length===0 || selectedSources[0].rewash_quantity === 0 || Object.values(chosenQty).some(val => val === null)}>
+                        +Add Rewash
+                    </Button>
                 </div>
                 )}
 
@@ -525,13 +929,17 @@ export default function FirstWashQC(){
                     <Box
                     sx={{
                         display: "flex",
-                        position:'relative',
+                        position:'fixed',
                         // top:'60px',
+                        marginLeft:'-5px',
                         flexDirection: "row",
                         alignItems: "center", // vertically center all items
                         gap: 2, // space between items
-                        mt: 30,
-                        ml: "150px", // adjust margin as needed
+                        // mt: 30,
+                        top: 400,
+                        left:250
+
+                        // ml: "150px", // adjust margin as needed
                         // height:'20px'
                     }}
                     // style={{
@@ -541,7 +949,7 @@ export default function FirstWashQC(){
                     <FormControl sx={{ width: 150 ,"& .MuiInputBase-root": {
                                     height: 40, // total height
                                     },}}>
-                        <InputLabel id="reject-reason-label">Reject Reason</InputLabel>
+                        <InputLabel id="reject-reason-label">Rejection Reason</InputLabel>
                         <Select
                             labelId="reject-reason-label"
                             id="reject-reason"
@@ -571,9 +979,10 @@ export default function FirstWashQC(){
                         onChange={() => {
                         const inv = individualBarcodeRef.current?.value.trim() || "";
                         if (inv.length === 16) {
-                            setinvbarcode(inv);
+                            // setinvbarcode(inv);
+                            fetchPieceDetails(inv);
                             setRejectField(true);
-                            setIndivScanned(true)
+                            // setIndivScanned(true)
                             individualBarcodeRef.current!.value = "";
                         }
                         }}
@@ -605,8 +1014,11 @@ export default function FirstWashQC(){
                     </Box>
 
                     {/* Table below */}
-                    <Box sx={{ ml:'40px' }}>
-                    <TableContainer component={Paper} sx={{ maxHeight: 380, overflow: "auto",marginLeft:"105px",position:'relative',top:'10px'}}>
+                    <Box sx={{
+                        // position:'relative',
+                        marginLeft:'-5px',
+                    }}>
+                    <TableContainer component={Paper} sx={{ maxHeight: 150, overflow: "auto",position:'fixed',top:450,left:245,width:1000 }}>
                         <Table stickyHeader aria-label="customized table">
                         <TableHead>
                             <TableRow>
@@ -623,7 +1035,7 @@ export default function FirstWashQC(){
                         </TableHead>
                         <TableBody>
                             {rows.map((row) => (
-                            <StyledTableRow key={row.id}>
+                            <StyledTableRow key={row.individual_barcode}>
                                 <StyledTableCell align="center">{row.individual_barcode}</StyledTableCell>
                                 <StyledTableCell align="center">{row.buyer}</StyledTableCell>
                                 <StyledTableCell align="center">{row.so}</StyledTableCell>
@@ -678,8 +1090,8 @@ export default function FirstWashQC(){
                             setIndivScanned(false)}
                         }
                         sx={{
-                            position:'relative',
-                            top:50
+                            position:'fixed',
+                            top:600
                         }}
                         >
                         Save
@@ -762,51 +1174,73 @@ export default function FirstWashQC(){
 
                             <Box sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}>
                             <Button sx={{ background: "blue", color: "white" }} onClick={() => {
-                                console.log(rows)
+                                // console.log(rows)
                                 let payload_rejs:RejPayload[]=[]
                                 for(const row of rows){
 
                                     // if(!row.saved){
                                         payload_rejs.push({
-                                             individual_barcode:row.individual_barcode,
-                                             reason:row.reason
+                                             garment_unit:row.individual_barcode,
+                                             rejection_reason:row.reason
                                         })
                                     // }
                                 }
                                 if(payload_rejs.length>0){
-                                        postData<WetWashRejection[]>(
-                                        "wet-process/rejections/",
-                                        ip,
-                                        {                  
-                                            batch: batchId,
-                                            rejections:payload_rejs
-                                        },
-                                        (data:WetWashRejection[]) => {
-                                            console.log("Rejection recorded:", data);
-                                            // rows.saved=true
-                                            setRejectPop(false);
-                                            setReason("");
-                                            setReasonDisplay("");
-                                            setRejectDone(prev => !prev);
-                                            setRows([])
-                                            // setRows(prev =>
-                                            //     prev.filter(item => item.individual_barcode !== row.individual_barcode)
-                                            // );
-                                            // setRows((prev)=>)
-                                            // setBatchId(0);
-                                            // setfetchedBatch(null)
+                                        console.log(payload_rejs)
+                                        postData<WetProcessBatch>(
+                                            `wet-process/batches/${batchqr}/rejections/`,
+                                            ip,
+                                            {
+                                                sources:payload_rejs
+                                            },
+                                            (rejRes:WetProcessBatch)=>{
+                                                console.log("Rejection recorded:", rejRes);
+                                                setRejectPop(false);
+                                                setReason("");
+                                                setReasonDisplay("");
+                                                setRejectDone(prev => !prev);
+                                                setfetchedBatch((prev)=>prev ? {...prev, ok_qty: rejRes.total_quantity-(rejRes.total_rewash_quantity+rejRes.total_rejection_quantity),rej_qty: rejRes.total_rejection_quantity,total_rewash: rejRes.total_rewash_quantity} : null)
+                                                const details=[]
+                                                for(const obj of rejRes.sources){ 
                                     
-
+                                                    details.push({
+                                                            'id':obj.id,
+                                                            'mpo':obj.mpo,
+                                                            'style':obj.style,
+                                                            'so':obj.so,
+                                                            'quantity':obj.quantity,
+                                                            'rewash_quantity':obj.rewash_quantity,  
+                                                            'rejection_quantity':obj.rejection_quantity,
+                                                            // 'add':false
+                                                    })
+                                                }
+                                                setFetchedBatchDetails(details)
+                                                setRows([])
+                                                // setBatchId("");
+                                                // setBatchQR("");
+                                                // setfetchedBatch(null)
                                         },
                                         (error: any) => {
-                                            console.error("Error recording rejection:", error);
+                                            // setRejectDone(false)
+                                            setRejectDone(false)
+                                            console.error("Error recording rejection:", error.response.data);
+                                             setRejectPop(false);
+                                            setReason("");
+                                            setReasonDisplay("");
+                                            // setRejectDone(prev => !prev);
+                                            setRows([])
+                                            // const errorMsg =
+                                            // error?.response?.data?.individual_barcode?.[0] ||
+                                            // error?.response?.data?.[0] ||
+                                            // "Wrong Piece Scanned. Please check the barcode and try again.";
+                                            console.log(error.response.data)
+                                            let msg=""
+                                            Object.entries(error.response.data).forEach(([key, value]:any) => {
+                                                msg+=value
+                                            });
 
-                                            const errorMsg =
-                                            error?.response?.data?.individual_barcode?.[0] ||
-                                            error?.response?.data?.[0] ||
-                                            "Something went wrong";
-
-                                            setRejectError(errorMsg);
+                                            
+                                            setRejectError(msg);
                                             setReason("");
                                             setReasonDisplay("");
                                             setRejectPop(false);
@@ -835,15 +1269,15 @@ export default function FirstWashQC(){
                                 display: "flex",
                                 alignItems: "center",
                                 justifyContent: "center",
-                                bgcolor: "rgba(0,0,0,0.5)", // dark overlay
+                                // bgcolor: "rgba(0,0,0,0.5)", // dark overlay
                                 }}
                             >
                                 <Box
                                 sx={{
-                                    bgcolor: "rgba(202, 29, 29, 0.5)", // light red background for error
+                                    bgcolor: "white", // light red background for error
                                     p: 4,
                                     borderRadius: 2,
-                                    color: "white", // red text for error
+                                    color: "red", // red text for error
                                     width: 400,
                                 }}
                                 >
@@ -948,5 +1382,35 @@ export default function FirstWashQC(){
                                           </Box>
                                       </Box>
                                   </Modal>
+            ``          <Modal open={addRewashError!=""} onClose={() => setAddRewashError("")}>
+                            <Box
+                                sx={{
+                                position: "fixed", // ← changed from absolute
+                                top: 0,
+                                left: 0,
+                                width: "100vw",
+                                height: "100vh",    
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                // bgcolor: "rgba(0,0,0,0.5)", // dark overlay
+                                }}
+                            >
+                                <Box
+                                sx={{
+                                    bgcolor: "white", // light red background for error
+                                    p: 4,
+                                    borderRadius: 2,
+                                    color: "red", // red text for error
+                                    width: 400,
+                                }}
+                                >
+                                <Typography variant="h6">{addRewashError}</Typography>
+                                {/* <Typography>Already batches are allocated according to this plan */}
+                                {/* </Typography> */}
+                                <Button sx={{ mt: 2 }} onClick={() => setAddRewashError("")}>Close</Button>
+                                </Box>
+                            </Box>
+                        </Modal>
             </>
 }
