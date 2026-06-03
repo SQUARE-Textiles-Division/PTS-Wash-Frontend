@@ -516,7 +516,7 @@ import type WetProcessBatch from "../../TypeAnnotations/WetProcessBatch";
             elevation={0}
             sx={{
             top:80,
-            left:320,
+            left:230,
             position:'fixed',
             // position: "fixed",
             // top:85,

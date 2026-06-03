@@ -50,6 +50,10 @@ import DryerTumbleOut from './components/WetProcess/DryerTumbleOut'
 import FirstWashQC from './components/WetProcess/FirstWashQC'
 import Rewash from './components/WetProcess/Rewash'
 import { MasterRouting } from './components/MasterRouting'
+import { InputAdornment } from '@mui/material'
+import InProcessGen from './components/InProcess/InProcessGen'
+import OutProcessGen from './components/OutProcess/OutProcessGen'
+import QCGen from './components/QC/QCGen'
 function App() {
   // const [count, setCount] = useState(0)
   return (
@@ -82,27 +86,49 @@ function App() {
         <Route path="/washreceive" element={<WashReceivePass />} />
         <Route path="/createbatch" element={<CreateBatch />} />
         <Route path="/qceditdel" element={<QCEditDel />} />
-        <Route path="/whiskerin" element={<WhiskerIn />} />
-        <Route path="/whiskerqc" element={<WhiskerQC />} />
-        <Route path="/whiskeroutput" element={<WhiskerOutput/>}/>
-        <Route path='/laserwhiskerin' element={<LaserWhiskerIn/>}/>
-        <Route path='/laserwhiskerqc' element={<LaserWhiskerQC/>}/>
-        <Route path='/laserwhiskeroutput' element={<LaserWhiskerOutput/>}/>
-        <Route path='/brushin' element={<BrushIn/>}/>
-        <Route path='/brushqc' element={<BrushQC/>}/>
-        <Route path='/brushoutput' element={<BrushOutput/>}/>
-        <Route path='/laserbrushin' element={<LaserBrushIn/>}/>
-        <Route path='/laserbrushqc' element={<LaserBrushQC/>}></Route>
-        <Route path='/laserbrushoutput' element={<LaserBrushOutput/>}/>
-        <Route path='/wrinklein' element={<WrinkleIn/>}/>
-        <Route path='/wrinkleqc' element={<WrinkleQC/>}/>
-        <Route path='/wrinkleoutput' element={<WrinkleOutput/>}/>
-        <Route path='/tagin' element={<TagIn/>}/>
-        <Route path='/tagqc' element={<TagQC/>}/>
-        <Route path='/tagoutput' element={<TagOutput/>}/>
-        <Route path='/tiein' element={<TieIn/>}/>
-        <Route path='/tieqc' element={<TieQC/>}/>
-        <Route path='/tieoutput' element={<TieOutput/>}/>
+        {/* <Route path="/whiskerin" element={<WhiskerIn />} /> */}
+        <Route path="/whiskerin" element={<InProcessGen  key="whisker" processName="whisker"  processDisplay='Whisker'/>}/>
+        {/* <Route path="/whiskerqc" element={<WhiskerQC />} /> */}
+        <Route path="/whiskerqc" element={<QCGen  key="whisker" processName="whisker" processDisplay='Whisker'/>} />
+        {/* <Route path="/whiskeroutput" element={<WhiskerOutput/>}/> */}
+        <Route path="/whiskeroutput" element={<OutProcessGen  key="whisker" processName="whisker" processDisplay='Whisker'/>}/>
+
+        {/* <Route path='/laserwhiskerin' element={<LaserWhiskerIn/>}/> */}
+        <Route path='/laserwhiskerin' element={<InProcessGen  key="laser_whisker" processName="laser_whisker" processDisplay='Laser Whisker'/>}/>
+        {/* <Route path='/laserwhiskerqc' element={<LaserWhiskerQC/>}/> */}
+        <Route path='/laserwhiskerqc' element={<QCGen  key="laser_whisker" processName="laser_whisker" processDisplay='Laser Whisker'/>} />
+        {/* <Route path='/laserwhiskeroutput' element={<LaserWhiskerOutput/>}/> */}
+        <Route path='/laserwhiskeroutput' element={<OutProcessGen  key="laser_whisker" processName="laser_whisker" processDisplay='Laser Whisker'/>}/>
+        {/* <Route path='/brushin' element={<BrushIn/>}/> */}
+        <Route path='/brushin' element={<InProcessGen  key="brush" processName="brush" processDisplay='Brush'/>}/>
+        {/* <Route path='/brushqc' element={<BrushQC/>}/> */}
+        <Route path='/brushqc' element={<QCGen  key="brush" processName="brush" processDisplay='Brush'/>} />
+        {/* <Route path='/brushoutput' element={<BrushOutput/>}/> */}
+        <Route path='/brushoutput' element={<OutProcessGen  key="brush" processName="brush" processDisplay='Brush'/>}/>
+        {/* <Route path='/laserbrushin' element={<LaserBrushIn/>}/> */}
+        <Route path='/laserbrushin' element={<InProcessGen  key="laser_brush" processName="laser_brush" processDisplay='Laser Brush'/>}/>
+        {/* <Route path='/laserbrushqc' element={<LaserBrushQC/>}></Route> */}
+        <Route path='/laserbrushqc' element={<QCGen  key="laser_brush" processName="laser_brush" processDisplay='Laser Brush'/>} />
+        {/* <Route path='/laserbrushoutput' element={<LaserBrushOutput/>}/> */}
+        <Route path='/laserbrushoutput' element={<OutProcessGen  key="laser_brush" processName="laser_brush" processDisplay='Laser Brush'/>}/>
+        {/* <Route path='/wrinklein' element={<WrinkleIn/>}/> */}
+        <Route path='/wrinklein' element={<InProcessGen  key="wrinkle" processName="wrinkle" processDisplay='Wrinkle'/>}/>
+        {/* <Route path='/wrinkleqc' element={<WrinkleQC/>}/> */}
+        <Route path='/wrinkleqc' element={<QCGen  key="wrinkle" processName="wrinkle" processDisplay='Wrinkle'/>} />
+        {/* <Route path='/wrinkleoutput' element={<WrinkleOutput/>}/> */}
+        <Route path='/wrinkleoutput' element={<OutProcessGen  key="wrinkle" processName="wrinkle" processDisplay='Wrinkle'/>}/>
+        {/* <Route path='/tagin' element={<TagIn/>}/> */}
+        <Route path='/tagin' element={<InProcessGen  key="tag" processName="tag" processDisplay='Tag'/>}/>
+        {/* <Route path='/tagqc' element={<TagQC/>}/> */}
+        <Route path='/tagqc' element={<QCGen  key="tag" processName="tag" processDisplay='Tag'/>} />
+        {/* <Route path='/tagoutput' element={<TagOutput/>}/> */}
+        <Route path='/tagoutput' element={<OutProcessGen  key="tag" processName="tag" processDisplay='Tag'/>}/>
+        {/* <Route path='/tiein' element={<TieIn/>}/> */}
+        <Route path='/tiein' element={<InProcessGen  key="tie" processName="tie" processDisplay='Tie'/>}/>
+        {/* <Route path='/tieqc' element={<TieQC/>}/> */}
+        <Route path='/tieqc' element={<QCGen  key="tie" processName="tie" processDisplay='Tie'/>} />
+        {/* <Route path='/tieoutput' element={<TieOutput/>}/> */}
+        <Route path='/tieoutput' element={<OutProcessGen  key="tie" processName="tie" processDisplay='Tie'/>}/>
         <Route path='/masterroute' element={<MasterRouting/>}/>
 
         {/* <Route path='/tieoutput' element={<TieOutput/>}/> */}

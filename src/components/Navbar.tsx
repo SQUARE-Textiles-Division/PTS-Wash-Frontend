@@ -102,7 +102,7 @@ export default function Navbar() {
     { primary: "Tag QC", to: "/tagqc" },
     { primary: "Tag QC Pass", to: "/tagoutput" },
     
-    { primary: "Tie Input", to: "/tiein" },
+    { primary: "Tie In", to: "/tiein" },
     { primary: "Tie QC", to: "/tieqc" },
     { primary: "Tie QC Pass", to: "/tieoutput" },
     

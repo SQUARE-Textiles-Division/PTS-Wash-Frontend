@@ -17,6 +17,20 @@ import NumberSpinner from "../NumberSpinner";
 import type WetProcessBatch from "../../TypeAnnotations/WetProcessBatch";
 import type WetWashRejection from "../../TypeAnnotations/WetWashRejection";
 import type IndividualInfo from "../../TypeAnnotations/IndividualInfo";
+
+
+import {
+//   Box,
+  Card,
+  CardContent,
+  Grid,
+//   Typography,
+} from "@mui/material";
+
+import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
+import ReplayOutlinedIcon from "@mui/icons-material/ReplayOutlined";
+import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
+import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
 // import NumberField from './components/NumberField';
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
@@ -453,9 +467,10 @@ export default function FirstWashQC(){
                 
 
                 
-               {fetchedBatch!=null && ( 
+            {fetchedBatch!=null && ( 
                 
             <div style={{display:'flex',flexDirection:'column',gap:3,position:'fixed',top:130,left:100}}>
+                
 
                     <div style={{marginLeft:'160px'}}>
                         
@@ -722,12 +737,11 @@ export default function FirstWashQC(){
                         </TableHead>
 
                         <TableBody>
-                            {fetchedBatchDetails.filter(batch => batch.quantity-(batch.rewash_quantity +batch.rejection_quantity) > 0).map((batch)=>
+                            {fetchedBatchDetails
+                            // filter(batch => batch.quantity-(batch.rewash_quantity +batch.rejection_quantity) > 0)
+                            .map((batch)=>
                             {
-                                const isDisabled = !selectedSources.some(
-                                    item =>
-                                        item.batch_source === batch.id 
-                                );
+                                const isDisabled =!(batch.quantity-(batch.rewash_quantity +batch.rejection_quantity) > 0);
                                 const key =batch.id;
 
                                 const actualValue =chosenQty[key] ??null; 
@@ -757,6 +771,7 @@ export default function FirstWashQC(){
                                 <StyledTableCell align="center">
                                             <Checkbox 
                                             checked={selectedSources.some(item => item.batch_source === batch.id)}
+                                            disabled={isDisabled}
                                             onChange={(e, checked) => handleRowSelect(batch, checked)}
                                             slotProps={{ input: { 'aria-label': 'select-row' } }}
                                             sx={{
