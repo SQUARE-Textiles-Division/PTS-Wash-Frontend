@@ -13,6 +13,10 @@ import { tbCellColor, tbRowColor } from "../Colors/Colors";
 import type { Machine } from "../../TypeAnnotations/Machine";
 import type { ProcessFirstWash } from "../../TypeAnnotations/ProcessFirstWash";
 import { all } from "axios";
+import type StageEndpoint from "../../TypeAnnotations/StageEndpoint";
+import { StageDispMap } from "../../StageDispMap";
+import { StageMap } from "../../StageMap";
+import type WetProcessBatch from "../../TypeAnnotations/WetProcessBatch";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -45,7 +49,7 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 
 
 
-export default function HydroOut(){    
+export default function HydroOut({stageEndpoint}:StageEndpoint) {    
     const [showPopup, setShowPopup] = useState(false);
     const [processError,setProcessError]=useState("");
 
@@ -69,8 +73,22 @@ export default function HydroOut(){
         // console.log(batchIdNum)
         const tempBatchDetail:any=[]
         // let getId=0
-        getData<ProcessFirstWash[]>(
-            `wet-process/first-wash-hydro-processes`,
+
+        getData<WetProcessBatch>(
+            `wet-process/batches/${batchIdNum}`,
+            ip,
+            {},
+            {},
+            (batchMeta: WetProcessBatch) => {
+                // Handle the fetched batch details
+                console.log(batchMeta)
+                if(batchMeta.stage!=StageMap[stageEndpoint]){
+                    setProcessError(`Batch is currently at ${StageDispMap[batchMeta.stage] } stage`)
+
+                    return
+                }
+                 getData<ProcessFirstWash[]>(
+            `wet-process/${stageEndpoint}-hydro-processes`,
             ip,
             {},
             {
@@ -82,12 +100,12 @@ export default function HydroOut(){
                 console.log(res)
                 if(res.length==0)
                 {
-                    setProcessError("Hydro In is not Completed Yet....")
+                    setProcessError("Batch Stages Already Completed or Hydro In Not Completed")
                     return;
                 }
                 console.log(res[0].id)
                 patchData<ProcessFirstWash>(
-                    `wet-process/first-wash-hydro-processes/${res[0].id}/`,
+                    `wet-process/${stageEndpoint}-hydro-processes/${res[0].id}/`,
                     ip,
                     {
                         state:'hydro_out'
@@ -110,12 +128,23 @@ export default function HydroOut(){
                         setTotQty(result.batch.total_quantity)
                     },
                     (error:any)=>{
-                        console.log(error.response.data)
                         let msg=""
-                        Object.entries(error.response.data).forEach(([key, value]:any) => {
-                            msg+=value[0]
+                    if (error instanceof Error && error.message === "Network Error") {
+                        console.log("Network Error");
+                        msg="Network Error"
+                                
+                    }
+                    
+                    else if(error.response.data){
+                        Object.entries(error.response.data).forEach(([key, value]) => {
+                            if (Array.isArray(value)) {
+                                msg += value[0];
+                            } else {
+                                msg += value;
+                            }
                         });
-
+                        
+                    }
                         // if
 
                         setProcessError(msg)   
@@ -124,10 +153,32 @@ export default function HydroOut(){
                 )
             },
             (error:any)=>{
-                    console.log(error.response.data)
+                    let msg=""
+                    if (error instanceof Error && error.message === "Network Error") {
+                        console.log("Network Error");
+                        msg="Network Error"
+                                
+                    }
+                    
+                    else if(error.response.data){
+                        Object.entries(error.response.data).forEach(([key, value]) => {
+                            if (Array.isArray(value)) {
+                                msg += value[0];
+                            } else {
+                                msg += value;
+                            }
+                        });
+                        
+                    }
+                    setProcessError(msg)
             }
 
         )
+                // if()
+            }
+        );
+  
+       
         
     };
 
@@ -300,15 +351,15 @@ export default function HydroOut(){
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        bgcolor: "rgba(0,0,0,0.5)", // dark overlay
+                        // bgcolor: "rgba(0,0,0,0.5)", // dark overlay
                         }}
                     >
                         <Box
                         sx={{
-                            bgcolor: "rgba(202, 29, 29, 0.5)", // light red background for error
+                            bgcolor: "white", // light red background for error
                             p: 4,
                             borderRadius: 2,
-                            color: "white", // red text for error
+                            color: "red", // red text for error
                             width: 400,
                         }}
                         >

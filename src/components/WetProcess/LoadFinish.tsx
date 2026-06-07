@@ -13,6 +13,10 @@ import { tbCellColor, tbRowColor } from "../Colors/Colors";
 import type { Machine } from "../../TypeAnnotations/Machine";
 import type { ProcessFirstWash } from "../../TypeAnnotations/ProcessFirstWash";
 import { all } from "axios";
+import type StageEndpoint from "../../TypeAnnotations/StageEndpoint";
+import type WetProcessBatch from "../../TypeAnnotations/WetProcessBatch";
+import { StageDispMap } from "../../StageDispMap";
+import { StageMap } from "../../StageMap";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -45,7 +49,7 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 
 
 
-export default function LoadFinish(){    
+export default function LoadFinish({stageEndpoint}:StageEndpoint) {    
     const [showPopup, setShowPopup] = useState(false);
     const [processError,setProcessError]=useState("");
 
@@ -70,59 +74,112 @@ export default function LoadFinish(){
         // console.log(batchIdNum)
         const tempBatchDetail:any=[]
         // let getId=0
-        getData<ProcessFirstWash[]>(
-            `wet-process/first-wash-processes`,
+        // let ret=false
+        getData<WetProcessBatch>(
+            `wet-process/batches/${batchIdNum}`,
             ip,
             {},
-            {
-                batch:batchIdNum,
-                // type:'oven'
-            },
-            (res:ProcessFirstWash[])=>{
-                // getId=res[0].id
-                console.log(res)
-                console.log(res[0].id)
-                patchData<ProcessFirstWash>(
-                    `wet-process/first-wash-processes/${res[0].id}/`,
-                    ip,
-                    {
-                        state:'loading_finish'
-                    },
-                  (result:ProcessFirstWash)=>{
-                        console.log(result)
-                        tempBatchDetail.push(
-                            {
-                                'Shade':result.batch.shade,
-                                'Color':result.batch.color,
-                                'Buyer':result.batch.buyer,
-                                'BatchQRCode':result.batch.id,
-                                'Quantity':result.batch.total_quantity,
-                                'Machine':result.machine.machine_number
-                            }
-                        )
-        
-                        setBatchDetails(tempBatchDetail)
-                        setBatchNumber(batchNumber)
-                        setTotQty(result.batch.total_quantity)
-                    },
-                    (error:any)=>{
-                        console.log(error.response.data)
-                        let msg=error.response.data[0]
-                        // if
-
-                        setProcessError(msg)   
-                        
+            {},
+            (batchMeta: WetProcessBatch) => {
+                // Handle the fetched batch details
+                console.log(batchMeta)
+                if(batchMeta.stage!=StageMap[stageEndpoint]){
+                    setProcessError(`Batch is currently at ${StageDispMap[batchMeta.stage] } stage`)
+                    // ret=true
+                    return
+                }
+                getData<ProcessFirstWash[]>(
+                `wet-process/${stageEndpoint}-processes`,
+                ip,
+                {},
+                {
+                    batch:batchIdNum,
+                    // type:'oven'
+                },
+                (res:ProcessFirstWash[])=>{
+                    // getId=res[0].id
+                    console.log(res)
+                    if(res.length===0){
+                        setProcessError("Batch Stages Already Completed or Loading Start Not Completed")
+                        return;
                     }
-                )
-            },
-            (error:any)=>{
-                    console.log(error.response.data)
+                    console.log(res[0].id)
+                    patchData<ProcessFirstWash>(
+                        `wet-process/${stageEndpoint}-processes/${res[0].id}/`,
+                        ip,
+                        {
+                            state:'loading_finish'
+                        },
+                    (result:ProcessFirstWash)=>{
+                            console.log(result)
+                            tempBatchDetail.push(
+                                {
+                                    'Shade':result.batch.shade,
+                                    'Color':result.batch.color,
+                                    'Buyer':result.batch.buyer,
+                                    'BatchQRCode':result.batch.id,
+                                    'Quantity':result.batch.total_quantity,
+                                    'Machine':result.machine.machine_number
+                                }
+                            )
+            
+                            setBatchDetails(tempBatchDetail)
+                            setBatchNumber(batchNumber)
+                            setTotQty(result.batch.total_quantity)
+                        },
+                        (error:any)=>{
+                            let msg=""
+                        if (error instanceof Error && error.message === "Network Error") {
+                            console.log("Network Error");
+                            msg="Network Error"
+                                    
+                        }
+                        
+                        else if(error.response.data){
+                            Object.entries(error.response.data).forEach(([key, value]) => {
+                                if (Array.isArray(value)) {
+                                    msg += value[0];
+                                } else {
+                                    msg += value;
+                                }
+                            });
+                            
+                        }
+                            // if
+
+                            setProcessError(msg)   
+                            
+                        }
+                    )
+                },
+                (error:any)=>{
+                        let msg=""
+                        if (error instanceof Error && error.message === "Network Error") {
+                            console.log("Network Error");
+                            msg="Network Error"
+                                    
+                        }
+                        
+                        else if(error.response.data){
+                            Object.entries(error.response.data).forEach(([key, value]) => {
+                                if (Array.isArray(value)) {
+                                    msg += value[0];
+                                } else {
+                                    msg += value;
+                                }
+                            });
+                            
+                        }
+                        setProcessError(msg)
+                }
+
+            )
+                // if()
             }
+        );
+ 
 
-        )
-        
-    };
-
+    }
 
 
     return (
@@ -234,7 +291,7 @@ export default function LoadFinish(){
                          
                     <TableHead>
                       <TableRow>
-                        <StyledTableCell align="center">BatchQRCode(First Wash)</StyledTableCell>
+                        <StyledTableCell align="center">BatchQRCode</StyledTableCell>
                         <StyledTableCell align="center">Buyer</StyledTableCell>
                         {/* <StyledTableCell align="center">Style</StyledTableCell> */}
                         {/* <StyledTableCell align="center">Sales Order</StyledTableCell> */}

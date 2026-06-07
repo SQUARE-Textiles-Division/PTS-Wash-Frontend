@@ -31,6 +31,8 @@ import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
 import ReplayOutlinedIcon from "@mui/icons-material/ReplayOutlined";
 import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
 import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
+import type WetProcessStage from "../../TypeAnnotations/WetProcessStage";
+import type CompletedQc from "../../TypeAnnotations/CompletedQc";
 // import NumberField from './components/NumberField';
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
@@ -103,10 +105,10 @@ type FetchBatchDetails={
     rejection_quantity: number
     // add:boolean
 }
-export default function FirstWashQC(){
+export default function FirstWashQC({stage}:WetProcessStage){
 
-
-
+    const [batchComplete,setBatchComplete]=useState<boolean>(false)
+    const [qcCompletePop,setQcCompletePop]=useState<boolean>(false)
     const individualBarcodeRef = React.useRef<HTMLInputElement>(null);
     const [invbarcode,setinvbarcode]=React.useState<string>("");
     const batchqrcoderef=useRef<HTMLInputElement>(null);
@@ -174,7 +176,7 @@ export default function FirstWashQC(){
                     size: data.size,
                     style: data.style,
                     so: data.so,
-                    rejected_at: 'first wash',
+                    rejected_at: stage,
                     reason: reason,
                     // saved:false
                 });
@@ -231,7 +233,7 @@ export default function FirstWashQC(){
                             size: obj.size,
                             style: obj.style,
                             so: obj.so,
-                            rejected_at: 'first wash',
+                            rejected_at: stage,
                             reason: reason,
                             // saved:false
                         });
@@ -269,7 +271,15 @@ export default function FirstWashQC(){
             ip,
             {},
             {},
-            (batchData: WetProcessBatch) => {   
+            (batchData: WetProcessBatch) => {  
+                if(batchData.stage!=stage){
+                    setRejectError(`Batch is currently in ${batchData.stage} stage. Please scan a batch in ${stage} stage.`)
+                    return
+                } 
+                else if(batchData.status=="completed"){
+                    setRejectError("You have already completed QC for this Batch.")
+                    return
+                }
                 setfetchedBatch(
                     {
                         'id':batchData.id,
@@ -464,7 +474,11 @@ export default function FirstWashQC(){
                
                 
 
-                
+            {fetchedBatch!=null && (
+                <Button 
+                onClick={() => setQcCompletePop(true)} 
+                sx={{ backgroundColor: "green", color: "white" ,position:'fixed',top:80,left:1000}}>QC Complete</Button>
+            )}
 
                 
             {fetchedBatch!=null && ( 
@@ -914,11 +928,23 @@ export default function FirstWashQC(){
                                 // setFetchedBatch(prev => prev ? {...prev, ok_qty: 
                             },
                             (error:any)=>{
-                                console.log(error.response.data)
-                                let msg=""
-                                Object.entries(error.response.data).forEach(([key, value]:any) => {
-                                    msg+=value[0]
-                                });
+                                 let msg=""
+                                if (error instanceof Error && error.message === "Network Error") {
+                                    console.log("Network Error");
+                                    msg="Network Error"
+                                            
+                                }
+                                
+                                else if(error.response.data){
+                                    Object.entries(error.response.data).forEach(([key, value]) => {
+                                        if (Array.isArray(value)) {
+                                            msg += value[0];
+                                        } else {
+                                            msg += value;
+                                        }
+                                    });
+                                    
+                                }
 
                                 // if
 
@@ -1115,46 +1141,97 @@ export default function FirstWashQC(){
                     </Box>
                 </>
                 )}
-{/*                 
-                        <Modal open={deletePop && deleteId !== 0} onClose={() => {setDeletePop(false);setDeleteId(0);}}>
-                                <Box
-                                    sx={{
-                                    position: "fixed",
-                                    top: 0,
-                                    left: 0,
-                                    width: "100vw",
-                                    height: "100vh",
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    bgcolor: "rgba(148, 131, 131, 0.5)", // dark overlay
-                                    }}
-                                >
-                                    <Box
-                                        sx={{
-                                            bgcolor: "#fea116", // light red background for error
-                                            p: 4,
-                                            borderRadius: 2,
-                                            color: "black", // red text for error
-                                            width: 400,
-                                        }}
-                                    >
-                                    <Typography variant="h4">Are you Sure?</Typography>
-                                    
-                                    {/* <Typography>Already batches are allocated according to this plan */}
-                                    {/* </Typography> */}
-                                    {/* <div style={{
-                                    display:'flex',
-                                    justifyContent:'space-between'
-                                    }}>
-                                        <Button sx={{ mt: 2 ,background:'red',color:'white'}}
-                                            onClick={()=>handleDelete(deleteId)}>Delete</Button>
-                                        <Button sx={{ mt: 2 ,background:'green',color:'white'}} onClick={() => {setDeletePop(false);setDeleteId(0);}}>Cancel</Button>
-                                    </div>
-                                    
-                                    </Box>
-                                </Box>
-                        </Modal> */} 
+
+                    <Modal open={qcCompletePop} onClose={() => setQcCompletePop(false)}>
+                        <Box
+                        
+                            sx={{
+                            position: "fixed",
+                            top: 0,
+                            left: 0,
+                            width: "100vw",
+                            height: "100vh",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            bgcolor: "rgba(148, 131, 131, 0.5)", // dark overlay
+                            }}
+                        >
+                            <Box
+                            sx={{
+                                bgcolor: "#ffffe0", // light red background for error
+                                
+                                border:'3px solid #e6db55',// light red background for error
+                                p: 4,
+                                borderRadius: 2,
+                                color: "#9c9999", // red text for error
+                                width: 400,
+                            }}
+                        >
+                            <Typography variant="h4">Are you sure?</Typography>
+                            <Typography variant="h6">
+                            You want to complete QC for {fetchedBatch?.ok_qty} OK pieces, {fetchedBatch?.rej_qty} Rejected pieces and {fetchedBatch?.total_rewash} Rewash pieces.
+                            {/* <b>{reasonDisplay?.toUpperCase() || ""}</b>  */}
+                            <br></br>in This Stage
+                            </Typography>
+
+                            <Box sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}>
+                                 <Button sx={{ background: "blue", color: "white" }} onClick={() => {
+                                    patchData<CompletedQc>(
+                                        `wet-process/batches/${batchqr}/`,
+                                        ip,
+                                        {
+                                             status: "completed"
+                                        },
+                                        (qcRes:CompletedQc)=>{
+                                            console.log("QC Completed:", qcRes);
+                                            setQcCompletePop(false);
+                                            setBatchComplete(true);
+                                            setfetchedBatch(null);
+                                            setBatchId("");
+                                            setBatchQR("");
+                                            setFetchedBatchDetails([]);
+                                            setRows([]);
+                                            
+                                        },
+                                        (error: any) => {
+                                            console.error("Error completing QC:", error.response.data);
+                                            setQcCompletePop(false);
+                                             let msg=""
+                                            if (error instanceof Error && error.message === "Network Error") {
+                                                console.log("Network Error");
+                                                msg="Network Error"
+                                                        
+                                            }
+                                            
+                                            else if(error.response.data){
+                                                Object.entries(error.response.data).forEach(([key, value]) => {
+                                                    if (Array.isArray(value)) {
+                                                        msg += value[0];
+                                                    } else {
+                                                        msg += value;
+                                                    }
+                                                });
+                                            }   
+                                            setRejectError(msg);
+                                        }
+                                            // setBatchId("");
+                                            // setBatchQR("");
+                                            // setfetchedBatch(null)
+                                        
+                                    )
+                                // console.log(rows)
+                                 }}>
+                                    Yes
+                                 </Button>
+                                <Button sx={{ background: "red", color: "white" }} onClick={() => {setQcCompletePop(false)}}>
+                                    Exit
+                                </Button>
+                            </Box>
+                           </Box> 
+                             
+                        </Box>
+                    </Modal>
                     <Modal open={rejectPop} onClose={() => setRejectPop(false)}>
                         <Box
                         sx={{
@@ -1184,7 +1261,7 @@ export default function FirstWashQC(){
                             <Typography variant="h6">
                             You want to reject {rows.length > 1 ? `${rows.length} these` : `${rows.length} this`} {rows.length > 1 ? `${rows.length} pieces` : `${rows.length} piece`}
                             {/* <b>{reasonDisplay?.toUpperCase() || ""}</b>  */}
-                            <br></br>in First Wash Stage
+                            <br></br>in This Stage
                             </Typography>
 
                             <Box sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}>
@@ -1248,11 +1325,23 @@ export default function FirstWashQC(){
                                             // error?.response?.data?.individual_barcode?.[0] ||
                                             // error?.response?.data?.[0] ||
                                             // "Wrong Piece Scanned. Please check the barcode and try again.";
-                                            console.log(error.response.data)
-                                            let msg=""
-                                            Object.entries(error.response.data).forEach(([key, value]:any) => {
-                                                msg+=value
-                                            });
+                                             let msg=""
+                                            if (error instanceof Error && error.message === "Network Error") {
+                                                console.log("Network Error");
+                                                msg="Network Error"
+                                                        
+                                            }
+                                            
+                                            else if(error.response.data){
+                                                Object.entries(error.response.data).forEach(([key, value]) => {
+                                                    if (Array.isArray(value)) {
+                                                        msg += value[0];
+                                                    } else {
+                                                        msg += value;
+                                                    }
+                                                });
+                                                
+                                            }
 
                                             
                                             setRejectError(msg);
@@ -1367,6 +1456,36 @@ export default function FirstWashQC(){
                                 </Box>
                             </Box>
                             </Modal>
+                            <Modal open={batchComplete} onClose={() => setBatchComplete(false)}>
+                                      <Box
+                                          sx={{
+                                          position: "fixed", // ← changed from absolute
+                                          top: 0,
+                                          left: 0,
+                                          width: "100vw",
+                                          height: "100vh",
+                                          display: "flex",
+                                          alignItems: "center",
+                                          justifyContent: "center",
+                                          bgcolor: "rgba(0, 0, 0, 0.07)", // dark overlay
+                                          }}
+                                      >
+                                          <Box
+                                          sx={{
+                                              bgcolor: "white", // light red background for error
+                                              p: 4,
+                                              borderRadius: 2,
+                                              color: "green", // red text for error
+                                              width: 400,
+                                          }}
+                                          >
+                                          <Typography variant="h6">Batch QC Completed</Typography>
+                                          {/* <Typography>Already batches are allocated according to this plan */}
+                                          {/* </Typography> */}
+                                          <Button sx={{ mt: 2 }} onClick={() => setBatchComplete(false)}>Close</Button>
+                                          </Box>
+                                      </Box>
+                                  </Modal>
                             <Modal open={rejectDone} onClose={() => setRejectDone(false)}>
                                       <Box
                                           sx={{
@@ -1397,7 +1516,7 @@ export default function FirstWashQC(){
                                           </Box>
                                       </Box>
                                   </Modal>
-            ``          <Modal open={addRewashError!=""} onClose={() => setAddRewashError("")}>
+                      <Modal open={addRewashError!=""} onClose={() => setAddRewashError("")}>
                             <Box
                                 sx={{
                                 position: "fixed", // ← changed from absolute

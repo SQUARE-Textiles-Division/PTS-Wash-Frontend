@@ -13,6 +13,10 @@ import { tbCellColor, tbRowColor } from "../Colors/Colors";
 import type { Machine } from "../../TypeAnnotations/Machine";
 import type { ProcessFirstWash } from "../../TypeAnnotations/ProcessFirstWash";
 import { all } from "axios";
+import type StageEndpoint from "../../TypeAnnotations/StageEndpoint";
+import { StageDispMap } from "../../StageDispMap";
+import type WetProcessBatch from "../../TypeAnnotations/WetProcessBatch";
+import { StageMap } from "../../StageMap";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -45,7 +49,7 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 
 
 
-export default function DryerOvenOut(){    
+export default function DryerOvenOut({stageEndpoint}:StageEndpoint) {    
     const [showPopup, setShowPopup] = useState(false);
     const [processError,setProcessError]=useState("");
 
@@ -69,8 +73,22 @@ export default function DryerOvenOut(){
         // console.log(batchIdNum)
         const tempBatchDetail:any=[]
         // let getId=0
-        getData<ProcessFirstWash[]>(
-            `wet-process/first-wash-dryer-processes`,
+        // let res=false
+        getData<WetProcessBatch>(
+            `wet-process/batches/${batchIdNum}`,
+            ip,
+            {},
+            {},
+            (batchMeta: WetProcessBatch) => {
+                // Handle the fetched batch details
+                console.log(batchMeta)
+                if(batchMeta.stage!=StageMap[stageEndpoint]){
+                    setProcessError(`Batch is currently at ${StageDispMap[batchMeta.stage] } stage`)
+                    // res=true
+                    return
+                }
+                 getData<ProcessFirstWash[]>(
+            `wet-process/${stageEndpoint}-dryer-processes`,
             ip,
             {},
             {
@@ -82,12 +100,12 @@ export default function DryerOvenOut(){
                 console.log(res)
                 if(res.length==0)
                 {
-                    setProcessError("Dryer Oven  In is not Completed Yet....")
+                    setProcessError("Batch Stages Already Completed or Dryer Oven In Not Completed")
                     return;
                 }
                 console.log(res[0].id)
                 patchData<ProcessFirstWash>(
-                    `wet-process/first-wash-dryer-processes/${res[0].id}/`,
+                    `wet-process/${stageEndpoint}-dryer-processes/${res[0].id}/`,
                     ip,
                     {
                         state:'dryer_out'
@@ -110,21 +128,55 @@ export default function DryerOvenOut(){
                         setTotQty(result.batch.total_quantity)
                     },
                     (error:any)=>{
-                        console.log(error.response.data)
-                        let msg=""
-                        Object.entries(error.response.data).forEach(([key, value]:any) => {
-                            msg+=value[0]
-                        });
+                         let msg=""
+                        if (error instanceof Error && error.message === "Network Error") {
+                            console.log("Network Error");
+                            msg="Network Error"
+                                    
+                        }
+                        
+                        else if(error.response.data){
+                            Object.entries(error.response.data).forEach(([key, value]) => {
+                                if (Array.isArray(value)) {
+                                    msg += value[0];
+                                } else {
+                                    msg += value;
+                                }
+                            });
+                            
+                        }
                         setProcessError(msg)   
                         
                     }
                 )
             },
             (error:any)=>{
-                    console.log(error.response.data)
+                     let msg=""
+                    if (error instanceof Error && error.message === "Network Error") {
+                        console.log("Network Error");
+                        msg="Network Error"
+                                
+                    }
+                    
+                    else if(error.response.data){
+                        Object.entries(error.response.data).forEach(([key, value]) => {
+                            if (Array.isArray(value)) {
+                                msg += value[0];
+                            } else {
+                                msg += value;
+                            }
+                        });
+                        
+                    }
+                    setProcessError(msg)
             }
 
         )
+                // if()
+            }
+        );
+        
+       
         
     };
 
@@ -239,7 +291,7 @@ export default function DryerOvenOut(){
                          
                     <TableHead>
                       <TableRow>
-                        <StyledTableCell align="center">BatchQRCode(First Wash)</StyledTableCell>
+                        <StyledTableCell align="center">BatchQRCode</StyledTableCell>
                         <StyledTableCell align="center">Buyer</StyledTableCell>
                         {/* <StyledTableCell align="center">Style</StyledTableCell> */}
                         {/* <StyledTableCell align="center">Sales Order</StyledTableCell> */}

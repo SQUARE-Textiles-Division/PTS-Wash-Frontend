@@ -76,51 +76,97 @@ export function MenuText({text}: MenuTextProps) {
         return "Dry Process / Tie QC Pass"
     }
     else if(text=="/firstwash/dryerconveyorin"){
-        return "First Wash / Dryer / Dryer Conveyor In"
+        return "1st Wash / Dryer / Dryer Conveyor In"
     }
     else if(text=="/firstwash/dryerconveyorout"){  
-        return "First Wash / Dryer / Dryer Conveyor Out"
+        return "1st Wash / Dryer / Dryer Conveyor Out"
     }
     else if(text=="/firstwash/dryerovenin"){
-        return "First Wash / Dryer / Dryer Oven In"
+        return "1st Wash / Dryer / Dryer Oven In"
     }
     else if(text=="/firstwash/dryerovenout"){
-        return "First Wash / Dryer / Dryer Oven Out"
+        return "1st Wash / Dryer / Dryer Oven Out"
     }
     else if(text=="/firstwash/dryertumblein"){
-        return "First Wash / Dryer / Dryer Tumble In"
+        return "1st Wash / Dryer / Dryer Tumble In"
     }
     else if(text=="/firstwash/dryertumbleout"){
-        return "First Wash / Dryer / Dryer Tumble Out"
+        return "1st Wash / Dryer / Dryer Tumble Out"
     }
     else if(text=="/firstwash/createbatch"){
-        return "First Wash / Create Batch"
+        return "1st Wash / Create Batch"
     }
     else if(text=="/firstwash/processfinish"){
-        return "First Wash / Unload / Process Finish & Unload Start"
+        return "1st Wash / Unload / Process Finish & Unload Start"
     }
     else if(text=="/firstwash/hydroout"){
-        return "First Wash / Hydro / Hydro Out"
+        return "1st Wash / Hydro / Hydro Out"
     }
     else if (text=="/firstwash/unloadfinish"){
-        return "First Wash / Unload / Unload Finish"
+        return "1st Wash / Unload / Unload Finish"
     }
     else if(text=="/firstwash/loadfinish"){
-        return "First Wash / Load / Load Finish & Process Start"
+        return "1st Wash / Load / Load Finish & Process Start"
     }
     else if(text=="/firstwash/rewashcreatebatch"){
-        return "First Wash / Rewash / Create Batch"
+        return "1st Wash / Rewash / Create Batch"
     }
     else if (text=="/firstwash/loadstart"){
-        return "First Wash / Load / Load Start"
+        return "1st Wash / Load / Load Start"
     }
     else if (text=="/firstwash/createbatch"){
-        return "First Wash / Create Batch"
+        return "1st Wash / Create Batch"
     }
     else if(text=="/firstwashqc"){
-        return "First Wash / QC"
+        return "1st Wash / QC"
     }
     else if(text=="/firstwash/hydroin"){
-        return "First Wash / Hydro / Hydro In"
+        return "1st Wash / Hydro / Hydro In"
     }
+    else if(text=="/secondwash/createbatch"){
+        return "2nd Wash / Create Batch"
+    }
+    else if(text=="/secondwash/hydroin"){
+        return "2nd Wash / Hydro / Hydro In"
+    }
+    else if(text=="/secondwash/hydroout"){
+        return "2nd Wash / Hydro / Hydro Out"
+    }
+    else if(text=="/secondwash/loadstart"){ 
+        return "2nd Wash / Load / Load Start"
+    }
+    else if(text=="/secondwash/loadfinish"){
+        return "2nd Wash / Load / Load Finish & Process Start"
+    }
+    else if(text=="/secondwash/unloadfinish"){
+        return "2nd Wash / Unload / Unload Finish"
+    }
+    else if(text=="/secondwashqc"){
+        return "2nd Wash / QC"
+    }
+    else if(text=="/secondwash/rewashcreatebatch"){
+        return "2nd Wash / Rewash / Create Batch"
+    }
+    else if(text=="/secondwash/processfinish"){
+        return "2nd Wash / Unload / Process Finish & Unload Start"
+    }
+    else if(text=="/secondwash/dryerconveyorin"){
+        return "2nd Wash / Dryer / Dryer Conveyor In"
+    }
+    else if(text=="/secondwash/dryerconveyorout"){
+        return "2nd Wash / Dryer / Dryer Conveyor Out"
+    }
+    else if(text=="/secondwash/dryerovenin"){
+        return "2nd Wash / Dryer / Dryer Oven In"
+    }
+    else if(text=="/secondwash/dryerovenout"){
+        return "2nd Wash / Dryer / Dryer Oven Out"
+    }
+    else if(text=="/secondwash/dryertumblein"){
+        return "2nd Wash / Dryer / Dryer Tumble In"
+    }
+    else if(text=="/secondwash/dryertumbleout"){
+        return "2nd Wash / Dryer / Dryer Tumble Out"
+    }   
+
 }

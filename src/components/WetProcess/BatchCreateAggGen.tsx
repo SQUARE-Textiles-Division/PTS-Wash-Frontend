@@ -18,7 +18,7 @@ import { tbCellColor,tbRowColor } from '../Colors/Colors'
 import NumberSpinner from "../NumberSpinner";
 import Checkbox from '@mui/material/Checkbox';
 import { ip } from "../../ip";
-import { Box, Button, Modal, TextField, Typography } from "@mui/material";
+import { Box, Button, fabClasses, Modal, TextField, Typography } from "@mui/material";
 import type RejectionReason from "../../TypeAnnotations/RejectionReason";
 import type FirstWashBatch from "../../TypeAnnotations/WetProcessBatch";
 // import type FirstWashBatchCreate from "../../TypeAnnotations/FirstWashBatchCreate";
@@ -47,7 +47,7 @@ import type WetProcessStage from "../../TypeAnnotations/WetProcessStage";
     // }
 
 
-    interface RewashBatch{
+    interface AggData {
         mpo:string,
         style:string,
         so:string,
@@ -83,9 +83,9 @@ import type WetProcessStage from "../../TypeAnnotations/WetProcessStage";
     },
     }));
     
-    export default function Rewash({stage}:WetProcessStage) {
+    export default function BatchCreateAgg({stage}:WetProcessStage){
         const [batchCard,setBatchCard]=useState(false)
-        const [rewashBatchList,setRewashBatchList]=useState<RewashBatch[]>([])
+        const [aggDataList,setAggDataList]=useState<AggData[]>([])
         const [qrData, setQrData] = useState<any | null>(null);
         const printRef = useRef<HTMLDivElement>(null);
         const [errorLog,setErrorLog]=useState<string>('')
@@ -128,37 +128,49 @@ import type WetProcessStage from "../../TypeAnnotations/WetProcessStage";
                         // let rewashList=[]
                         const mpoMetaMap = new Map();
                         const mpoQtyMap= new Map();
-                        const rewashmpoQtyMap=new Map();
+                       
                         for(let i=0;i<result.length;i++){
                                 for (const source of result[i].sources) {
                                 const mapKey = `${source.mpo}-${result[i].color}-${result[i].shade}`;
                                 const value = `${source.mpo}-${source.style}-${source.so}-${result[i].buyer}-${result[i].color}-${result[i].shade}`;
                                 
-                                if(result[i].stage!=stage)
-                                    continue;
+                                if(result[i].status!="completed" ){
+                                    if(result[i].stage==='first_wash' && stage==='second_wash'){
+                                        continue;
+                                    }
+                                    else if(result[i].stage==='second_wash' && stage==='third_wash'){
+                                        continue;
+                                    }
+                                    else if(result[i].stage==='third_wash' && stage==='final_wash'){
+                                        continue;
+                                    }
+                                }
+                                       
+                               
                                 mpoMetaMap.set(mapKey, mpoMetaMap.get(mapKey) || value);
-
-                                mpoQtyMap.set(
+                                
+                                console.log(result[i].stage,' ',stage)
+                                if(result[i].stage===stage){
+                                    mpoQtyMap.set(
                                     mapKey,
-                                    (mpoQtyMap.get(mapKey) || 0) + source.rewash_quantity
-                                );
-
-                                if (result[i].type === "rewash") {
-                                    rewashmpoQtyMap.set(
-                                        mapKey,
-                                        (rewashmpoQtyMap.get(mapKey) || 0) + source.quantity
+                                    (mpoQtyMap.get(mapKey) || 0) - source.quantity+(source.rewash_quantity+source.rejection_quantity)
                                     );
                                 }
+                                else{
+                                    mpoQtyMap.set(
+                                    mapKey,
+                                    (mpoQtyMap.get(mapKey) || 0) + source.quantity-(source.rewash_quantity+source.rejection_quantity)
+                                    );
+                                }
+                               
                             }
                         }
                         
-                        let newRewashList=[]
+                        let aggDataTempList = [];
                         for(const [key,val] of mpoMetaMap){
-                           const quantity =
-                            (mpoQtyMap.get(key) || 0) -
-                            (rewashmpoQtyMap.get(key) || 0);
+                           const quantity =(mpoQtyMap.get(key) || 0) 
                             const [mpo, style, so, buyer, color, shade] = val.split("-");
-                            newRewashList.push({
+                            aggDataTempList.push({
                                 mpo,
                                 style,
                                 so,
@@ -168,7 +180,7 @@ import type WetProcessStage from "../../TypeAnnotations/WetProcessStage";
                                 quantity
                             })
                         }
-                        setRewashBatchList(newRewashList)
+                        setAggDataList(aggDataTempList)
                     },
                     (error:any)=>{
                         console.log('Error fetching batches:', error.response.data)
@@ -184,99 +196,99 @@ import type WetProcessStage from "../../TypeAnnotations/WetProcessStage";
 
 
 
-        const fetchPrimary=()=>{
+        // const fetchPrimary=()=>{
 
-                getData<WetProcessBatchMeta[]>(
-                    `wet-process/batch-sources/`,
-                    ip,
-                    {},
-                    {stage:'first_wash'},
-                    (result2:WetProcessBatchMeta[])=>{
-                        let tempBatch:RewashBatch[]=[]
-                        const BatchMetaMap = new Map();
-                        const RewashtMap = new Map();
-                        for(let i=0;i<result2.length;i++){
-                            const key=`${result2[i].source.mpo}-${result2[i].source.style}-${result2[i].source.so}-${result2[i].batch.buyer}-${result2[i].batch.color}-${result2[i].batch.shade}`
-                            BatchMetaMap.set(key,(BatchMetaMap.get(key)||0)+result2[i].rewash_quantity)
-                            if(result2[i].batch.type=='rewash'){
-                                RewashtMap.set(key,(RewashtMap.get(key)||0)+result2[i].quantity)
-                            }
+        //         getData<WetProcessBatchMeta[]>(
+        //             `wet-process/batch-sources/`,
+        //             ip,
+        //             {},
+        //             {stage:'first_wash'},
+        //             (result2:WetProcessBatchMeta[])=>{
+        //                 let tempBatch:RewashBatch[]=[]
+        //                 const BatchMetaMap = new Map();
+        //                 const RewashtMap = new Map();
+        //                 for(let i=0;i<result2.length;i++){
+        //                     const key=`${result2[i].source.mpo}-${result2[i].source.style}-${result2[i].source.so}-${result2[i].batch.buyer}-${result2[i].batch.color}-${result2[i].batch.shade}`
+        //                     BatchMetaMap.set(key,(BatchMetaMap.get(key)||0)+result2[i].rewash_quantity)
+        //                     if(result2[i].batch.type=='rewash'){
+        //                         RewashtMap.set(key,(RewashtMap.get(key)||0)+result2[i].quantity)
+        //                     }
                            
-                        }
-                        for (const [key] of BatchMetaMap) {
-                            BatchMetaMap.set(
-                                key,
-                                (BatchMetaMap.get(key) || 0) - (RewashtMap.get(key) || 0)
-                            );
-                        }
-                        for(const[key,val] of BatchMetaMap){
-                            const [mpo, style, so, buyer, color, shade] = key.split("-");
-                            tempBatch.push(
-                                {
-                                    mpo:mpo,
-                                    style:style,
-                                    so:so,
-                                    buyer:buyer,
-                                    color:color,
-                                    shade:shade,
-                                    quantity:val
-                                }
-                            )
-                            // tempBatch.p
-                        }
-                        const mpocolorshade = new Map<string, number>();
+        //                 }
+        //                 for (const [key] of BatchMetaMap) {
+        //                     BatchMetaMap.set(
+        //                         key,
+        //                         (BatchMetaMap.get(key) || 0) - (RewashtMap.get(key) || 0)
+        //                     );
+        //                 }
+        //                 for(const[key,val] of BatchMetaMap){
+        //                     const [mpo, style, so, buyer, color, shade] = key.split("-");
+        //                     tempBatch.push(
+        //                         {
+        //                             mpo:mpo,
+        //                             style:style,
+        //                             so:so,
+        //                             buyer:buyer,
+        //                             color:color,
+        //                             shade:shade,
+        //                             quantity:val
+        //                         }
+        //                     )
+        //                     // tempBatch.p
+        //                 }
+        //                 const mpocolorshade = new Map<string, number>();
 
-                        for (const obj of tempBatch) {
-                            const key = `${obj.mpo}|${obj.color}|${obj.shade}`;
-                            mpocolorshade.set(key, (mpocolorshade.get(key) || 0) + obj.quantity);
-                        }
+        //                 for (const obj of tempBatch) {
+        //                     const key = `${obj.mpo}|${obj.color}|${obj.shade}`;
+        //                     mpocolorshade.set(key, (mpocolorshade.get(key) || 0) + obj.quantity);
+        //                 }
 
-                        const tempModifyBatchMap = new Map();
-                        for (const obj of tempBatch) {
-                                const key = `${obj.mpo}|${obj.color}|${obj.shade}`;
-                                const qty = mpocolorshade.get(key);
-                                if (qty !== undefined) {
-                                tempModifyBatchMap.set(key, {
-                                    mpo: obj.mpo,
-                                    buyer: obj.buyer,
-                                    style: obj.style,
-                                    so: obj.so,
-                                    color: obj.color,
-                                    shade: obj.shade,
-                                    quantity: qty,
-                                });
-                                }
-                        }
-                        let tempModifyBatchList = [...tempModifyBatchMap.values()];
-                        // let batchDryFinal:BatchDryItem[]=[]
-                        // for(let i=0;i<result2.length;i++){
-                        //     tempBatch.push(
-                        //         {
-                        //             content_type:result2[i].content_type,
-                        //             object_id:result2[i].object_id,
-                        //             buyer:result2[i].batch_details.buyer,
-                        //             color:result2[i].batch_details.color,
-                        //             shade:result2[i].batch_details.shade,
-                        //             quantity:result2[i].remaining_rewash_quantity
+        //                 const tempModifyBatchMap = new Map();
+        //                 for (const obj of tempBatch) {
+        //                         const key = `${obj.mpo}|${obj.color}|${obj.shade}`;
+        //                         const qty = mpocolorshade.get(key);
+        //                         if (qty !== undefined) {
+        //                         tempModifyBatchMap.set(key, {
+        //                             mpo: obj.mpo,
+        //                             buyer: obj.buyer,
+        //                             style: obj.style,
+        //                             so: obj.so,
+        //                             color: obj.color,
+        //                             shade: obj.shade,
+        //                             quantity: qty,
+        //                         });
+        //                         }
+        //                 }
+        //                 let tempModifyBatchList = [...tempModifyBatchMap.values()];
+        //                 // let batchDryFinal:BatchDryItem[]=[]
+        //                 // for(let i=0;i<result2.length;i++){
+        //                 //     tempBatch.push(
+        //                 //         {
+        //                 //             content_type:result2[i].content_type,
+        //                 //             object_id:result2[i].object_id,
+        //                 //             buyer:result2[i].batch_details.buyer,
+        //                 //             color:result2[i].batch_details.color,
+        //                 //             shade:result2[i].batch_details.shade,
+        //                 //             quantity:result2[i].remaining_rewash_quantity
 
-                        //         }
-                        //     )
-                        // }
-                        // let shadeSet = new Set();
+        //                 //         }
+        //                 //     )
+        //                 // }
+        //                 // let shadeSet = new Set();
 
-                        tempModifyBatchList.sort((a, b) => {
-                            // Compare Shade first
-                                if (a.shade < b.shade) return -1;
-                                if (a.shade > b.shade) return 1;
+        //                 tempModifyBatchList.sort((a, b) => {
+        //                     // Compare Shade first
+        //                         if (a.shade < b.shade) return -1;
+        //                         if (a.shade > b.shade) return 1;
 
-                                return 0; // Shade and Size are equal
-                        })
+        //                         return 0; // Shade and Size are equal
+        //                 })
 
-                        setRewashBatchList(tempModifyBatchList)
+        //                 setRewashBatchList(tempModifyBatchList)
 
-                    }
-                )
-        }
+        //             }
+        //         )
+        // }
         useEffect(() => {
             // fetchPrimary();
             fetchAggregateData();
@@ -368,7 +380,7 @@ import type WetProcessStage from "../../TypeAnnotations/WetProcessStage";
         payload.buyer=selectedRows[0].buyer
         payload.color=selectedRows[0].color
         payload.stage=stage
-        payload.type="rewash"
+        payload.type="normal_wash"
         //    const preShade=payload.shade
         //    const prevBatch={batch:selectedRows[0].BatchNumber,quantity:selectedRows[0].Quantity}
         for(let i=0;i<selectedRows.length;i++){
@@ -449,42 +461,60 @@ import type WetProcessStage from "../../TypeAnnotations/WetProcessStage";
 
             },
             (error: any)=>{
-                console.log('Error creating batch:', error.response.data)
+                console.log('Error creating batch:', error)
+                let msg=""
+                if (error instanceof Error && error.message === "Network Error") {
+                    console.log("Network Error");
+                    msg="Network Error"
+                            
+                }
+                
+                else if(error.response.data){
+                    Object.entries(error.response.data).forEach(([key, value]) => {
+                        if (Array.isArray(value)) {
+                            msg += value[0];
+                        } else {
+                            msg += value;
+                        }
+                    });
+                    
+                }
+                setErrorLog(msg)
                 // console.log(error.response.data)
                 //                 let msg=""
                 //                 Object.entries(error.response.data).forEach(([key, value]:any) => {
                 //                     msg+=value[0]
                 //                 });
                 // console.log('Error creating batch:', err.response.data)
-                const data = error.response?.data;
-                if (typeof data?.shade === 'string') {
-                    setErrorLog(data.shade);
+                // const data = error.response?.data;
+                // if (typeof data?.shade === 'string') {
+                //     setErrorLog(data.shade);
+                // }
+                // else if (typeof data?.buyer === 'string') {
+                //     setErrorLog(data.buyer);
+                // }
+                // else if (typeof data?.color === 'string') {
+                //     setErrorLog(data.color);
+                // }
+                // else if (typeof data?.type === 'string') {
+                //     setErrorLog(data.type);
+                // }
+                // else if (typeof data?.input_sources?.[0]?.type?.[0] === 'string') {
+                //     setErrorLog(data.input_sources[0].type[0]);
+                // }
+                // else if (typeof data?.input_sources?.[0]?.mpo?.[0] === 'string') {
+                //     setErrorLog(data.input_sources[0].mpo[0]);
+                // }
+                // else if (typeof data?.input_sources?.[0]?.style?.[0] === 'string') {
+                //     setErrorLog(data.input_sources[0].style[0]);
+                // }
+                // else if (typeof data?.input_sources?.[0]?.so?.[0] === 'string') {
+                //     setErrorLog(data.input_sources[0].so[0]);
+                // }
+                // else if (typeof data?.input_sources?.[0]?.quantity?.[0] === 'string') {
+                //     setErrorLog(data.input_sources[0].quantity[0]);
+                // }
                 }
-                else if (typeof data?.buyer === 'string') {
-                    setErrorLog(data.buyer);
-                }
-                else if (typeof data?.color === 'string') {
-                    setErrorLog(data.color);
-                }
-                else if (typeof data?.type === 'string') {
-                    setErrorLog(data.type);
-                }
-                else if (typeof data?.input_sources?.[0]?.type?.[0] === 'string') {
-                    setErrorLog(data.input_sources[0].type[0]);
-                }
-                else if (typeof data?.input_sources?.[0]?.mpo?.[0] === 'string') {
-                    setErrorLog(data.input_sources[0].mpo[0]);
-                }
-                else if (typeof data?.input_sources?.[0]?.style?.[0] === 'string') {
-                    setErrorLog(data.input_sources[0].style[0]);
-                }
-                else if (typeof data?.input_sources?.[0]?.so?.[0] === 'string') {
-                    setErrorLog(data.input_sources[0].so[0]);
-                }
-                else if (typeof data?.input_sources?.[0]?.quantity?.[0] === 'string') {
-                    setErrorLog(data.input_sources[0].quantity[0]);
-                }
-            }
             )
         }
 
@@ -851,7 +881,7 @@ import type WetProcessStage from "../../TypeAnnotations/WetProcessStage";
                 // lineHeight:2
                 // height:'20px'
             }}>
-            {rewashBatchList
+            {aggDataList
                     .filter(row => row.quantity > 0).filter(row =>
                             Object.entries(filter).every(([key, value]) =>
                                 value === "" || row[key as keyof typeof row]

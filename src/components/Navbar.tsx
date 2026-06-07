@@ -110,7 +110,7 @@ export default function Navbar() {
 
   const WetProcessItemContent: (MenuItem & { children?: MenuItem[] }) []= [
     {
-      primary:"First Wash",
+      primary:"1st Wash",
       children:[
         { primary: "Create Batch", to: "/firstwash/createbatch" },
         // { primary: "Create Batch (With Dry)", to: "/batchwithdry" },
@@ -148,86 +148,61 @@ export default function Navbar() {
           ],
         },
         {primary: "QC",to:"/firstwashqc"},
+        {
+          primary:"Rewash",
+          children:[
+            { primary: "Create Batch", to: "/firstwash/rewashcreatebatch" },
+          ]
+        }
+
       ]
     },
 
     {
-      primary:"Rewash",
+      primary:'2nd Wash',
       children:[
-        { primary: "Create Batch", to: "/firstwash/rewashcreatebatch" },
-        
-        // { primary: "Load",
-        //   children: [
-        //     { primary: "Load Start", to: "/loadstart" },
-        //     { primary: "Load Finish & Process Start", to: "/loadfinish" },
-        //   ],
-        // },
-        // { primary: "Unload",
-        //   // to: "",
-        //   children: [
-        //     { primary: "Process Finish & Unload Start", to: "/processfinish" },
-        //     { primary: "UnLoad Finish", to: "/unloadfinish" },
-        //   ],
-        // },
-        // { primary: "Hydro",
-        //   // to: "",
-        //   children: [
-        //     { primary: "Hydro In", to: "/hydroin" },
-        //     { primary: "Hydro Out", to: "/hydroout" },
-        //   ],
-        // },
-        // {
-        //   primary: "Dryer",
-        //   children: [
-        //     { primary: "Dryer Conveyor In", to: "/dryerconveyorin" },
-        //     { primary: "Dryer Conveyor Out", to: "/dryerconveyorout" },
-        //     { primary: "Dryer Oven In", to: "/dryerovenin" },
-        //     { primary: "Dryer Oven Out", to: "/dryerovenout" },
-        //     { primary: "Dryer Tumble In", to: "/dryertumblein" },
-        //     { primary: "Dryer Tumble Out", to: "/dryertumbleout" },
+        { primary: "Create Batch", to: "/secondwash/createbatch" },
+        { primary: "Load",
+          children: [
+            { primary: "Load Start", to: "/secondwash/loadstart" },
+            { primary: "Load Finish & Process Start", to: "/secondwash/loadfinish" },
+          ],
+        },
+        { primary: "Unload",
+          // to: "",
+          children: [
+            { primary: "Process Finish & Unload Start", to: "/secondwash/processfinish" },
+            { primary: "UnLoad Finish", to: "/secondwash/unloadfinish" },
+          ],
+        },
+        { primary: "Hydro",
+          // to: "",
+          children: [
+            { primary: "Hydro In", to: "/secondwash/hydroin" },
+            { primary: "Hydro Out", to: "/secondwash/hydroout" },
+          ],
+        },
+        {
+          primary: "Dryer",
+          children: [
+            { primary: "Dryer Conveyor In", to: "/secondwash/dryerconveyorin" },
+            { primary: "Dryer Conveyor Out", to: "/secondwash/dryerconveyorout" },
+            { primary: "Dryer Oven In", to: "/secondwash/dryerovenin" },
+            { primary: "Dryer Oven Out", to: "/secondwash/dryerovenout" },
+            { primary: "Dryer Tumble In", to: "/secondwash/dryertumblein" },
+            { primary: "Dryer Tumble Out", to: "/secondwash/dryertumbleout" },
           
-        //   ],
-        // },
-        // {primary: "First Wash QC",to:"/firstwashqc"},
+          ],
+        },
+        {primary: "QC",to:"/secondwashqc"},
+        {
+          primary:"Rewash",
+          children:[
+            { primary: "Create Batch", to: "/secondwash/rewashcreatebatch" },
+          ]
+        }
       ]
-    },
-    
-    // { primary: "Create Batch (Without Dry)", to: "/batchdry" },
-    // { primary: "Create Batch (With Dry)", to: "/batchwithdry" },
-    
-    // { primary: "Load",
-    //   to: "",
-    //   children: [
-    //     { primary: "Load Start", to: "/loadstart" },
-    //     { primary: "Load Finish & Process Start", to: "/loadfinish" },
-    //   ],
-    // },
-    // { primary: "Unload",
-    //   to: "#",
-    //   children: [
-    //     { primary: "Process Finish & Unload Start", to: "/processfinish" },
-    //     { primary: "UnLoad Finish", to: "/unloadfinish" },
-    //   ],
-    // },
-    // { primary: "Hydro",
-    //   to: "",
-    //   children: [
-    //     { primary: "Hydro In", to: "/hydroin" },
-    //     { primary: "Hydro Out", to: "/hydroout" },
-    //   ],
-    // },
-    // {
-    //   primary: "Dryer",
-    //   children: [
-    //     { primary: "Dryer Conveyor In", to: "/dryerconveyorin" },
-    //     { primary: "Dryer Conveyor Out", to: "/dryerconveyorout" },
-    //     { primary: "Dryer Oven In", to: "/dryerovenin" },
-    //     { primary: "Dryer Oven Out", to: "/dryerovenout" },
-    //     { primary: "Dryer Tumble In", to: "/dryertumblein" },
-    //     { primary: "Dryer Tumble Out", to: "/dryertumbleout" },
-       
-    //   ],
-    // },
+    }
     
   ];
   const [openSubmenus, setOpenSubmenus] = useState<{ [key: string]: boolean }>({});
@@ -290,7 +265,22 @@ export default function Navbar() {
       location.pathname.startsWith("/firstwash/dryertumblein")||
       location.pathname.startsWith("/firstwash/dryertumbleout")||
       location.pathname.startsWith("/firstwashqc")||
-      location.pathname.startsWith("/firstwash/rewashcreatebatch")
+      location.pathname.startsWith("/firstwash/rewashcreatebatch")||
+      location.pathname.startsWith("/secondwash/createbatch")||
+      location.pathname.startsWith("/secondwash/hydroin")||
+      location.pathname.startsWith("/secondwash/hydroout")||
+      location.pathname.startsWith("/secondwash/loadstart")||
+      location.pathname.startsWith("/secondwash/loadfinish")||
+      location.pathname.startsWith("/secondwash/processfinish")||
+      location.pathname.startsWith("/secondwash/unloadfinish")||
+      location.pathname.startsWith("/secondwash/dryerconveyorin")||
+      location.pathname.startsWith("/secondwash/dryerconveyorout")||
+      location.pathname.startsWith("/secondwash/dryerovenin")||
+      location.pathname.startsWith("/secondwash/dryerovenout")||
+      location.pathname.startsWith("/secondwash/dryertumblein")||
+      location.pathname.startsWith("/secondwash/dryertumbleout")||
+      location.pathname.startsWith("/secondwashqc")||
+      location.pathname.startsWith("/secondwash/rewashcreatebatch")
     ) {
       setDryProcess(false);
       setItemContent(WetProcessItemContent);

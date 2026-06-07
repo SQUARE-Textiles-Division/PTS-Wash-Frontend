@@ -14,6 +14,10 @@ import type { Machine } from "../../TypeAnnotations/Machine";
 import type { ProcessFirstWash } from "../../TypeAnnotations/ProcessFirstWash";
 import { all } from "axios";
 import NumberSpinner from "../NumberSpinner";
+import type StageEndpoint from "../../TypeAnnotations/StageEndpoint";
+import type WetProcessBatch from "../../TypeAnnotations/WetProcessBatch";
+import { StageMap } from "../../StageMap";
+import { StageDispMap } from "../../StageDispMap";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -46,7 +50,7 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 
 
 
-export default function HydroIn(){    
+export default function HydroIn({stageEndpoint}:StageEndpoint) {    
     const [hourminError,setHourMinError]=useState(false)
     const [showPopup, setShowPopup] = useState(false);
     const [processError,setProcessError]=useState("");
@@ -116,104 +120,139 @@ export default function HydroIn(){
         else{
             minStr=min+""
         }
-        postData<ProcessFirstWash>(
-            `wet-process/first-wash-hydro-processes/`,
+        // let ret=false
+        getData<WetProcessBatch>(
+            `wet-process/batches/${batchIdNum}`,
             ip,
-            {
-                batch:batchIdNum,
-                machine:machine,
-                standard_time: `${hourStr}:${minStr}:00`
-            },
-            (result:ProcessFirstWash)=>{
-                console.log(result)
-                // const shade=result.batch.shade
-                // const batchNumber=result.batch.id
-                // let batchQR=`W8220${result.batch.updated_at}B${String(batchDry[i].id).padStart(10, '0')}`
-                tempBatchDetail.push(
-                    {
-                        'Shade':result.batch.shade,
-                        'Color':result.batch.color,
-                        'Buyer':result.batch.buyer,
-                        'BatchQRCode':result.batch.id,
-                        'Quantity':result.batch.total_quantity,
-                        'Machine':result.machine
-                    }
-                )
-                // for(const batchObj of sourceBatches){
-                //     const allocquantity=batchObj.quantity
-                //     for(const batchBundle of batchObj.batch.batch_bundles){
-                //         if(batchBundle.received.shade==shade){
-                //             tempBatchDetail.push({
-                //                 'Shade':shade,
-                //                 'MPO':batchBundle.received.mpo,
-                //                 'SO':batchBundle.received.so,
-                //                 'Style':batchBundle.received.style,
-                //                 'Color':batchBundle.received.color,
-                //                 'Size':batchBundle.received.size,
-                //                 'Buyer':batchBundle.received.buyer,
-                //                 'Quantity':allocquantity,
-                //                 'Machine':result.machine.machine_number
-                //                 // 'BatchNumber':batchNumber,
-                //                 // 'BatchQRCode':
-                //                 // {row.MPO}-${row.Buyer}-${row.Style}-${row.Color}-${row.Shade}-${row.Size}-${row.BatchQRCode}-${row.BatchNumber}-${row.Quantity}
-                //             })
-                //             break;
-                //         }
-                //     }
-                // }
-                // const sourceBundles=result.batch_for_first_wash.source_bundles
+            {},
+            {},
+            (batchMeta: WetProcessBatch) => {
+                // Handle the fetched batch details
+                console.log(batchMeta)
+                if(batchMeta.stage!=StageMap[stageEndpoint]){
+                    setProcessError(`Batch is currently at ${StageDispMap[batchMeta.stage] } stage`)
+                    
+                    return
+                }
+                        postData<ProcessFirstWash>(
+                            `wet-process/${stageEndpoint}-hydro-processes/`,
+                            ip,
+                            {
+                                batch:batchIdNum,
+                                machine:machine,
+                                standard_time: `${hourStr}:${minStr}:00`
+                            },
+                            (result:ProcessFirstWash)=>{
+                                console.log(result)
+                                // const shade=result.batch.shade
+                                // const batchNumber=result.batch.id
+                                // let batchQR=`W8220${result.batch.updated_at}B${String(batchDry[i].id).padStart(10, '0')}`
+                                tempBatchDetail.push(
+                                    {
+                                        'Shade':result.batch.shade,
+                                        'Color':result.batch.color,
+                                        'Buyer':result.batch.buyer,
+                                        'BatchQRCode':result.batch.id,
+                                        'Quantity':result.batch.total_quantity,
+                                        'Machine':result.machine
+                                    }
+                                )
+                                // for(const batchObj of sourceBatches){
+                                //     const allocquantity=batchObj.quantity
+                                //     for(const batchBundle of batchObj.batch.batch_bundles){
+                                //         if(batchBundle.received.shade==shade){
+                                //             tempBatchDetail.push({
+                                //                 'Shade':shade,
+                                //                 'MPO':batchBundle.received.mpo,
+                                //                 'SO':batchBundle.received.so,
+                                //                 'Style':batchBundle.received.style,
+                                //                 'Color':batchBundle.received.color,
+                                //                 'Size':batchBundle.received.size,
+                                //                 'Buyer':batchBundle.received.buyer,
+                                //                 'Quantity':allocquantity,
+                                //                 'Machine':result.machine.machine_number
+                                //                 // 'BatchNumber':batchNumber,
+                                //                 // 'BatchQRCode':
+                                //                 // {row.MPO}-${row.Buyer}-${row.Style}-${row.Color}-${row.Shade}-${row.Size}-${row.BatchQRCode}-${row.BatchNumber}-${row.Quantity}
+                                //             })
+                                //             break;
+                                //         }
+                                //     }
+                                // }
+                                // const sourceBundles=result.batch_for_first_wash.source_bundles
 
-            //     const bundleMap = new Map();
+                            //     const bundleMap = new Map();
 
-            //    for (const bundleObj of sourceBundles) {
-            //         const allocquantity = bundleObj.quantity;
+                            //    for (const bundleObj of sourceBundles) {
+                            //         const allocquantity = bundleObj.quantity;
 
-            //         if (bundleObj.bundle.shade == shade) {
+                            //         if (bundleObj.bundle.shade == shade) {
 
-            //             const key = `${shade}|${bundleObj.bundle.mpo}|${bundleObj.bundle.so}|${bundleObj.bundle.style}|${bundleObj.bundle.color}|${bundleObj.bundle.size}|${bundleObj.bundle.buyer}|${result.machine.machine_number}`;
+                            //             const key = `${shade}|${bundleObj.bundle.mpo}|${bundleObj.bundle.so}|${bundleObj.bundle.style}|${bundleObj.bundle.color}|${bundleObj.bundle.size}|${bundleObj.bundle.buyer}|${result.machine.machine_number}`;
 
-            //             if (!bundleMap.has(key)) {
-            //                 bundleMap.set(key, allocquantity);
-            //             } else {
-            //                 bundleMap.set(key, bundleMap.get(key) + allocquantity);
-            //             }
-            //         }
-            //     }
-            //     for (const [key, value] of bundleMap) {
+                            //             if (!bundleMap.has(key)) {
+                            //                 bundleMap.set(key, allocquantity);
+                            //             } else {
+                            //                 bundleMap.set(key, bundleMap.get(key) + allocquantity);
+                            //             }
+                            //         }
+                            //     }
+                            //     for (const [key, value] of bundleMap) {
 
-            //         const parts = key.split("|");
-            //         console.log(parts)
-            //         tempBatchDetail.push({
-            //             Shade: parts[0],
-            //             MPO: parts[1],
-            //             SO: parts[2],
-            //             Style: parts[3],
-            //             Color: parts[4],
-            //             Size: parts[5],
-            //             Buyer: parts[6],
-            //             Machine:parts[7],
-            //             // BatchNumber: parts[7],
-            //             Quantity: value
-            //         });
-            //     }
-            
-            setBatchDetails(tempBatchDetail)
-            setBatchNumber(batchNumber)
-            setTotQty(result.batch.total_quantity)
-            },
-            (error:any)=>{
-               console.log(error.response.data)
-                let msg=""
-                Object.entries(error.response.data).forEach(([key, value]:any) => {
-                    msg+=value[0]
-                });
+                            //         const parts = key.split("|");
+                            //         console.log(parts)
+                            //         tempBatchDetail.push({
+                            //             Shade: parts[0],
+                            //             MPO: parts[1],
+                            //             SO: parts[2],
+                            //             Style: parts[3],
+                            //             Color: parts[4],
+                            //             Size: parts[5],
+                            //             Buyer: parts[6],
+                            //             Machine:parts[7],
+                            //             // BatchNumber: parts[7],
+                            //             Quantity: value
+                            //         });
+                            //     }
+                            
+                            setBatchDetails(tempBatchDetail)
+                            setBatchNumber(batchNumber)
+                            setTotQty(result.batch.total_quantity)
+                            },
+                            (error:any)=>{
+                            //    console.log(error.response.data)
+                            //     let msg=""
+                            //     Object.entries(error.response.data).forEach(([key, value]:any) => {
+                            //         msg+=value[0]
+                            //     });
+                                let msg=""
+                                    if (error instanceof Error && error.message === "Network Error") {
+                                        console.log("Network Error");
+                                        msg="Network Error"
+                                                
+                                    }
+                                    
+                                    else if(error.response.data){
+                                        Object.entries(error.response.data).forEach(([key, value]) => {
+                                            if (Array.isArray(value)) {
+                                                msg += value[0];
+                                            } else {
+                                                msg += value;
+                                            }
+                                        });
+                                        
+                                    }
+                                // if
 
-                // if
-
-                setProcessError(msg)   
+                                setProcessError(msg)   
+                            }
+                        
+                        )
+                // if()
             }
+        );
         
-        )
+
         // getData<BundleInfo>(
         //     `washing/${barcode}/`
         //     "http://127.0.0.1:8000",
@@ -459,7 +498,7 @@ export default function HydroIn(){
                     <TableHead>
                       <TableRow>
                         {/* <StyledTableCell align="center">MPO</StyledTableCell> */}
-                        <StyledTableCell align="center">BatchQRCode(First Wash)</StyledTableCell>
+                        <StyledTableCell align="center">BatchQRCode</StyledTableCell>
                         <StyledTableCell align="center">Buyer</StyledTableCell>
                         {/* <StyledTableCell align="center">Style</StyledTableCell> */}
                         {/* <StyledTableCell align="center">Sales Order</StyledTableCell> */}

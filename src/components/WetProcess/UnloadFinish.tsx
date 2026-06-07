@@ -13,6 +13,10 @@ import { tbCellColor, tbRowColor } from "../Colors/Colors";
 import type { Machine } from "../../TypeAnnotations/Machine";
 import type { ProcessFirstWash } from "../../TypeAnnotations/ProcessFirstWash";
 import { all } from "axios";
+import type StageEndpoint from "../../TypeAnnotations/StageEndpoint";
+import { StageDispMap } from "../../StageDispMap";
+import type WetProcessBatch from "../../TypeAnnotations/WetProcessBatch";
+import { StageMap } from "../../StageMap";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -45,7 +49,7 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 
 
 
-export default function UnloadFinish(){    
+export default function UnloadFinish({stageEndpoint}:StageEndpoint) {    
     const [showPopup, setShowPopup] = useState(false);
     const [processError,setProcessError]=useState("");
 
@@ -70,56 +74,116 @@ export default function UnloadFinish(){
         // console.log(batchIdNum)
         const tempBatchDetail:any=[]
         // let getId=0
-        getData<ProcessFirstWash[]>(
-            `wet-process/first-wash-processes`,
+        // let ret=false
+        getData<WetProcessBatch>(
+            `wet-process/batches/${batchIdNum}`,
             ip,
             {},
-            {
-                batch:batchIdNum,
-                // type:'oven'
-            },
-            (res:ProcessFirstWash[])=>{
-                // getId=res[0].id
-                console.log(res)
-                console.log(res[0].id)
-                patchData<ProcessFirstWash>(
-                    `wet-process/first-wash-processes/${res[0].id}/`,
+            {},
+            (batchMeta: WetProcessBatch) => {
+                // Handle the fetched batch details
+                console.log(batchMeta)
+                if(batchMeta.stage!=StageMap[stageEndpoint]){
+                    setProcessError(`Batch is currently at ${StageDispMap[batchMeta.stage] } stage`)
+                    // ret=true
+                    return
+                }
+                 getData<ProcessFirstWash[]>(
+                    `wet-process/${stageEndpoint}-processes`,
                     ip,
+                    {},
                     {
-                        state:'unload_finish'
+                        batch:batchIdNum,
+                        // type:'oven'
                     },
-                  (result:ProcessFirstWash)=>{
-                        console.log(result)
-                        tempBatchDetail.push(
+                    (res:ProcessFirstWash[])=>{
+                        // getId=res[0].id
+                        console.log(res)
+                        // console.log(res[0].id)
+                        if(res.length===0){
+                            setProcessError("Batch Stages Already Completed or Process Finish Not Completed")
+                            return;
+                        }
+                        patchData<ProcessFirstWash>(
+                            `wet-process/${stageEndpoint}-processes/${res[0].id}/`,
+                            ip,
                             {
-                                'Shade':result.batch.shade,
-                                'Color':result.batch.color,
-                                'Buyer':result.batch.buyer,
-                                'BatchQRCode':result.batch.id,
-                                'Quantity':result.batch.total_quantity,
-                                'Machine':result.machine.machine_number
+                                state:'unload_finish'
+                            },
+                        (result:ProcessFirstWash)=>{
+                                console.log(result)
+                                tempBatchDetail.push(
+                                    {
+                                        'Shade':result.batch.shade,
+                                        'Color':result.batch.color,
+                                        'Buyer':result.batch.buyer,
+                                        'BatchQRCode':result.batch.id,
+                                        'Quantity':result.batch.total_quantity,
+                                        'Machine':result.machine.machine_number
+                                    }
+                                )
+                
+                                setBatchDetails(tempBatchDetail)
+                                setBatchNumber(batchNumber)
+                                setTotQty(result.batch.total_quantity)
+                            },
+                            (error:any)=>{
+                                console.log(error)
+                                let msg=""
+                            if (error instanceof Error && error.message === "Network Error") {
+                                console.log("Network Error");
+                                msg="Network Error"
+                                        
+                            }
+                            else if (error instanceof Error) {
+                                msg = error.message;
+                            }
+                            else if(error.response.data){
+                                Object.entries(error.response.data).forEach(([key, value]) => {
+                                    if (Array.isArray(value)) {
+                                        msg += value[0];
+                                    } else {
+                                        msg += value;
+                                    }
+                                });
+                                
+                            }
+                                // if
+
+                                setProcessError(msg)   
+                                
                             }
                         )
-        
-                        setBatchDetails(tempBatchDetail)
-                        setBatchNumber(batchNumber)
-                        setTotQty(result.batch.total_quantity)
                     },
                     (error:any)=>{
-                        console.log(error.response.data)
-                        let msg=error.response.data[0]
-                        // if
-
-                        setProcessError(msg)   
-                        
+                            // console.log(error)
+                            let msg=""
+                            if (error instanceof Error && error.message === "Network Error") {
+                                console.log("Network Error");
+                                msg="Network Error"
+                                        
+                            }
+                            else if (error instanceof Error) {
+                                msg = error.message;
+                            }
+                            else if(error.response && error.response.data){
+                                Object.entries(error.response.data).forEach(([key, value]) => {
+                                    if (Array.isArray(value)) {
+                                        msg += value[0];
+                                    } else {
+                                        msg += value;
+                                    }
+                                });
+                                
+                            }
+                            setProcessError(msg)
                     }
-                )
-            },
-            (error:any)=>{
-                    console.log(error.response.data)
+       )
+                // if()
             }
-
-        )
+        );
+          
+       
         
     };
 
@@ -234,7 +298,7 @@ export default function UnloadFinish(){
                          
                     <TableHead>
                       <TableRow>
-                        <StyledTableCell align="center">BatchQRCode(First Wash)</StyledTableCell>
+                        <StyledTableCell align="center">BatchQRCode</StyledTableCell>
                         <StyledTableCell align="center">Buyer</StyledTableCell>
                         {/* <StyledTableCell align="center">Style</StyledTableCell> */}
                         {/* <StyledTableCell align="center">Sales Order</StyledTableCell> */}

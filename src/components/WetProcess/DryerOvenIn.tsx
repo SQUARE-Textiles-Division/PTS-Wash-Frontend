@@ -14,6 +14,10 @@ import type { Machine } from "../../TypeAnnotations/Machine";
 import type { ProcessFirstWash } from "../../TypeAnnotations/ProcessFirstWash";
 import { all } from "axios";
 import NumberSpinner from "../NumberSpinner";
+import type StageEndpoint from "../../TypeAnnotations/StageEndpoint";
+import type WetProcessBatch from "../../TypeAnnotations/WetProcessBatch";
+import { StageMap } from "../../StageMap";
+import { StageDispMap } from "../../StageDispMap";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -46,7 +50,7 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 
 
 
-export default function DryerOvenIn(){    
+export default function DryerOvenIn({stageEndpoint}:StageEndpoint){    
     const [showPopup, setShowPopup] = useState(false);
     const [processError,setProcessError]=useState("");
     const [hourError,setHourError]=useState(false)
@@ -116,8 +120,22 @@ export default function DryerOvenIn(){
         else{
             minStr=min+""
         }
-        postData<ProcessFirstWash>(
-            `wet-process/first-wash-dryer-processes/`,
+        // let ret=false
+        getData<WetProcessBatch>(
+            `wet-process/batches/${batchIdNum}`,
+            ip,
+            {},
+            {},
+            (batchMeta: WetProcessBatch) => {
+                // Handle the fetched batch details
+                console.log(batchMeta)
+                if(batchMeta.stage!=StageMap[stageEndpoint]){
+                    setProcessError(`Batch is currently at ${StageDispMap[batchMeta.stage] } stage`)
+                    // ret=true
+                    return
+                }
+                 postData<ProcessFirstWash>(
+            `wet-process/${stageEndpoint}-dryer-processes/`,
             ip,
             {
                 batch:batchIdNum,
@@ -203,11 +221,23 @@ export default function DryerOvenIn(){
             setTotQty(result.batch.total_quantity)
             },
             (error:any)=>{
-                console.log(error.response.data)
-                let msg=""
-                Object.entries(error.response.data).forEach(([key, value]:any) => {
-                    msg+=value[0]
-                });
+                 let msg=""
+                if (error instanceof Error && error.message === "Network Error") {
+                    console.log("Network Error");
+                    msg="Network Error"
+                            
+                }
+                
+                else if(error.response.data){
+                    Object.entries(error.response.data).forEach(([key, value]) => {
+                        if (Array.isArray(value)) {
+                            msg += value[0];
+                        } else {
+                            msg += value;
+                        }
+                    });
+                    
+                }
 
 
                 // if
@@ -216,6 +246,11 @@ export default function DryerOvenIn(){
             }
         
         )
+                // if()
+            }
+        );
+        
+       
         // getData<BundleInfo>(
         //     `washing/${barcode}/`
         //     "http://127.0.0.1:8000",
@@ -461,7 +496,7 @@ export default function DryerOvenIn(){
                     <TableHead>
                       <TableRow>
                         {/* <StyledTableCell align="center">MPO</StyledTableCell> */}
-                        <StyledTableCell align="center">BatchQRCode(First Wash)</StyledTableCell>
+                        <StyledTableCell align="center">BatchQRCode</StyledTableCell>
                         <StyledTableCell align="center">Buyer</StyledTableCell>
                         {/* <StyledTableCell align="center">Style</StyledTableCell> */}
                         {/* <StyledTableCell align="center">Sales Order</StyledTableCell> */}
