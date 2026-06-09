@@ -275,7 +275,7 @@ const handleReplaceStage = (newStage: string) => {
           >
             {availableStagesToAdd.map((stage) => (
               <MenuItem key={stage} onClick={() => handleAddStage(stage)}>
-                {stage}
+                {stage.toUpperCase()}
               </MenuItem>
             ))}
           </Menu>

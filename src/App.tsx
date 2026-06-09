@@ -63,43 +63,76 @@ function App() {
       <Routes >
         {/* <Route path="/" /> */}
         <Route path="/planning" element={<Planning />} />
-        <Route path='/firstwash/hydroin' element={<HydroIn key='first-wash-hydroin' stageEndpoint="first-wash" />}/>
-        <Route path='/firstwash/hydroout' element={<HydroOut key='first-wash-hydroout' stageEndpoint="first-wash" />} />
-        <Route path='/firstwash/loadstart' element={<LoadStart key='first-wash-loadstart' stageEndpoint="first-wash" />} />
-        <Route path='/firstwash/loadfinish' element={<LoadFinish key='first-wash-loadfinish' stageEndpoint="first-wash" />} />
+        <Route path='/firstwash/hydroin' element={<HydroIn key='first-wash-hydroin'  stage="first_wash"/>}/>
+        <Route path='/firstwash/hydroout' element={<HydroOut key='first-wash-hydroout'  stage="first_wash" />} />
+        <Route path='/firstwash/loadstart' element={<LoadStart key='first-wash-loadstart'   stage='first_wash'/>} />
+        <Route path='/firstwash/loadfinish' element={<LoadFinish key='first-wash-loadfinish' stage='first_wash' />} />
         <Route path='/firstwashqc' element={<FirstWashQC key='first-wash-qc' stage='first_wash' />} />
         <Route path='/firstwash/rewashcreatebatch' element={<Rewash key='first-wash-rewash' stage='first_wash' />}/>
         
-        <Route path='/firstwash/processfinish' element={<ProcessFinish key='first-wash-processfinish' stageEndpoint="first-wash" />}  />
-        <Route path='/firstwash/unloadfinish' element={<UnloadFinish key='first-wash-unloadfinish' stageEndpoint="first-wash" />} />
-        <Route path="/firstwash/dryerconveyorin" element={<DryerConveyorIn key='first-wash-dryerconveyorin' stageEndpoint="first-wash" />} />
-        <Route path="/firstwash/dryerconveyorout" element={<DryerConveyorOut key='first-wash-dryerconveyorout' stageEndpoint="first-wash" />} />
-        <Route path='/firstwash/dryertumblein' element={<DryerTumbleIn key='first-wash-dryertumblein' stageEndpoint='first-wash'/>}/>
-        <Route path='/firstwash/dryerovenin' element={<DryerOvenIn key='first-wash-dryerovenin' stageEndpoint='first-wash' />} />
-        <Route path='/firstwash/dryerovenout' element={<DryerOvenOut key='first-wash-dryerovenout' stageEndpoint='first-wash' />} />
-        <Route path='/firstwash/dryertumbleout' element={<DryerTumbleOut key='first-wash-dryertumbleout' stageEndpoint='first-wash' />} />
+        <Route path='/firstwash/processfinish' element={<ProcessFinish key='first-wash-processfinish' stage='first_wash'/>}  />
+        <Route path='/firstwash/unloadfinish' element={<UnloadFinish key='first-wash-unloadfinish'  stage='first_wash'/>} />
+        <Route path="/firstwash/dryerconveyorin" element={<DryerConveyorIn key='first-wash-dryerconveyorin' stage="first_wash" />} />
+        <Route path="/firstwash/dryerconveyorout" element={<DryerConveyorOut key='first-wash-dryerconveyorout' stage="first_wash" />}/>
+        <Route path='/firstwash/dryerovenin' element={<DryerOvenIn key='first-wash-dryerovenin' stage="first_wash" />} />
+        <Route path='/firstwash/dryerovenout' element={<DryerOvenOut key='first-wash-dryerovenout' stage="first_wash" />} />
+        <Route path='/firstwash/dryertumblein' element={<DryerTumbleIn key='first-wash-dryertumblein' stage="first_wash" />}/>
+        <Route path='/firstwash/dryertumbleout' element={<DryerTumbleOut key='first-wash-dryertumbleout' stage="first_wash" />} />
         {/* <Route path='/firstwash/batchwithdry' element={<BatchCreateDry/>}/> */}
         <Route path='/firstwash/createbatch' element={<BatchCreateDirect/>}/>
         <Route path='/secondwash/createbatch' element={<BatchCreateAggGen key='second-wash-createbatch' stage='second_wash' />} />
 
-        <Route path='/secondwash/hydroin' element={<HydroIn key='second-wash-hydroin' stageEndpoint="second-wash" />}/>
-        <Route path='/secondwash/hydroout' element={<HydroOut key='second-wash-hydroout' stageEndpoint="second-wash" />} />
-        <Route path='/secondwash/loadstart' element={<LoadStart key='second-wash-loadstart' stageEndpoint="second-wash" />} />
-        <Route path='/secondwash/loadfinish' element={<LoadFinish key='second-wash-loadfinish' stageEndpoint="second-wash" />} />
+        <Route path='/secondwash/hydroin' element={<HydroIn key='second-wash-hydroin'   stage="second_wash"/>}/>
+        <Route path='/secondwash/hydroout' element={<HydroOut key='second-wash-hydroout'  stage="second_wash" />} />
+        <Route path='/secondwash/loadstart' element={<LoadStart key='second-wash-loadstart'   stage='second_wash'/>} />
+        <Route path='/secondwash/loadfinish' element={<LoadFinish key='second-wash-loadfinish' stage='second_wash' />} />
         <Route path='/secondwashqc' element={<FirstWashQC key='second-wash-qc' stage='second_wash' />} />
         <Route path='/secondwash/rewashcreatebatch' element={<Rewash key='second-wash-rewash' stage='second_wash' />}/>
         
-        <Route path='/secondwash/processfinish' element={<ProcessFinish key='second-wash-processfinish' stageEndpoint="second-wash" />}  />
-        <Route path='/secondwash/unloadfinish' element={<UnloadFinish key='second-wash-unloadfinish' stageEndpoint="second-wash" />} />
-        <Route path="/secondwash/dryerconveyorin" element={<DryerConveyorIn key='second-wash-dryerconveyorin' stageEndpoint="second-wash" />} />
-        <Route path="/secondwash/dryerconveyorout" element={<DryerConveyorOut key='second-wash-dryerconveyorout' stageEndpoint="second-wash" />} />
-        <Route path='/secondwash/dryertumblein' element={<DryerTumbleIn key='second-wash-dryertumblein' stageEndpoint='second-wash'/>}/>
-        <Route path='/secondwash/dryerovenin' element={<DryerOvenIn key='second-wash-dryerovenin' stageEndpoint='second-wash' />} />
-        <Route path='/secondwash/dryerovenout' element={<DryerOvenOut key='second-wash-dryerovenout' stageEndpoint='second-wash' />} />
-        <Route path='/secondwash/dryertumbleout' element={<DryerTumbleOut key='second-wash-dryertumbleout' stageEndpoint='second-wash' />} />
+        <Route path='/secondwash/processfinish' element={<ProcessFinish key='second-wash-processfinish'  stage='second_wash'/>}  />
+        <Route path='/secondwash/unloadfinish' element={<UnloadFinish key='second-wash-unloadfinish'  stage='second_wash'/>} />
+        <Route path="/secondwash/dryerconveyorin" element={<DryerConveyorIn key='second-wash-dryerconveyorin' stage="second_wash" />} />
+        <Route path="/secondwash/dryerconveyorout" element={<DryerConveyorOut key='second-wash-dryerconveyorout' stage="second_wash" />} />
+        <Route path='/secondwash/dryertumblein' element={<DryerTumbleIn key='second-wash-dryertumblein' stage="second_wash" />}/>
+        <Route path='/secondwash/dryerovenin' element={<DryerOvenIn key='second-wash-dryerovenin' stage="second_wash" />} />
+        <Route path='/secondwash/dryerovenout' element={<DryerOvenOut key='second-wash-dryerovenout' stage="second_wash" />} />
+        <Route path='/secondwash/dryertumbleout' element={<DryerTumbleOut key='second-wash-dryertumbleout' stage="second_wash" />} />
+
+        <Route path='/thirdwash/createbatch' element={<BatchCreateAggGen key='third-wash-createbatch' stage='third_wash' />} />
+        <Route path='/thirdwash/hydroin' element={<HydroIn key='third-wash-hydroin'   stage="third_wash"/>}/>
+        <Route path='/thirdwash/hydroout' element={<HydroOut key='third-wash-hydroout'  stage="third_wash" />} />
+        <Route path='/thirdwash/loadstart' element={<LoadStart key='third-wash-loadstart'   stage='third_wash'/>} />
+        <Route path='/thirdwash/loadfinish' element={<LoadFinish key='third-wash-loadfinish' stage='third_wash' />} />
+        <Route path='/thirdwashqc' element={<FirstWashQC key='third-wash-qc' stage='third_wash' />} />
+        <Route path='/thirdwash/rewashcreatebatch' element={<Rewash key='third-wash-rewash' stage='third_wash' />}/>
+        
+        <Route path='/thirdwash/processfinish' element={<ProcessFinish key='third-wash-processfinish'  stage='third_wash'/>}  />
+        <Route path='/thirdwash/unloadfinish' element={<UnloadFinish key='third-wash-unloadfinish'  stage='third_wash'/>} />
+        <Route path="/thirdwash/dryerconveyorin" element={<DryerConveyorIn key='third-wash-dryerconveyorin' stage="third_wash" />} />
+        <Route path="/thirdwash/dryerconveyorout" element={<DryerConveyorOut key='third-wash-dryerconveyorout' stage="third_wash" />} />
+        <Route path='/thirdwash/dryertumblein' element={<DryerTumbleIn key='third-wash-dryertumblein' stage="third_wash" />}/>
+        <Route path='/thirdwash/dryerovenin' element={<DryerOvenIn key='third-wash-dryerovenin' stage="third_wash" />} />
+        <Route path='/thirdwash/dryerovenout' element={<DryerOvenOut key='third-wash-dryerovenout' stage="third_wash" />} />
+        <Route path='/thirdwash/dryertumbleout' element={<DryerTumbleOut key='third-wash-dryertumbleout' stage="third_wash" />} />
 
 
-
+        <Route path='/finalwash/createbatch' element={<BatchCreateAggGen key='final-wash-createbatch' stage='final_wash' />} />
+        <Route path='/finalwash/hydroin' element={<HydroIn key='final-wash-hydroin'   stage="final_wash"/>}/>
+        <Route path='/finalwash/hydroout' element={<HydroOut key='final-wash-hydroout'  stage="final_wash" />} />
+        <Route path='/finalwash/loadstart' element={<LoadStart key='final-wash-loadstart'   stage='final_wash'/>} />
+        <Route path='/finalwash/loadfinish' element={<LoadFinish key='final-wash-loadfinish' stage='final_wash' />} />
+        <Route path='/finalwashqc' element={<FirstWashQC key='final-wash-qc' stage='final_wash' />} />
+        <Route path='/finalwash/rewashcreatebatch' element={<Rewash key='final-wash-rewash' stage='final_wash' />}/>
+        
+        <Route path='/finalwash/processfinish' element={<ProcessFinish key='final-wash-processfinish'  stage='final_wash'/>}  />
+        <Route path='/finalwash/unloadfinish' element={<UnloadFinish key='final-wash-unloadfinish'  stage='final_wash'/>} />
+        <Route path='/finalwash/unloadfinish' element={<UnloadFinish key='final-wash-unloadfinish'  stage='third_wash'/>} />
+        <Route path="/finalwash/dryerconveyorin" element={<DryerConveyorIn key='final-wash-dryerconveyorin' stage="final_wash" />} />
+        <Route path="/finalwash/dryerconveyorout" element={<DryerConveyorOut key='final-wash-dryerconveyorout' stage="final_wash" />} />
+        <Route path='/finalwash/dryertumblein' element={<DryerTumbleIn key='final-wash-dryertumblein' stage="final_wash" />}/>
+        <Route path='/finalwash/dryerovenin' element={<DryerOvenIn key='final-wash-dryerovenin' stage="final_wash" />} />
+        <Route path='/finalwash/dryerovenout' element={<DryerOvenOut key='final-wash-dryerovenout' stage="final_wash" />} />
+        <Route path='/finalwash/dryertumbleout' element={<DryerTumbleOut key='final-wash-dryertumbleout' stage="final_wash" />} />
 
         <Route path="/washreceive" element={<WashReceivePass />} />
         <Route path="/createbatch" element={<CreateBatch />} />

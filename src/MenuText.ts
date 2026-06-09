@@ -168,5 +168,96 @@ export function MenuText({text}: MenuTextProps) {
     else if(text=="/secondwash/dryertumbleout"){
         return "2nd Wash / Dryer / Dryer Tumble Out"
     }   
+    else if(text=="/thirdwash/createbatch"){
+        return "3rd Wash / Create Batch"
+    }
+    else if(text=="/thirdwash/hydroin"){
+        return "3rd Wash / Hydro / Hydro In"
+    }
+    else if(text=="/thirdwash/hydroout"){
+        return "3rd Wash / Hydro / Hydro Out"
+    }
+    else if(text=="/thirdwash/loadstart"){ 
+        return "3rd Wash / Load / Load Start"
+    }
+    else if(text=="/thirdwash/loadfinish"){
+        return "3rd Wash / Load / Load Finish & Process Start"
+    }
+    else if(text=="/thirdwash/unloadfinish"){
+        return "3rd Wash / Unload / Unload Finish"
+    }
+    else if(text=="/thirdwashqc"){
+        return "3rd Wash / QC"
+    }
+    else if(text=="/thirdwash/rewashcreatebatch"){
+        return "3rd Wash / Rewash / Create Batch"
+    }
+    else if(text=="/thirdwash/processfinish"){
+        return "3rd Wash / Unload / Process Finish & Unload Start"
+    }
+    else if(text=="/thirdwash/dryerconveyorin"){
+        return "3rd Wash / Dryer / Dryer Conveyor In"
+    }
+    else if(text=="/thirdwash/dryerconveyorout"){
+        return "3rd Wash / Dryer / Dryer Conveyor Out"
+    }
+    else if(text=="/thirdwash/dryerovenin"){
+        return "3rd Wash / Dryer / Dryer Oven In"
+    }
+    else if(text=="/thirdwash/dryerovenout"){
+        return "3rd Wash / Dryer / Dryer Oven Out"
+    }
+    else if(text=="/thirdwash/dryertumblein"){
+        return "3rd Wash / Dryer / Dryer Tumble In"
+    }
+    else if(text=="/thirdwash/dryertumbleout"){
+        return "3rd Wash / Dryer / Dryer Tumble Out"
+    }   
+    
 
+    else if(text=="/finalwash/createbatch"){
+        return "Final Wash / Create Batch"
+    }
+    else if(text=="/finalwash/hydroin"){
+        return "Final Wash / Hydro / Hydro In"
+    }
+    else if(text=="/finalwash/hydroout"){
+        return "Final Wash / Hydro / Hydro Out"
+    }
+    else if(text=="/finalwash/loadstart"){ 
+        return "Final Wash / Load / Load Start"
+    }
+    else if(text=="/finalwash/loadfinish"){
+        return "Final Wash / Load / Load Finish & Process Start"
+    }
+    else if(text=="/finalwash/unloadfinish"){
+        return "Final Wash / Unload / Unload Finish"
+    }
+    else if(text=="/finalwashqc"){
+        return "Final Wash / QC"
+    }
+    else if(text=="/finalwash/rewashcreatebatch"){
+        return "Final Wash / Rewash / Create Batch"
+    }
+    else if(text=="/finalwash/processfinish"){
+        return "Final Wash / Unload / Process Finish & Unload Start"
+    }
+    else if(text=="/finalwash/dryerconveyorin"){
+        return "Final Wash / Dryer / Dryer Conveyor In"
+    }
+    else if(text=="/finalwash/dryerconveyorout"){
+        return "Final Wash / Dryer / Dryer Conveyor Out"
+    }
+    else if(text=="/finalwash/dryerovenin"){
+        return "Final Wash / Dryer / Dryer Oven In"
+    }
+    else if(text=="/finalwash/dryerovenout"){
+        return "Final Wash / Dryer / Dryer Oven Out"
+    }
+    else if(text=="/finalwash/dryertumblein"){
+        return "Final Wash / Dryer / Dryer Tumble In"
+    }
+    else if(text=="/finalwash/dryertumbleout"){
+        return "Final Wash / Dryer / Dryer Tumble Out"
+    } 
 }

@@ -18,6 +18,7 @@ import type StageEndpoint from "../../TypeAnnotations/StageEndpoint";
 import type WetProcessBatch from "../../TypeAnnotations/WetProcessBatch";
 import { StageMap } from "../../StageMap";
 import { StageDispMap } from "../../StageDispMap";
+import type WetProcessStage from "../../TypeAnnotations/WetProcessStage";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -50,7 +51,7 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 
 
 
-export default function HydroIn({stageEndpoint}:StageEndpoint) {    
+export default function HydroIn({stage}:WetProcessStage) {    
     const [hourminError,setHourMinError]=useState(false)
     const [showPopup, setShowPopup] = useState(false);
     const [processError,setProcessError]=useState("");
@@ -129,13 +130,13 @@ export default function HydroIn({stageEndpoint}:StageEndpoint) {
             (batchMeta: WetProcessBatch) => {
                 // Handle the fetched batch details
                 console.log(batchMeta)
-                if(batchMeta.stage!=StageMap[stageEndpoint]){
+                if(batchMeta.stage!=stage){
                     setProcessError(`Batch is currently at ${StageDispMap[batchMeta.stage] } stage`)
                     
                     return
                 }
                         postData<ProcessFirstWash>(
-                            `wet-process/${stageEndpoint}-hydro-processes/`,
+                            `wet-process/hydro-processes/`,
                             ip,
                             {
                                 batch:batchIdNum,

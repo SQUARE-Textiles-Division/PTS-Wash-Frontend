@@ -76,7 +76,7 @@ export default function Navbar() {
   const DryProcessItemContent: MenuItem[] = [
     { primary: "Planning", to: "/planning" },
     // { primary: "Create Batch", to: "/createbatch" },
-    { primary: "QC Update", to: "/qceditdel" },
+    // { primary: "QC Update", to: "/qceditdel" },
 
     { primary: "Whisker In", to: "/whiskerin" },
     { primary: "Whisker QC", to: "/whiskerqc" },
@@ -202,6 +202,96 @@ export default function Navbar() {
           ]
         }
       ]
+    },
+     {
+      primary:'3rd Wash',
+      children:[
+        { primary: "Create Batch", to: "/thirdwash/createbatch" },
+        { primary: "Load",
+          children: [
+            { primary: "Load Start", to: "/thirdwash/loadstart" },
+            { primary: "Load Finish & Process Start", to: "/thirdwash/loadfinish" },
+          ],
+        },
+        { primary: "Unload",
+          // to: "",
+          children: [
+            { primary: "Process Finish & Unload Start", to: "/thirdwash/processfinish" },
+            { primary: "UnLoad Finish", to: "/thirdwash/unloadfinish" },
+          ],
+        },
+        { primary: "Hydro",
+          // to: "",
+          children: [
+            { primary: "Hydro In", to: "/thirdwash/hydroin" },
+            { primary: "Hydro Out", to: "/thirdwash/hydroout" },
+          ],
+        },
+         {
+          primary: "Dryer",
+          children: [
+            { primary: "Dryer Conveyor In", to: "/thirdwash/dryerconveyorin" },
+            { primary: "Dryer Conveyor Out", to: "/thirdwash/dryerconveyorout" },
+            { primary: "Dryer Oven In", to: "/thirdwash/dryerovenin" },
+            { primary: "Dryer Oven Out", to: "/thirdwash/dryerovenout" },
+            { primary: "Dryer Tumble In", to: "/thirdwash/dryertumblein" },
+            { primary: "Dryer Tumble Out", to: "/thirdwash/dryertumbleout" },
+          
+          ],
+        },
+        {primary: "QC",to:"/thirdwashqc"},
+        {
+          primary:"Rewash",
+          children:[
+            { primary: "Create Batch", to: "/thirdwash/rewashcreatebatch" },
+          ]
+        }
+      ]
+    },
+    {
+      primary:'Final Wash',
+      children:[
+        { primary: "Create Batch", to: "/finalwash/createbatch" },
+        { primary: "Load",
+          children: [
+            { primary: "Load Start", to: "/finalwash/loadstart" },
+            { primary: "Load Finish & Process Start", to: "/finalwash/loadfinish" },
+          ],
+        },
+        { primary: "Unload",
+          // to: "",
+          children: [
+            { primary: "Process Finish & Unload Start", to: "/finalwash/processfinish" },
+            { primary: "UnLoad Finish", to: "/finalwash/unloadfinish" },
+          ],
+        },
+        { primary: "Hydro",
+          // to: "",
+          children: [
+            { primary: "Hydro In", to: "/finalwash/hydroin" },
+            { primary: "Hydro Out", to: "/finalwash/hydroout" },
+          ],
+        },
+         {
+          primary: "Dryer",
+          children: [
+            { primary: "Dryer Conveyor In", to: "/finalwash/dryerconveyorin" },
+            { primary: "Dryer Conveyor Out", to: "/finalwash/dryerconveyorout" },
+            { primary: "Dryer Oven In", to: "/finalwash/dryerovenin" },
+            { primary: "Dryer Oven Out", to: "/finalwash/dryerovenout" },
+            { primary: "Dryer Tumble In", to: "/finalwash/dryertumblein" },
+            { primary: "Dryer Tumble Out", to: "/finalwash/dryertumbleout" },
+          
+          ],
+        },
+        {primary: "QC",to:"/finalwashqc"},
+        {
+          primary:"Rewash",
+          children:[
+            { primary: "Create Batch", to: "/finalwash/rewashcreatebatch" },
+          ]
+        }
+      ]
     }
     
   ];
@@ -214,7 +304,7 @@ export default function Navbar() {
     if (
       location.pathname.startsWith("/planning") ||
       location.pathname.startsWith("/createbatch") ||
-      location.pathname.startsWith("/qceditdel") ||
+      // location.pathname.startsWith("/qceditdel") ||
 
       location.pathname.startsWith("/whiskerin") ||
        location.pathname.startsWith("/whiskerqc") ||
@@ -266,6 +356,7 @@ export default function Navbar() {
       location.pathname.startsWith("/firstwash/dryertumbleout")||
       location.pathname.startsWith("/firstwashqc")||
       location.pathname.startsWith("/firstwash/rewashcreatebatch")||
+
       location.pathname.startsWith("/secondwash/createbatch")||
       location.pathname.startsWith("/secondwash/hydroin")||
       location.pathname.startsWith("/secondwash/hydroout")||
@@ -280,7 +371,39 @@ export default function Navbar() {
       location.pathname.startsWith("/secondwash/dryertumblein")||
       location.pathname.startsWith("/secondwash/dryertumbleout")||
       location.pathname.startsWith("/secondwashqc")||
-      location.pathname.startsWith("/secondwash/rewashcreatebatch")
+      location.pathname.startsWith("/secondwash/rewashcreatebatch")||
+
+      location.pathname.startsWith("/thirdwash/createbatch")||
+      location.pathname.startsWith("/thirdwash/hydroin")||
+      location.pathname.startsWith("/thirdwash/hydroout")||
+      location.pathname.startsWith("/thirdwash/loadstart")||
+      location.pathname.startsWith("/thirdwash/loadfinish")||
+      location.pathname.startsWith("/thirdwash/processfinish")||
+      location.pathname.startsWith("/thirdwash/unloadfinish")||
+      location.pathname.startsWith("/thirdwash/dryerconveyorin")||
+      location.pathname.startsWith("/thirdwash/dryerconveyorout")||
+      location.pathname.startsWith("/thirdwash/dryerovenin")||
+      location.pathname.startsWith("/thirdwash/dryerovenout")||
+      location.pathname.startsWith("/thirdwash/dryertumblein")||
+      location.pathname.startsWith("/thirdwash/dryertumbleout")||
+      location.pathname.startsWith("/thirdwashqc")||
+      location.pathname.startsWith("/thirdwash/rewashcreatebatch")||
+
+      location.pathname.startsWith("/finalwash/createbatch")||
+      location.pathname.startsWith("/finalwash/hydroin")||
+      location.pathname.startsWith("/finalwash/hydroout")||
+      location.pathname.startsWith("/finalwash/loadstart")||
+      location.pathname.startsWith("/finalwash/loadfinish")||
+      location.pathname.startsWith("/finalwash/processfinish")||
+      location.pathname.startsWith("/finalwash/unloadfinish")||
+      location.pathname.startsWith("/finalwash/dryerconveyorin")||
+      location.pathname.startsWith("/finalwash/dryerconveyorout")||
+      location.pathname.startsWith("/finalwash/dryerovenin")||
+      location.pathname.startsWith("/finalwash/dryerovenout")||
+      location.pathname.startsWith("/finalwash/dryertumblein")||
+      location.pathname.startsWith("/finalwash/dryertumbleout")||
+      location.pathname.startsWith("/finalwashqc")||
+      location.pathname.startsWith("/finalwash/rewashcreatebatch")
     ) {
       setDryProcess(false);
       setItemContent(WetProcessItemContent);

@@ -17,6 +17,7 @@ import type StageEndpoint from "../../TypeAnnotations/StageEndpoint";
 import { StageDispMap } from "../../StageDispMap";
 import type WetProcessBatch from "../../TypeAnnotations/WetProcessBatch";
 import { StageMap } from "../../StageMap";
+import type WetProcessStage from "../../TypeAnnotations/WetProcessStage";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -49,7 +50,7 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 
 
 
-export default function UnloadFinish({stageEndpoint}:StageEndpoint) {    
+export default function UnloadFinish({stage}:WetProcessStage) {    
     const [showPopup, setShowPopup] = useState(false);
     const [processError,setProcessError]=useState("");
 
@@ -83,13 +84,13 @@ export default function UnloadFinish({stageEndpoint}:StageEndpoint) {
             (batchMeta: WetProcessBatch) => {
                 // Handle the fetched batch details
                 console.log(batchMeta)
-                if(batchMeta.stage!=StageMap[stageEndpoint]){
+                if(batchMeta.stage!=stage){
                     setProcessError(`Batch is currently at ${StageDispMap[batchMeta.stage] } stage`)
                     // ret=true
                     return
                 }
                  getData<ProcessFirstWash[]>(
-                    `wet-process/${stageEndpoint}-processes`,
+                    `wet-process/wash-processes`,
                     ip,
                     {},
                     {
@@ -105,10 +106,10 @@ export default function UnloadFinish({stageEndpoint}:StageEndpoint) {
                             return;
                         }
                         patchData<ProcessFirstWash>(
-                            `wet-process/${stageEndpoint}-processes/${res[0].id}/`,
+                            `wet-process/wash-processes/${res[0].id}/`,
                             ip,
                             {
-                                state:'unload_finish'
+                                action:'unloading_finish'
                             },
                         (result:ProcessFirstWash)=>{
                                 console.log(result)

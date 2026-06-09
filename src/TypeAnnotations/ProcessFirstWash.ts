@@ -47,8 +47,8 @@ export interface ProcessFirstWash {
   loading_finished_by: string | null;
   process_finish: string | null;
   process_finished_by: string | null;
-  unload_finish: string | null;
-  unload_finished_by: string | null;
+  unloading_finish: string | null;
+  unloading_finished_by: string | null;
 }
 
 

@@ -33,6 +33,7 @@ import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
 import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
 import type WetProcessStage from "../../TypeAnnotations/WetProcessStage";
 import type CompletedQc from "../../TypeAnnotations/CompletedQc";
+import { StageDispMap } from "../../StageDispMap";
 // import NumberField from './components/NumberField';
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
@@ -273,7 +274,7 @@ export default function FirstWashQC({stage}:WetProcessStage){
             {},
             (batchData: WetProcessBatch) => {  
                 if(batchData.stage!=stage){
-                    setRejectError(`Batch is currently in ${batchData.stage} stage. Please scan a batch in ${stage} stage.`)
+                    setRejectError(`Batch is currently in ${StageDispMap[batchData.stage]} stage. Please scan a batch in ${StageDispMap[stage]} stage.`)
                     return
                 } 
                 else if(batchData.status=="completed"){

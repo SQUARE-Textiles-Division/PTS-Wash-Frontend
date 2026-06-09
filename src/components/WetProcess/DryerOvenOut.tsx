@@ -17,6 +17,7 @@ import type StageEndpoint from "../../TypeAnnotations/StageEndpoint";
 import { StageDispMap } from "../../StageDispMap";
 import type WetProcessBatch from "../../TypeAnnotations/WetProcessBatch";
 import { StageMap } from "../../StageMap";
+import type WetProcessStage from "../../TypeAnnotations/WetProcessStage";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -49,7 +50,7 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 
 
 
-export default function DryerOvenOut({stageEndpoint}:StageEndpoint) {    
+export default function DryerOvenOut({stage}:WetProcessStage){    
     const [showPopup, setShowPopup] = useState(false);
     const [processError,setProcessError]=useState("");
 
@@ -82,13 +83,13 @@ export default function DryerOvenOut({stageEndpoint}:StageEndpoint) {
             (batchMeta: WetProcessBatch) => {
                 // Handle the fetched batch details
                 console.log(batchMeta)
-                if(batchMeta.stage!=StageMap[stageEndpoint]){
+                if(batchMeta.stage!=stage){
                     setProcessError(`Batch is currently at ${StageDispMap[batchMeta.stage] } stage`)
                     // res=true
                     return
                 }
                  getData<ProcessFirstWash[]>(
-            `wet-process/${stageEndpoint}-dryer-processes`,
+            `wet-process/dryer-processes`,
             ip,
             {},
             {
@@ -105,10 +106,10 @@ export default function DryerOvenOut({stageEndpoint}:StageEndpoint) {
                 }
                 console.log(res[0].id)
                 patchData<ProcessFirstWash>(
-                    `wet-process/${stageEndpoint}-dryer-processes/${res[0].id}/`,
+                    `wet-process/dryer-processes/${res[0].id}/`,
                     ip,
                     {
-                        state:'dryer_out'
+                        action:'finish'
                     },
                   (result:ProcessFirstWash)=>{
                         console.log(result)

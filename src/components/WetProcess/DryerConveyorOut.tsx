@@ -17,6 +17,7 @@ import type StageEndpoint from "../../TypeAnnotations/StageEndpoint";
 import { StageDispMap } from "../../StageDispMap";
 import type WetProcessBatch from "../../TypeAnnotations/WetProcessBatch";
 import { StageMap } from "../../StageMap";
+import type WetProcessStage from "../../TypeAnnotations/WetProcessStage";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -49,7 +50,7 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 
 
 
-export default function DryerConveyorOut({stageEndpoint}:StageEndpoint){    
+export default function DryerConveyorOut({stage}:WetProcessStage){    
     const [showPopup, setShowPopup] = useState(false);
     const [processError,setProcessError]=useState("");
     const [hourError,setHourError]=useState(false)
@@ -83,13 +84,13 @@ export default function DryerConveyorOut({stageEndpoint}:StageEndpoint){
             (batchMeta: WetProcessBatch) => {
                 // Handle the fetched batch details
                 console.log(batchMeta)
-                if(batchMeta.stage!=StageMap[stageEndpoint]){
+                if(batchMeta.stage!=stage){
                     setProcessError(`Batch is currently at ${StageDispMap[batchMeta.stage] } stage`)
                     // ret=true
                     return
                 }
                 getData<ProcessFirstWash[]>(
-            `wet-process/${stageEndpoint}-dryer-processes`,
+            `wet-process/dryer-processes`,
             ip,
             {},
             {
@@ -106,10 +107,10 @@ export default function DryerConveyorOut({stageEndpoint}:StageEndpoint){
                 }
                 console.log(res[0].id)
                 patchData<ProcessFirstWash>(
-                    `wet-process/${stageEndpoint}-dryer-processes/${res[0].id}/`,
+                    `wet-process/dryer-processes/${res[0].id}/`,
                     ip,
                     {
-                        state:'dryer_out'
+                        action:'finish'
                     },
                   (result:ProcessFirstWash)=>{
                         console.log(result)

@@ -18,6 +18,7 @@ import type StageEndpoint from "../../TypeAnnotations/StageEndpoint";
 import type WetProcessBatch from "../../TypeAnnotations/WetProcessBatch";
 import { StageDispMap } from "../../StageDispMap";
 import { StageMap } from "../../StageMap";
+import type WetProcessStage from "../../TypeAnnotations/WetProcessStage";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -50,7 +51,7 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 
 
 
-export default function DryerTumbleIn({stageEndpoint}:StageEndpoint){    
+export default function DryerTumbleIn({stage}:WetProcessStage){    
     const [showPopup, setShowPopup] = useState(false);
     const [processError,setProcessError]=useState("");
     const [hourError,setHourError]=useState(false)
@@ -128,13 +129,13 @@ export default function DryerTumbleIn({stageEndpoint}:StageEndpoint){
             (batchMeta: WetProcessBatch) => {
                 // Handle the fetched batch details
                 console.log(batchMeta)
-                if(batchMeta.stage!=StageMap[stageEndpoint]){
+                if(batchMeta.stage!=stage){
                     setProcessError(`Batch is currently at ${StageDispMap[batchMeta.stage] } stage`)
                     // ret=true
                     return
                 }
                  postData<ProcessFirstWash>(
-            `wet-process/${stageEndpoint}-dryer-processes/`,
+            `wet-process/dryer-processes/`,
             ip,
             {
                 batch:batchIdNum,

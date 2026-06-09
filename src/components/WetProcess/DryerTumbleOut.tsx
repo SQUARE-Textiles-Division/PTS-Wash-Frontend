@@ -17,6 +17,7 @@ import type StageEndpoint from "../../TypeAnnotations/StageEndpoint";
 import type WetProcessBatch from "../../TypeAnnotations/WetProcessBatch";
 import { StageMap } from "../../StageMap";
 import { StageDispMap } from "../../StageDispMap";
+import type WetProcessStage from "../../TypeAnnotations/WetProcessStage";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -49,7 +50,7 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 
 
 
-export default function DryerTumbleOut({stageEndpoint}:StageEndpoint) {    
+export default function DryerTumbleOut({stage}:WetProcessStage) {    
     const [showPopup, setShowPopup] = useState(false);
     const [processError,setProcessError]=useState("");
 
@@ -82,96 +83,96 @@ export default function DryerTumbleOut({stageEndpoint}:StageEndpoint) {
             (batchMeta: WetProcessBatch) => {
                 // Handle the fetched batch details
                 console.log(batchMeta)
-                if(batchMeta.stage!=StageMap[stageEndpoint]){
+                if(batchMeta.stage!=stage){
                     setProcessError(`Batch is currently at ${StageDispMap[batchMeta.stage] } stage`)
                     // ret=true
                     return
                 }
                  getData<ProcessFirstWash[]>(
-            `wet-process/${stageEndpoint}-dryer-processes`,
-            ip,
-            {},
-            {
-                batch:batchIdNum,
-                type:'tumble'
-            },
-            (res:ProcessFirstWash[])=>{
-                // getId=res[0].id
-                console.log(res)
-                if(res.length==0)
-                {
-                    setProcessError("Batch Stages Already Completed or Dryer Tumble In Not Completed")
-                    return;
-                }
-                console.log(res[0].id)
-                patchData<ProcessFirstWash>(
-                    `wet-process/${stageEndpoint}-dryer-processes/${res[0].id}/`,
+                    `wet-process/dryer-processes`,
                     ip,
+                    {},
                     {
-                        state:'dryer_out'
+                        batch:batchIdNum,
+                        type:'tumble'
                     },
-                  (result:ProcessFirstWash)=>{
-                        console.log(result)
-                        tempBatchDetail.push(
+                    (res:ProcessFirstWash[])=>{
+                        // getId=res[0].id
+                        console.log(res)
+                        if(res.length==0)
+                        {
+                            setProcessError("Batch Stages Already Completed or Dryer Tumble In Not Completed")
+                            return;
+                        }
+                        console.log(res[0].id)
+                        patchData<ProcessFirstWash>(
+                            `wet-process/dryer-processes/${res[0].id}/`,
+                            ip,
                             {
-                                'Shade':result.batch.shade,
-                                'Color':result.batch.color,
-                                'Buyer':result.batch.buyer,
-                                'BatchQRCode':result.batch.id,
-                                'Quantity':result.batch.total_quantity,
-                                'Machine':result.machine
+                                action:'finish'
+                            },
+                        (result:ProcessFirstWash)=>{
+                                console.log(result)
+                                tempBatchDetail.push(
+                                    {
+                                        'Shade':result.batch.shade,
+                                        'Color':result.batch.color,
+                                        'Buyer':result.batch.buyer,
+                                        'BatchQRCode':result.batch.id,
+                                        'Quantity':result.batch.total_quantity,
+                                        'Machine':result.machine
+                                    }
+                                )
+                
+                                setBatchDetails(tempBatchDetail)
+                                setBatchNumber(batchNumber)
+                                setTotQty(result.batch.total_quantity)
+                            },
+                            (error:any)=>{
+                                let msg=""
+                            if (error instanceof Error && error.message === "Network Error") {
+                                console.log("Network Error");
+                                msg="Network Error"
+                                        
+                            }
+                            
+                            else if(error.response.data){
+                                Object.entries(error.response.data).forEach(([key, value]) => {
+                                    if (Array.isArray(value)) {
+                                        msg += value[0];
+                                    } else {
+                                        msg += value;
+                                    }
+                                });
+                                
+                            }
+                                setProcessError(msg)   
+                                
                             }
                         )
-        
-                        setBatchDetails(tempBatchDetail)
-                        setBatchNumber(batchNumber)
-                        setTotQty(result.batch.total_quantity)
                     },
                     (error:any)=>{
-                         let msg=""
-                    if (error instanceof Error && error.message === "Network Error") {
-                        console.log("Network Error");
-                        msg="Network Error"
-                                
-                    }
-                    
-                    else if(error.response.data){
-                        Object.entries(error.response.data).forEach(([key, value]) => {
-                            if (Array.isArray(value)) {
-                                msg += value[0];
-                            } else {
-                                msg += value;
+                            let msg=""
+                            if (error instanceof Error && error.message === "Network Error") {
+                                console.log("Network Error");
+                                msg="Network Error"
+                                        
                             }
-                        });
-                        
-                    }
-                        setProcessError(msg)   
-                        
-                    }
-                )
-            },
-            (error:any)=>{
-                     let msg=""
-                    if (error instanceof Error && error.message === "Network Error") {
-                        console.log("Network Error");
-                        msg="Network Error"
+                            
+                            else if(error.response.data){
+                                Object.entries(error.response.data).forEach(([key, value]) => {
+                                    if (Array.isArray(value)) {
+                                        msg += value[0];
+                                    } else {
+                                        msg += value;
+                                    }
+                                });
                                 
-                    }
-                    
-                    else if(error.response.data){
-                        Object.entries(error.response.data).forEach(([key, value]) => {
-                            if (Array.isArray(value)) {
-                                msg += value[0];
-                            } else {
-                                msg += value;
                             }
-                        });
-                        
+                            setProcessError(msg)
                     }
-                    setProcessError(msg)
-            }
 
-        )
+                )
                 // if()
             }
         );

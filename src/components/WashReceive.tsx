@@ -212,15 +212,15 @@ export default function WashReceive({items, setItems}: Props){
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        bgcolor: "rgba(0,0,0,0.5)", // dark overlay
+                        // bgcolor: "rgba(0,0,0,0.5)", // dark overlay
                         }}
                     >
                         <Box
                         sx={{
-                            bgcolor: "rgba(202, 29, 29, 0.5)", // light red background for error
+                            bgcolor: "white", // light red background for error
                             p: 4,
                             borderRadius: 2,
-                            color: "white", // red text for error
+                            color: "red", // red text for error
                             width: 400,
                         }}
                         >
@@ -254,20 +254,20 @@ export default function WashReceive({items, setItems}: Props){
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        bgcolor: "rgba(0,0,0,0.5)", // dark overlay
+                        // bgcolor: "rgba(0,0,0,0.5)", // dark overlay
                         }}
                     >
                         <Box
                         sx={{
-                            bgcolor: "rgba(202, 29, 29, 0.5)", // light red background for error
+                            bgcolor: "white", // light red background for error
                             p: 4,
                             borderRadius: 2,
-                            color: "white", // red text for error
+                            color: "red", // red text for error
                             width: 400,
                         }}
                         >
                         <Typography variant="h6">Sewing Not Completed/Invalid Barcode!!!</Typography>
-                        <Typography>You can not receive this bundle before sewing is completed.
+                        <Typography>You can not receive this piece before sewing is completed.
                         </Typography>
                         <Button sx={{ mt: 2 }} onClick={() => setSewingError(false)}>Close</Button>
                         </Box>

@@ -348,7 +348,7 @@ export default function BatchCreateDirect(){
                         sx={{
                             // mt:20,
                             position:'fixed',
-                            top:610,
+                            top:600,
                             backgroundColor: "#485e68",
                             '&:hover': {
                                 backgroundColor: '#37474f',
@@ -445,7 +445,7 @@ export default function BatchCreateDirect(){
                 <TableContainer
                     component={Paper}
                     sx={{
-                    maxHeight: 480,          // vertical scrollbar
+                    maxHeight: 470,          // vertical scrollbar
                     overflowX: "auto",       // horizontal scrollbar
                     overflowY: "auto",
                     maxWidth: 1150,

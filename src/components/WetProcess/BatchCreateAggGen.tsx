@@ -135,17 +135,23 @@ import type WetProcessStage from "../../TypeAnnotations/WetProcessStage";
                                 const value = `${source.mpo}-${source.style}-${source.so}-${result[i].buyer}-${result[i].color}-${result[i].shade}`;
                                 
                                 if(result[i].status!="completed" ){
-                                    if(result[i].stage==='first_wash' && stage==='second_wash'){
+
+                                    if(result[i].stage!=stage){
                                         continue;
                                     }
-                                    else if(result[i].stage==='second_wash' && stage==='third_wash'){
-                                        continue;
-                                    }
-                                    else if(result[i].stage==='third_wash' && stage==='final_wash'){
-                                        continue;
-                                    }
+                                    
                                 }
-                                       
+                                else{
+                                    if(result[i].stage==='first_wash' && stage!='second_wash'){
+                                        continue;
+                                    }
+                                    else if(result[i].stage==='second_wash' && stage!='third_wash'){
+                                        continue;
+                                    }
+                                    else if(result[i].stage==='third_wash' && stage!='final_wash'){
+                                        continue;
+                                    }
+                                }      
                                
                                 mpoMetaMap.set(mapKey, mpoMetaMap.get(mapKey) || value);
                                 
