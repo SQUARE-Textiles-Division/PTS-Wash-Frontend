@@ -1,7 +1,7 @@
 import {Box,FormControl,InputLabel,MenuItem,Paper,Select,Table,TableBody,TableContainer,TableHead,TableRow,TextField}   from "@mui/material";
 import { Modal, Typography, Button } from "@mui/material";
 
-import { getData,patchData,postData} from "../genericApiService";
+// import { getData,patchData,postData} from "../genericApiService";
 import { useEffect, useRef,useState } from "react";
 import DoneAllIcon from '@mui/icons-material/DoneAll';
 // import ReceivedBundles from "./ReceivedBundles";
@@ -18,6 +18,7 @@ import type WetProcessBatch from "../../TypeAnnotations/WetProcessBatch";
 import { StageMap } from "../../StageMap";
 import { StageDispMap } from "../../StageDispMap";
 import type WetProcessStage from "../../TypeAnnotations/WetProcessStage";
+import { useApiService } from "../genericApiService";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -51,6 +52,7 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 
 
 export default function DryerTumbleOut({stage}:WetProcessStage) {    
+    const {getData,patchData}=useApiService()
     const [showPopup, setShowPopup] = useState(false);
     const [processError,setProcessError]=useState("");
 

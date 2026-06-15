@@ -2,7 +2,7 @@ import {Box,TextField}   from "@mui/material";
 import { Modal, Typography, Button ,Paper} from "@mui/material";
 import type BundleInfo from "../../TypeAnnotations/BundleInfo";
 import type BatchBundle from "../../TypeAnnotations/BatchBundle";
-import { getData, postData} from "../genericApiService";
+// import { getData, postData} from "../genericApiService";
 import { useEffect, useRef,useState } from "react";
 import DoneAllIcon from '@mui/icons-material/DoneAll';
 import alarmSound from "../../assets/alarm.mp3";
@@ -24,6 +24,7 @@ import type FirstWashBatchDirectCreate from "../../TypeAnnotations/FirstWashBatc
 import type FirstWashBatch from "../../TypeAnnotations/WetProcessBatch";
 import type WetProcessBatch from "../../TypeAnnotations/WetProcessBatch";
 import type IndividualInfo from "../../TypeAnnotations/IndividualInfo";
+import { useApiService } from "../genericApiService";
 
 // interface Props {
 //     items: BundleInfo[];
@@ -55,7 +56,7 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 }));
 // }
 export default function BatchCreateDirect(){
-
+    const {getData,postData}=useApiService()
     const audioRef = useRef<HTMLAudioElement | null>(null);
 
     // const [qrData, setQrData] = useState<any | null>(null);

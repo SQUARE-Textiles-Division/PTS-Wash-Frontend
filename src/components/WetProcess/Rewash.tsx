@@ -5,7 +5,7 @@ import { QRCodeCanvas } from "qrcode.react";
 import { useRef } from "react";
 import { useReactToPrint } from "react-to-print";
 import type BatchStage from "../../TypeAnnotations/BatchStage"
-import { getData, getDataAsync, postData } from "../genericApiService"
+// import { getData, getDataAsync, postData } from "../genericApiService"
 import { styled } from '@mui/material/styles';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -33,6 +33,7 @@ import type BatchSourceEntry from "../../TypeAnnotations/SourceBatch";
 import type WetProcessBatchMeta from "../../TypeAnnotations/WetProcessBatchMeta";
 import type WetProcessBatch from "../../TypeAnnotations/WetProcessBatch";
 import type WetProcessStage from "../../TypeAnnotations/WetProcessStage";
+import { useApiService } from "../genericApiService";
 
 
     // interface StoreMeta {
@@ -84,6 +85,7 @@ import type WetProcessStage from "../../TypeAnnotations/WetProcessStage";
     }));
     
     export default function Rewash({stage}:WetProcessStage) {
+        const {getData,postData}=useApiService()
         const [batchCard,setBatchCard]=useState(false)
         const [rewashBatchList,setRewashBatchList]=useState<RewashBatch[]>([])
         const [qrData, setQrData] = useState<any | null>(null);

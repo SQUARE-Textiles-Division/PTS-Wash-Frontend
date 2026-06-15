@@ -16,7 +16,8 @@ import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 // import Button from '@mui/material/Button';
 import {  Typography, Button} from "@mui/material";
-import { getData, postData } from '../genericApiService';
+// import { getData, postData } from '../genericApiService';
+import { useApiService } from '../genericApiService';
 // import type BundleInfo from '../../TypeAnnotations/BundleInfo';
 import type BatchStage from '../../TypeAnnotations/BatchStage';
 import type BatchInstance from '../../TypeAnnotations/BatchInstance';
@@ -62,6 +63,7 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 }));
 
 export default function InProcessGen({processName,processDisplay}:ProcessName) {
+  const {getData,postData}=useApiService()
   const successAudio = new Audio(success);
   const setAlarm = () => {
       successAudio.currentTime = 0; // restart if already playing

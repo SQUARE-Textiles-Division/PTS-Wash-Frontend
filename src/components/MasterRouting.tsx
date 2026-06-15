@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from "react"
-import { getData, postData } from "./genericApiService"
+// import { getData, postData } from "./genericApiService"
+import { useApiService } from "./genericApiService";
 import { Box, Button, FormControl, InputLabel, Menu, MenuItem, Modal, Select, Step, StepLabel, Stepper, Typography } from "@mui/material"
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import ProcessRouteBuilder, { type ProcessNode, type ProcessType, type SubProcessType } from "./MasterRoutingStyling";
 import type MasterRoute from "../TypeAnnotations/MasterRoute";
-import { ip } from "../ip";
+import { ip, ptsip } from "../ip";
 
 const ALL_STAGES = [
   "Dry Process",
@@ -27,6 +28,7 @@ interface Color{
 }
 
 export function MasterRouting(){
+    const {getData,postData}=useApiService()
     const [errorMsg,setErrorMsg]=useState<string>("")
     const [saved,setSaved]=useState(false)
     const [routes, setRoutes] = useState<ProcessNode[]>([])
@@ -61,7 +63,7 @@ export function MasterRouting(){
     const fetchBuyers=()=>{
         getData<Buyer>(
             `washing/get_buyers/`,
-            `http://127.0.0.1:8000`,
+            ptsip,
             {},
             {},
             (res:Buyer)=>{
@@ -77,7 +79,7 @@ export function MasterRouting(){
     const fetchStyles=(buyer:string)=>{
         getData<Style>(
             `washing/get_styles/`,
-            `http://127.0.0.1:8000`,
+            ptsip,
             {},
             {buyer:buyer},
             (res:Style)=>{
@@ -94,7 +96,7 @@ export function MasterRouting(){
      const fetchColors=(buyer:string,style:string)=>{
         getData<Color>(
             `washing/get_colorAssociated/`,
-            `http://127.0.0.1:8000`,
+            ptsip,
             {},
             {buyer:buyer,style:style},
             (res:Color)=>{

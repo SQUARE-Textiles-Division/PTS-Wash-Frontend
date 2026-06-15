@@ -1,6 +1,6 @@
 import { Box, Button, Checkbox, FormControl, InputLabel, MenuItem, Modal, Paper, Select, styled, Table, TableBody, TableCell, tableCellClasses, TableContainer, TableHead, TableRow, TextField, Typography, type SelectChangeEvent } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
-import { getData, patchData, postData } from "../genericApiService";
+// import { getData, patchData, postData } from "../genericApiService";
 import { washlog } from "../../endpoints";
 import { ip } from "../../ip";
 import { tbCellColor, tbRowColor } from "../Colors/Colors";
@@ -34,6 +34,7 @@ import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
 import type WetProcessStage from "../../TypeAnnotations/WetProcessStage";
 import type CompletedQc from "../../TypeAnnotations/CompletedQc";
 import { StageDispMap } from "../../StageDispMap";
+import { useApiService } from "../genericApiService";
 // import NumberField from './components/NumberField';
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
@@ -107,7 +108,7 @@ type FetchBatchDetails={
     // add:boolean
 }
 export default function FirstWashQC({stage}:WetProcessStage){
-
+    const {getData,postData,patchData}=useApiService()
     const [batchComplete,setBatchComplete]=useState<boolean>(false)
     const [qcCompletePop,setQcCompletePop]=useState<boolean>(false)
     const individualBarcodeRef = React.useRef<HTMLInputElement>(null);

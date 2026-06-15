@@ -1,7 +1,8 @@
 import {Box,TextField}   from "@mui/material";
 import { Modal, Typography, Button } from "@mui/material";
 import type BundleInfo from "../TypeAnnotations/BundleInfo";
-import { getData,postData} from "./genericApiService";
+// import { getData,postData} from "./genericApiService";
+// import { axiosPrivate } from "../api/axios";
 import { useEffect, useRef,useState } from "react";
 import DoneAllIcon from '@mui/icons-material/DoneAll';
 import ReceivedBundles from "./ReceivedBundles";
@@ -9,6 +10,7 @@ import { red } from "@mui/material/colors";
 import { ip, ptsip } from "../ip";
 import success from '../assets/success.mp3'
 import type IndividualInfo from "../TypeAnnotations/IndividualInfo";
+import { useApiService } from "./genericApiService";
 
 interface Props {
     items: IndividualInfo[];
@@ -16,6 +18,8 @@ interface Props {
 }
 
 export default function WashReceive({items, setItems}: Props){
+    const {getData}=useApiService()
+    const {postData}=useApiService()
     // const audioRef = useRef<HTMLAudioElement | null>(null);
     // const [successAlarm,setSuccessAlarm]=useState<boolean>(false)
     const successAudio = new Audio(success);

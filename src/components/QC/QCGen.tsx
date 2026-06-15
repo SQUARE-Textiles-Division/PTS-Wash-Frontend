@@ -17,7 +17,8 @@ import type { SelectChangeEvent } from '@mui/material/Select';
 import { WhiskerRejectReasons } from "../RejectionReasons/WhiskerRejectReasons";
 import React, { useState } from "react";
 import type RejectionReason from "../../TypeAnnotations/RejectionReason";
-import { delData, getData, postData } from "../genericApiService";
+// import { delData, getData, postData } from "../genericApiService";
+import { useApiService } from "../genericApiService";
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import { tbCellColor, tbRowColor } from "../Colors/Colors";
 import { ip } from "../../ip";
@@ -68,6 +69,7 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
   },
 }));
 export default function QCGen({processName,processDisplay}:ProcessName) {
+  const {getData,postData,delData}=useApiService()
    const successAudio = new Audio(success);
    const setAlarm = () => {
         successAudio.currentTime = 0; // restart if already playing

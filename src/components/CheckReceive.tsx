@@ -2,7 +2,8 @@ import {Box,TextField}   from "@mui/material";
 import { Modal, Typography, Button ,Paper} from "@mui/material";
 import type BundleInfo from "../TypeAnnotations/BundleInfo";
 import type BatchBundle from "../TypeAnnotations/BatchBundle";
-import { getData, postData} from "./genericApiService";
+// import { getData, postData} from "./genericApiService";
+import { useApiService } from "./genericApiService";
 import { useEffect, useRef,useState } from "react";
 import DoneAllIcon from '@mui/icons-material/DoneAll';
 import alarmSound from "../assets/BatchCreationError.mp3";
@@ -16,6 +17,7 @@ interface Props {
     setQrData: React.Dispatch<React.SetStateAction<any | null>>;
 }
 export default function CheckReceive({items, setItems,qrData,setQrData}: Props){
+    const {getData,postData}=useApiService()
 
     const audioRef = useRef<HTMLAudioElement | null>(null);
 

@@ -12,7 +12,8 @@ import {
 } from "@mui/material";
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import { useRef, useState, useMemo, useEffect } from "react";
-import { getData,postData,patchData } from "./genericApiService";
+// import { getData,postData,patchData } from "./genericApiService";
+import { useApiService } from "./genericApiService";
 import type Planning from '../TypeAnnotations/BatchInstance'
 import type RouteSteps from "../TypeAnnotations/BatchInstance";
 import React from "react";
@@ -40,6 +41,7 @@ const ALL_STAGES = [
 ]
 
 export default function PlanningComponent() {
+  const {getData,postData,patchData}=useApiService()
   const [saved,setSaved]=useState(false)
   const [alarm,setAlarm]=useState(false)
   const mpoRef = useRef<HTMLInputElement>(null);

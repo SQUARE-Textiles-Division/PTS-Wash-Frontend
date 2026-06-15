@@ -6,13 +6,17 @@ import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
 import { tbCellColor } from "./Colors/Colors";
 import logo from '../assets/PTS Wash Logo.png'
 import { MenuText } from "../MenuText";
+import ROLES from "../Roles";
+import useAuth from "../hooks/useAuth";
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 
 type MenuItem = {
   primary: string;
   to?: string;
   children?: MenuItem[];
 };
-export default function Navbar() {
+export default function Navbar({allowedRoles}:any) {
+  const {auth}=useAuth()
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -74,11 +78,17 @@ export default function Navbar() {
   );
 };
   const DryProcessItemContent: MenuItem[] = [
-    { primary: "Planning", to: "/planning" },
+    // if()
+    ...(allowedRoles?.includes(ROLES.Production)
+    ? [{ primary: "Planning", to: "/planning" }]
+    : []),
+    
     // { primary: "Create Batch", to: "/createbatch" },
     // { primary: "QC Update", to: "/qceditdel" },
-
-    { primary: "Whisker In", to: "/whiskerin" },
+     ...(allowedRoles?.includes(ROLES.WhiskerIn)
+    ? [{ primary: "Whisker In", to: "/whiskerin" }]
+    : []),
+    
     { primary: "Whisker QC", to: "/whiskerqc" },
     { primary: "Whisker QC Pass", to: "/whiskeroutput" },
 
@@ -504,6 +514,19 @@ export default function Navbar() {
               style={{ textDecoration: "none", color: "#485e68", cursor: "pointer" }}
             >
               Wet Process
+            </p>
+           <p
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+                textDecoration: "none",
+                color: "#485e68",
+                cursor: "pointer",
+              }}
+            >
+              <AccountCircleIcon />
+              {auth.userId}
             </p>
           </Box>
           {/* </Box> */}
