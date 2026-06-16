@@ -1,7 +1,7 @@
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
 import ROLES, { ROLES_ADD } from "../Roles";
-import { all } from "axios";
+// import { all } from "axios";
 
 // Build reverse map ONCE (outside component)
 const getRoleKeyByValue = (value: string) => {
@@ -30,8 +30,8 @@ const RequireAuth = ({ allowedRoles }: any) => {
   // ---------------------
   // 2. ROLE NOT ALLOWED
   // ---------------------
-    const userRoles = auth.roles;
-
+    const userRoles = auth?.roles;
+    console.log(userRoles)
     const isAllowed = userRoles.some((role) =>
       allowedRoles.includes(role)
     );

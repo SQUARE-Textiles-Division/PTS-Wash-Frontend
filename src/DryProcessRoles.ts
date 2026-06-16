@@ -1,0 +1,26 @@
+import ROLES from "./Roles";
+
+export const dryProcessRoles = [
+  ROLES.Production,
+  ROLES.WhiskerIn,
+  ROLES.WhiskerQC,
+  ROLES.WhiskerOut,
+  ROLES.BrushIn,
+  ROLES.BrushQC,
+  ROLES.BrushOut,
+  ROLES.LaserWhiskerIn,
+  ROLES.LaserWhiskerQC,
+  ROLES.LaserWhiskerOut,
+  ROLES.LaserBrushIn,
+  ROLES.LaserBrushQC,
+  ROLES.LaserBrushOut,
+  ROLES.WrinkleIn,
+  ROLES.WrinkleQC,
+  ROLES.WrinkleOut,
+  ROLES.TagIn,
+  ROLES.TagQC,
+  ROLES.TagOut,
+  ROLES.TieIn,
+  ROLES.TieQC,
+  ROLES.TieOut,
+];

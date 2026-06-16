@@ -6,17 +6,57 @@ import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
 import { tbCellColor } from "./Colors/Colors";
 import logo from '../assets/PTS Wash Logo.png'
 import { MenuText } from "../MenuText";
-import ROLES from "../Roles";
+import ROLES, { ROLES_ADD } from "../Roles";
 import useAuth from "../hooks/useAuth";
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import { dryProcessRoles } from "../DryProcessRoles";
+import { wetProcessRoles } from "../WetProcessRoles";
+import { firstWashRoles } from "../1stWashRoles";
+import { secondWashRoles } from "../2ndWashRoles";
+import { thirdWashRoles } from "../3rrdWashRoles";
+import { finalWashRoles } from "../FinalWashRoles";
+import RoleBasedHome from "./RoleBasedHome";
+
+
+
 
 type MenuItem = {
   primary: string;
   to?: string;
   children?: MenuItem[];
 };
-export default function Navbar({allowedRoles}:any) {
+
+export default function Navbar() {
   const {auth}=useAuth()
+
+
+  
+
+const hasDryProcessRole = dryProcessRoles.some(role =>
+  auth?.roles?.includes(role)
+);
+const hasWetProcessRole = wetProcessRoles.some(role =>
+  auth?.roles?.includes(role)
+);
+const matchedRole = Object.keys(ROLES_ADD).find(role =>
+  auth?.roles?.includes(ROLES[role as keyof typeof ROLES])
+);
+const hasFirstWashRole=firstWashRoles.some(role=>
+  auth?.roles?.includes(role)
+)
+const hasSecondWashRole=secondWashRoles.some(role=>
+  auth?.roles?.includes(role)
+)
+const hasThirdWashRole=thirdWashRoles.some(role=>
+  auth?.roles?.includes(role)
+)
+const hasFinalWashRole=finalWashRoles.some(role=>
+  auth?.roles?.includes(role)
+)
+  // const {isLoading } = useAuth();
+
+  // if (isLoading) return <p>Loading...</p>;
+  // if (isLoading) return null; // or loader
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -79,164 +119,416 @@ export default function Navbar({allowedRoles}:any) {
 };
   const DryProcessItemContent: MenuItem[] = [
     // if()
-    ...(allowedRoles?.includes(ROLES.Production)
-    ? [{ primary: "Planning", to: "/planning" }]
-    : []),
-    
+    ...(auth?.roles?.includes(ROLES.Production)
+      ?[{ primary: "Planning", to: "/planning" }]
+      : []),
+
     // { primary: "Create Batch", to: "/createbatch" },
     // { primary: "QC Update", to: "/qceditdel" },
-     ...(allowedRoles?.includes(ROLES.WhiskerIn)
-    ? [{ primary: "Whisker In", to: "/whiskerin" }]
-    : []),
+
+    ...(auth?.roles?.includes(ROLES.WhiskerIn)
+      ? [{ primary: "Whisker In", to: "/whiskerin" }]
+      : []),
     
-    { primary: "Whisker QC", to: "/whiskerqc" },
-    { primary: "Whisker QC Pass", to: "/whiskeroutput" },
+    ...(auth?.roles?.includes(ROLES.WhiskerQC)
+      ?[{ primary: "Whisker QC", to: "/whiskerqc" }]
+      :[]),
 
-    { primary: "Laser Whisker In", to: "/laserwhiskerin" },
-    {primary:"Laser Whisker QC", to:"/laserwhiskerqc"},
-    { primary: "Laser Whisker QC Pass", to: "/laserwhiskeroutput" },
+    ...(auth?.roles?.includes(ROLES.WhiskerOut)
+      ?[ {primary: "Whisker QC Pass", to: "/whiskeroutput" }]
+      :[]
+      ),
+    ...(auth?.roles?.includes(ROLES.LaserWhiskerIn)
+      ?[{ primary: "Laser Whisker In", to: "/laserwhiskerin" }]
+      :[]
+      ),
+
+     ...(auth?.roles?.includes(ROLES.LaserWhiskerQC)
+      ?[{primary:"Laser Whisker QC", to:"/laserwhiskerqc"}]
+      :[]
+      ),
+     ...(auth?.roles?.includes(ROLES.LaserWhiskerOut)
+      ?[{ primary: "Laser Whisker QC Pass", to: "/laserwhiskeroutput" }]
+      :[]
+      ),
+     ...(auth?.roles?.includes(ROLES.BrushIn)
+      ?[{ primary: "Brush In", to: "/brushin" }]
+      :[]
+      ),
+     ...(auth?.roles?.includes(ROLES.BrushQC)
+      ?[{primary: "Brush QC", to: "/brushqc" }]
+      :[]
+      ),
+     ...(auth?.roles?.includes(ROLES.BrushOut)
+      ?[{ primary: "Brush QC Pass", to: "/brushoutput" }]
+      :[]
+      ),
+    ...(auth?.roles?.includes(ROLES.LaserBrushIn)
+      ?[{ primary: "Laser Brush In", to: "/laserbrushin" }]
+      :[]
+      ),
+    ...(auth?.roles?.includes(ROLES.LaserBrushQC)
+      ?[{primary:"Laser Brush QC", to:"/laserbrushqc"}]
+      :[]
+      ),
+      ...(auth?.roles?.includes(ROLES.LaserBrushOut)
+      ?[{ primary: "Laser Brush QC Pass", to: "/laserbrushoutput" }]
+      :[]
+      ),
     
-    { primary: "Brush In", to: "/brushin" },
-    {primary: "Brush QC", to: "/brushqc" },
-    { primary: "Brush QC Pass", to: "/brushoutput" },
-
-    { primary: "Laser Brush In", to: "/laserbrushin" },
-    {primary:"Laser Brush QC", to:"/laserbrushqc"},
-    { primary: "Laser Brush QC Pass", to: "/laserbrushoutput" },
-
-    { primary: "Wrinkle In", to: "/wrinklein" },
-    { primary: "Wrinkle QC", to: "/wrinkleqc" },
-    { primary: "Wrinkle QC Pass", to: "/wrinkleoutput" },
-
-    { primary: "Tag In", to: "/tagin" },
-    { primary: "Tag QC", to: "/tagqc" },
-    { primary: "Tag QC Pass", to: "/tagoutput" },
+      ...(auth?.roles?.includes(ROLES.WrinkleIn)
+      ?[{ primary: "Wrinkle In", to: "/wrinklein" }]
+      :[]
+      ),
     
-    { primary: "Tie In", to: "/tiein" },
-    { primary: "Tie QC", to: "/tieqc" },
-    { primary: "Tie QC Pass", to: "/tieoutput" },
+      ...(auth?.roles?.includes(ROLES.WrinkleQC)
+      ?[{ primary: "Wrinkle QC", to: "/wrinkleqc" }]
+      :[]
+      ),
+      ...(auth?.roles?.includes(ROLES.WrinkleOut)
+      ?[{ primary: "Wrinkle QC Pass", to: "/wrinkleoutput" }]
+      :[]
+      ),
+    
+    ...(auth?.roles?.includes(ROLES.TagIn)
+      ?[{ primary: "Tag In", to: "/tagin" }]
+      :[]
+      ),
+    ...(auth?.roles?.includes(ROLES.TagQC)
+      ?[{ primary: "Tag QC", to: "/tagqc" }]
+      :[]
+      ),
+    
+    ...(auth?.roles?.includes(ROLES.TagOut)
+      ?[{ primary: "Tag QC Pass", to: "/tagoutput" }]
+      :[]
+      ),
+    ...(auth?.roles?.includes(ROLES.TieIn)
+      ?[{ primary: "Tie In", to: "/tiein" }]
+      :[]
+      ),
+    
+    ...(auth?.roles?.includes(ROLES.TieQC)
+      ?[{ primary: "Tie QC", to: "/tieqc" }]
+      :[]
+      ),
+    ...(auth?.roles?.includes(ROLES.TieOut)
+      ?[{ primary: "Tie QC Pass", to: "/tieoutput" }]
+      :[]
+      ),
+    
     
   ];
 
   const WetProcessItemContent: (MenuItem & { children?: MenuItem[] }) []= [
-    {
-      primary:"1st Wash",
-      children:[
-        { primary: "Create Batch", to: "/firstwash/createbatch" },
-        // { primary: "Create Batch (With Dry)", to: "/batchwithdry" },
-        
-        { primary: "Load",
-          children: [
-            { primary: "Load Start", to: "/firstwash/loadstart" },
-            { primary: "Load Finish & Process Start", to: "/firstwash/loadfinish" },
-          ],
-        },
-        { primary: "Unload",
-          // to: "",
-          children: [
-            { primary: "Process Finish & Unload Start", to: "/firstwash/processfinish" },
-            { primary: "UnLoad Finish", to: "/firstwash/unloadfinish" },
-          ],
-        },
-        { primary: "Hydro",
-          // to: "",
-          children: [
-            { primary: "Hydro In", to: "/firstwash/hydroin" },
-            { primary: "Hydro Out", to: "/firstwash/hydroout" },
-          ],
-        },
-        {
-          primary: "Dryer",
-          children: [
-            { primary: "Dryer Conveyor In", to: "/firstwash/dryerconveyorin" },
-            { primary: "Dryer Conveyor Out", to: "/firstwash/dryerconveyorout" },
-            { primary: "Dryer Oven In", to: "/firstwash/dryerovenin" },
-            { primary: "Dryer Oven Out", to: "/firstwash/dryerovenout" },
-            { primary: "Dryer Tumble In", to: "/firstwash/dryertumblein" },
-            { primary: "Dryer Tumble Out", to: "/firstwash/dryertumbleout" },
-          
-          ],
-        },
-        {primary: "QC",to:"/firstwashqc"},
-        {
-          primary:"Rewash",
-          children:[
-            { primary: "Create Batch", to: "/firstwash/rewashcreatebatch" },
-          ]
-        }
+    ...(hasFirstWashRole
+          ?[ {primary:"1st Wash",
+                  children:[
+                    ...(auth?.roles?.includes(ROLES.FirstWashBatch)
+                    ?[ { primary: "Create Batch", to: "/firstwash/createbatch" }]
+                    :[]
+                  ),
+                  
+                    // { primary: "Create Batch (With Dry)", to: "/batchwithdry" },
+                    ...(auth?.roles?.includes(ROLES.FirstLoadStart) || auth?.roles?.includes(ROLES.FirstLoadFinish)
+                  
+                    ?[
+                      { primary: "Load",
+                        children: [
+                          ...(auth?.roles?.includes(ROLES.FirstLoadStart)
+                          ?[{ primary: "Load Start", to: "/firstwash/loadstart" }]
+                          :[]
+                        ),
+                        ...(auth?.roles?.includes(ROLES.FirstLoadFinish)
+                        ?[{ primary: "Load Finish & Process Start", to: "/firstwash/loadfinish" }]
+                        :[]
+                        ),
+                        ],
+                    }
+                    ]
+                    :[]
+                  ),
+                  ...(auth?.roles?.includes(ROLES.FirstProcessFinish)||auth?.roles?.includes(ROLES.FirstUnloadFinish)
+                  ?[
+                    { primary: "Unload",
+                      // to: "",
+                      children: [
+                        ...(auth?.roles?.includes(ROLES.FirstProcessFinish)
+                        ?[{ primary: "Process Finish & Unload Start", to: "/firstwash/processfinish" }]
+                        :[]
+                        ),
+                        ...(auth?.roles?.includes(ROLES.FirstUnloadFinish)
+                        ?[ { primary: "UnLoad Finish", to: "/firstwash/unloadfinish" }]
+                        :[]
+                        ),
+                      
+                      ],
+                    }
+                  ]
+                  :[]
+                  ),
+                    
+                    ...(auth?.roles?.includes(ROLES.FirstHydroIn) || auth?.roles?.includes(ROLES.FirstHydroOut)
+                  ?[
+                      { primary: "Hydro",
+                      // to: "",
+                      children: [
+                        ...(auth?.roles?.includes(ROLES.FirstHydroIn)
+                          ?[{ primary: "Hydro In", to: "/firstwash/hydroin" }]
+                          :[]
+                        ),
+                        ...(auth?.roles?.includes(ROLES.FirstHydroOut)
+                        ?[{ primary: "Hydro Out", to: "/firstwash/hydroout" }]
+                        :[]
+                        )
+                      ],
+                    }
+                  ]
+                  :[]
+                  ),
+                  ...(auth?.roles?.includes(ROLES.FirstConveyerIn) || auth?.roles?.includes(ROLES.FirstConveyerOut) || auth?.roles?.includes(ROLES.FirstOvenIn) 
+                  || auth?.roles?.includes(ROLES.FirstOvenOut) || auth?.roles?.includes(ROLES.FirstTumbleIn) || auth?.roles?.includes(ROLES.FirstTumbleOut)
+                  ?[
 
-      ]
-    },
+                    {
+                      primary: "Dryer",
+                      children: [
+                        ...(auth?.roles?.includes(ROLES.FirstConveyerIn)
+                        ?[
+                          { primary: "Dryer Conveyor In", to: "/firstwash/dryerconveyorin" }
+                        ]
+                        :[]
+                      ) ,
+                      ...(auth?.roles?.includes(ROLES.FirstConveyerOut) 
+                        ?[{ primary: "Dryer Conveyor Out", to: "/firstwash/dryerconveyorout" }]
+                        :[]
+                        ),
+                        ...(auth?.roles?.includes(ROLES.FirstOvenIn) 
+                        ?[{ primary: "Dryer Oven In", to: "/firstwash/dryerovenin" }]
+                        :[]
+                      ),
+                        ...(auth?.roles?.includes(ROLES.FirstOvenOut) 
+                        ?[
+                          { primary: "Dryer Oven Out", to: "/firstwash/dryerovenout" }
+                        ]
+                        :[]
+                      ),
+                        ...(auth?.roles?.includes(ROLES.FirstTumbleIn) 
+                        ?[
+                          { primary: "Dryer Tumble In", to: "/firstwash/dryertumblein" }
+                        ]
+                        :[]
+                      ),
+                      ...(auth?.roles?.includes(ROLES.FirstTumbleOut) 
+                        ?[
+                          { primary: "Dryer Tumble Out", to: "/firstwash/dryertumbleout" },
+                        ]
+                        :[]
+                      ),
+                        
+                      
+                      ],
+                    }
+                  ]
+                  :[]
+                ),
+                  ...(auth?.roles?.includes(ROLES.FirstWashQC)
+                  ?[{primary: "QC",to:"/firstwashqc"}]
+                  :[]
+                ),  
+                ...(auth?.roles?.includes(ROLES.FirstWashRewashBatch)
+                  ?[{
+                      primary:"Rewash",
+                      children:[
+                        { primary: "Create Batch", to: "/firstwash/rewashcreatebatch" },
+                      ]
+                    }]
+                  :[]
+                )
+                    
 
-    {
-      primary:'2nd Wash',
-      children:[
-        { primary: "Create Batch", to: "/secondwash/createbatch" },
-        { primary: "Load",
-          children: [
-            { primary: "Load Start", to: "/secondwash/loadstart" },
-            { primary: "Load Finish & Process Start", to: "/secondwash/loadfinish" },
-          ],
-        },
-        { primary: "Unload",
-          // to: "",
-          children: [
-            { primary: "Process Finish & Unload Start", to: "/secondwash/processfinish" },
-            { primary: "UnLoad Finish", to: "/secondwash/unloadfinish" },
-          ],
-        },
-        { primary: "Hydro",
-          // to: "",
-          children: [
-            { primary: "Hydro In", to: "/secondwash/hydroin" },
-            { primary: "Hydro Out", to: "/secondwash/hydroout" },
-          ],
-        },
-        {
-          primary: "Dryer",
-          children: [
-            { primary: "Dryer Conveyor In", to: "/secondwash/dryerconveyorin" },
-            { primary: "Dryer Conveyor Out", to: "/secondwash/dryerconveyorout" },
-            { primary: "Dryer Oven In", to: "/secondwash/dryerovenin" },
-            { primary: "Dryer Oven Out", to: "/secondwash/dryerovenout" },
-            { primary: "Dryer Tumble In", to: "/secondwash/dryertumblein" },
-            { primary: "Dryer Tumble Out", to: "/secondwash/dryertumbleout" },
+                  ]}]
+              :[]
+      ),
+   
+   ...(hasSecondWashRole
+              ?[{
+                primary:'2nd Wash',
+                children:[
+                  ...(auth?.roles?.includes(ROLES.SecondWashBatch)
+                    ?[{ primary: "Create Batch", to: "/secondwash/createbatch" }]
+                    :[]
+                ),
+                ...(auth?.roles?.includes(ROLES.SecondLoadStart) || auth?.roles?.includes(ROLES.SecondLoadFinish)
+                ?[
+                    { primary: "Load",
+                    children: [
+                      ...(auth?.roles?.includes(ROLES.SecondLoadStart) 
+                      ?[{ primary: "Load Start", to: "/secondwash/loadstart" }]
+                      :[]
+                    ),
+                    ...(auth?.roles?.includes(ROLES.SecondLoadFinish)
+                      ?[{ primary: "Load Finish & Process Start", to: "/secondwash/loadfinish" }]
+                      :[]
+                  )
+                    ],
+                  },
+                ]
+                :[]
+              ),
+
+              ...(auth?.roles?.includes(ROLES.SecondProcessFinish) || auth?.roles?.includes(ROLES.SecondUnloadFinish)
+              ?[
+                { primary: "Unload",
+                    // to: "",
+                    children: [
+                      ...(auth?.roles?.includes(ROLES.SecondProcessFinish)
+                            ?[{ primary: "Process Finish & Unload Start", to: "/secondwash/processfinish" }]
+                            :[]
+                      ),
+                      ...(auth?.roles?.includes(ROLES.SecondUnloadFinish)
+                          ?[{ primary: "UnLoad Finish", to: "/secondwash/unloadfinish" }]
+                          :[]
+                    )
+                      
+                    ],
+                  }
+              ]
+              :[]
+            ),
+                  
+            ...(auth?.roles?.includes(ROLES.SecondHydroIn) || auth?.roles?.includes(ROLES.SecondHydroOut)
+            ?[{ primary: "Hydro",
+                    // to: "",
+                    children: [
+                      ...(auth?.roles?.includes(ROLES.SecondHydroIn)
+                          ?[{ primary: "Hydro In", to: "/secondwash/hydroin" }]
+                          :[]
+                      ),
+                      ...(auth?.roles?.includes(ROLES.SecondHydroOut)
+                          ?[{ primary: "Hydro Out", to: "/secondwash/hydroout" }]
+                          :[]
+                      )
+                    ],
+                  },]
+            :[]
+          ),
+          ...(auth?.roles?.includes(ROLES.SecondConveyerIn) || auth?.roles?.includes(ROLES.SecondConveyerOut) || auth?.roles?.includes(ROLES.SecondOvenIn)
+            || auth?.roles?.includes(ROLES.SecondOvenOut) || auth?.roles?.includes(ROLES.SecondTumbleIn) || auth?.roles?.includes(ROLES.SecondTumbleOut)
+            ?[
+                {
+                  primary: "Dryer",
+                  children: [
+                    ...(auth?.roles?.includes(ROLES.SecondConveyerIn)
+                        ?[{ primary: "Dryer Conveyor In", to: "/secondwash/dryerconveyorin" }]
+                        :[]
+                    ),
+                    ...(auth?.roles?.includes(ROLES.SecondConveyerOut)
+                        ?[{ primary: "Dryer Conveyor Out", to: "/secondwash/dryerconveyorout" }]
+                        :[]
+                    ),
+                      ...(auth?.roles?.includes(ROLES.SecondOvenIn)
+                        ?[{ primary: "Dryer Oven In", to: "/secondwash/dryerovenin" }]
+                        :[]
+                    ),
+                      ...(auth?.roles?.includes(ROLES.SecondOvenOut)
+                        ?[{ primary: "Dryer Oven Out", to: "/secondwash/dryerovenout" }]
+                        :[]
+                    ),
+                     ...(auth?.roles?.includes(ROLES.SecondTumbleIn)
+                        ?[{ primary: "Dryer Tumble In", to: "/secondwash/dryertumblein" }]
+                        :[]
+                    ),
+                    ...(auth?.roles?.includes(ROLES.SecondTumbleOut)
+                        ?[{ primary: "Dryer Tumble Out", to: "/secondwash/dryertumbleout" },]
+                        :[]
+                    ),
+                    
+                  ],
+                },
+            ]
+            :[]
+          ),
           
-          ],
-        },
-        {primary: "QC",to:"/secondwashqc"},
-        {
-          primary:"Rewash",
-          children:[
-            { primary: "Create Batch", to: "/secondwash/rewashcreatebatch" },
-          ]
-        }
-      ]
-    },
-     {
+          ...(auth?.roles?.includes(ROLES.SecondWashQC)
+            ?[{primary: "QC",to:"/secondwashqc"}]
+            :[]
+          ),
+          ...(auth?.roles?.includes(ROLES.SecondWashRewashBatch)
+              ?[{
+                  primary:"Rewash",
+                  children:[
+                    { primary: "Create Batch", to: "/secondwash/rewashcreatebatch" },
+                  ]
+              }]
+              :[]
+          ),
+          
+        ]
+      }]
+      :[]
+   ) ,
+   ...(hasThirdWashRole?[
+    {
       primary:'3rd Wash',
       children:[
-        { primary: "Create Batch", to: "/thirdwash/createbatch" },
-        { primary: "Load",
-          children: [
-            { primary: "Load Start", to: "/thirdwash/loadstart" },
-            { primary: "Load Finish & Process Start", to: "/thirdwash/loadfinish" },
-          ],
-        },
-        { primary: "Unload",
-          // to: "",
-          children: [
-            { primary: "Process Finish & Unload Start", to: "/thirdwash/processfinish" },
-            { primary: "UnLoad Finish", to: "/thirdwash/unloadfinish" },
-          ],
-        },
-        { primary: "Hydro",
-          // to: "",
-          children: [
-            { primary: "Hydro In", to: "/thirdwash/hydroin" },
-            { primary: "Hydro Out", to: "/thirdwash/hydroout" },
-          ],
-        },
+        ...(auth?.roles?.includes(ROLES.ThirdWashBatch)
+            ?[{ primary: "Create Batch", to: "/thirdwash/createbatch" }]
+            :[]
+        ),
+        ...(auth?.roles?.includes(ROLES.ThirdLoadStart) || auth?.roles?.includes(ROLES.ThirdLoadFinish)
+            ?[
+               { primary: "Load",
+                children: [
+                  ...(auth?.roles?.includes(ROLES.ThirdLoadStart)
+                      ?[{ primary: "Load Start", to: "/thirdwash/loadstart" }]
+                      :[]
+                  ),
+                  ...(auth?.roles?.includes(ROLES.ThirdLoadFinish)
+                      ?[{ primary: "Load Finish & Process Start", to: "/thirdwash/loadfinish" }]
+                      :[]
+                  )
+                ],
+              }
+            ]
+            :[]
+        ),
+        ...(auth?.roles?.includes(ROLES.ThirdProcessFinish) || auth?.roles?.includes(ROLES.ThirdUnloadFinish)
+            ?[{ primary: "Unload",
+              // to: "",
+              children: [
+                ...(auth?.roles?.includes(ROLES.ThirdProcessFinish)
+                    ?[{ primary: "Process Finish & Unload Start", to: "/thirdwash/processfinish" }]
+                    :[]
+                ),
+                ...(auth?.roles?.includes(ROLES.ThirdUnloadFinish)
+                    ?[{ primary: "UnLoad Finish", to: "/thirdwash/unloadfinish" }]
+                    :[]
+                )
+              ],
+            }]
+            :[]
+        ),
+        ...(auth?.roles?.includes(ROLES.ThirdHydroIn) || auth?.roles?.includes(ROLES.ThirdHydroOut)
+            ?[{ primary: "Hydro",
+                // to: "",
+                children: [
+                  ...(auth?.roles?.includes(ROLES.ThirdHydroIn)
+                      ?[{ primary: "Hydro In", to: "/thirdwash/hydroin" }]
+                      :[]
+                  ),
+                  ...(auth?.roles?.includes(ROLES.ThirdHydroOut)
+                      ?[{ primary: "Hydro Out", to: "/thirdwash/hydroout" }]
+                      :[]
+                  ),
+                ],
+              }]
+            :[]
+        ),
+        
+       
+        
+        
          {
           primary: "Dryer",
           children: [
@@ -258,7 +550,11 @@ export default function Navbar({allowedRoles}:any) {
         }
       ]
     },
-    {
+   ]:[]),
+     
+   ...(hasFinalWashRole
+    ?[
+      {
       primary:'Final Wash',
       children:[
         { primary: "Create Batch", to: "/finalwash/createbatch" },
@@ -303,6 +599,10 @@ export default function Navbar({allowedRoles}:any) {
         }
       ]
     }
+    ]
+    :[]
+   ),
+    
     
   ];
   const [openSubmenus, setOpenSubmenus] = useState<{ [key: string]: boolean }>({});
@@ -420,8 +720,14 @@ export default function Navbar({allowedRoles}:any) {
     }
     else {
       setItemContent([
-        { primary: "Master Routing", to: "/masterroute" },
-        { primary: "Wash Receive", to: "/washreceive" }
+        ...(auth?.roles?.includes(ROLES.MasterRouting)
+        ?[{ primary: "Master Routing", to: "/masterroute" }]
+        :[]),
+          ...(auth?.roles?.includes(ROLES.WashReceive)
+        ?[{ primary: "Wash Receive", to: "/washreceive" }]
+        :[]),
+        
+        
       ]); // <-- nothing by default
     }
   }, [location.pathname]);
@@ -448,10 +754,65 @@ export default function Navbar({allowedRoles}:any) {
 
     // navigate(isDry ? "/planning" : "/batchdry");
     if(isDry){
-      window.open("/planning", "_blank")
+      if (matchedRole) {
+        window.open(
+          ROLES_ADD[matchedRole as keyof typeof ROLES_ADD].route,
+          "_blank"
+        );
+      }
+      // if(auth?.roles?.includes(ROLES.Production))
+      //   window.open(ROLES_ADD.Production.route, "_blank")
+      // else if(auth?.roles?.includes(ROLES.WhiskerIn))
+      //   window.open(ROLES_ADD.WhiskerIn.route,"_blank")
+      // else if(auth?.roles?.includes(ROLES.WhiskerQC))
+      //   window.open(ROLES_ADD.WhiskerQC.route,"_blank")
+      // else if(auth?.roles?.includes(ROLES.WhiskerOut))
+      //   window.open(ROLES_ADD.WhiskerOut.route,"_blank")
+      // else if(auth?.roles?.includes(ROLES.LaserWhiskerIn))
+      //   window.open(ROLES_ADD.LaserWhiskerIn.route,"_blank")
+      // else if(auth?.roles?.includes(ROLES.LaserWhiskerQC))
+      //   window.open(ROLES_ADD.LaserWhiskerQC.route,"_blank")
+      // else if(auth?.roles?.includes(ROLES.LaserWhiskerOut))
+      //   window.open(ROLES_ADD.LaserWhiskerOut.route,"_blank")
+      // else if(auth?.roles?.includes(ROLES.BrushIn))
+      //   window.open(ROLES_ADD.BrushIn.route,"_blank")
+      // else if(auth?.roles?.includes(ROLES.BrushQC))
+      //   window.open(ROLES_ADD.BrushQC.route,"_blank")
+      // else if(auth?.roles?.includes(ROLES.BrushOut))
+      //   window.open(ROLES_ADD.BrushOut.route,"_blank")
+      // else if(auth?.roles?.includes(ROLES.LaserBrushIn))
+      //   window.open(ROLES_ADD.LaserBrushIn.route,"_blank")
+      // else if(auth?.roles?.includes(ROLES.LaserBrushQC))
+      //   window.open(ROLES_ADD.LaserBrushQC.route,"_blank")
+      // else if(auth?.roles?.includes(ROLES.LaserBrushOut))
+      //   window.open(ROLES_ADD.LaserBrushOut.route,"_blank")
+      // else if(auth?.roles?.includes(ROLES.WrinkleIn))
+      //   window.open(ROLES_ADD.WrinkleIn.route,"_blank")
+      // else if(auth?.roles?.includes(ROLES.WrinkleQC))
+      //   window.open(ROLES_ADD.WrinkleQC.route,"_blank")
+      // else if(auth?.roles?.includes(ROLES.WrinkleOut))
+      //   window.open(ROLES_ADD.WrinkleOut.route,"_blank")
+      // else if(auth?.roles?.includes(ROLES.TagIn))
+      //   window.open(ROLES_ADD.TagIn.route,"_blank")
+      // else if(auth?.roles?.includes(ROLES.TagQC))
+      //   window.open(ROLES_ADD.TagQC.route,"_blank")
+      // else if(auth?.roles?.includes(ROLES.TagOut))
+      //   window.open(ROLES_ADD.TagOut.route,"_blank")
+      // else if(auth?.roles?.includes(ROLES.TieIn))
+      //   window.open(ROLES_ADD.TieIn.route,"_blank")
+      // else if(auth?.roles?.includes(ROLES.TieQC))
+      //   window.open(ROLES_ADD.TieQC.route,"_blank")
+      // else if(auth?.roles?.includes(ROLES.TieOut))
+      //   window.open(ROLES_ADD.TieOut.route,"_blank")
     }
     else{
-      window.open("/firstwash/createbatch", "_blank")
+      // window.open("/firstwash/createbatch", "_blank")
+      if (matchedRole) {
+        window.open(
+          ROLES_ADD[matchedRole as keyof typeof ROLES_ADD].route,
+          "_blank"
+        );
+      }
     }
   };
   return (
@@ -488,33 +849,38 @@ export default function Navbar({allowedRoles}:any) {
               </p>
             </Box>
           <Box sx={{ display: "flex", gap: 2, alignItems: "center",fontWeight:600 }}>
-            <p
+            {auth?.roles?.includes(ROLES.MasterRouting) &&(
+               <p
               // onClick={() => navigate("/washreceive")}
               onClick={()=>window.open("/masterroute", "_blank")}
               style={{ textDecoration: "none", color: "#485e68", cursor: "pointer",  }}
             >
               Master Routing
             </p>
+            )}
+           {auth?.roles?.includes(ROLES.WashReceive) &&(
             <p
-              // onClick={() => navigate("/washreceive")}
+              
               onClick={()=>window.open("/washreceive", "_blank")}
               style={{ textDecoration: "none", color: "#485e68", cursor: "pointer",  }}
             >
               Wash Receive
-            </p>
+            </p>)}
+            {hasDryProcessRole
+            &&(
             <p
               onClick={() => handleProcessClick(true)}
               style={{ textDecoration: "none", color: "#485e68", cursor: "pointer",  }}
             >
               Dry Process
-            </p>
+            </p>)}
 
-            <p
+            {hasWetProcessRole &&(<p
               onClick={() => handleProcessClick(false)}
               style={{ textDecoration: "none", color: "#485e68", cursor: "pointer" }}
             >
               Wet Process
-            </p>
+            </p>)}
            <p
               style={{
                 display: "flex",

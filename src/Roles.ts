@@ -44,6 +44,7 @@ const ROLES={
   FirstOvenOut:'FirstWashOvenOut',
   FirstWashQC:'FirstWashQC',
   FirstWashBatch:'FirstWashBatch',
+  FirstWashRewashBatch:'FirstWashRewashBatch',
   // Second Wash
   SecondHydroIn: 'SecondWashHydroIn',
   SecondHydroOut: 'SecondWashHydroOut',
@@ -59,6 +60,7 @@ const ROLES={
   SecondOvenOut: 'SecondWashOvenOut',
   SecondWashQC: 'SecondWashQC',
   SecondWashBatch: 'SecondWashBatch',
+  SecondWashRewashBatch:'SecondWashRewashBatch',
 
   // Third Wash
   ThirdHydroIn: 'ThirdWashHydroIn',
@@ -75,6 +77,7 @@ const ROLES={
   ThirdOvenOut: 'ThirdWashOvenOut',
   ThirdWashQC: 'ThirdWashQC',
   ThirdWashBatch: 'ThirdWashBatch',
+  ThirdWashRewashBatch:'ThirdWashRewashBatch',
 
   // Final Wash
   FinalHydroIn: 'FinalWashHydroIn',
@@ -91,6 +94,7 @@ const ROLES={
   FinalOvenOut: 'FinalWashOvenOut',
   FinalWashQC: 'FinalWashQC',
   FinalWashBatch: 'FinalWashBatch',
+  FinalWashRewashBatch:'FinalWashRewashBatch',
 
   WhiskerIn:'WhiskerInAuthority',
   WhiskerQC:'WhikserQCAuthority',
@@ -374,6 +378,79 @@ export const ROLES_ADD = {
     role: ROLES.WhiskerOut,
     route: '/whiskeroutput',
   },
+  LaserWhiskerIn:{
+    role:ROLES.LaserWhiskerIn,
+    route:'/laserwhiskerin'
+  },
+  LaserWhiskerQC:{
+    role:ROLES.LaserWhiskerQC,
+    route:'/laserwhiskerqc'
+  },
+  LaserWhiskerOut:{
+    role:ROLES.LaserWhiskerOut,
+    route:'/laserwhiskeroutput'
+  },
+  BrushIn:{
+    role:ROLES.BrushIn,
+    route:'/brushin'
+  },
+  BrushQC:{
+    role:ROLES.BrushQC,
+    route:'/brushqc'
+  },
+  BrushOut:{
+    role:ROLES.BrushOut,
+    route:'/brushoutput'
+  },
+  LaserBrushIn:{
+    role:ROLES.LaserBrushIn,
+    route:'/laserbrushin'
+  },
+  LaserBrushQC:{
+    role:ROLES.LaserBrushQC,
+    route:'/laserbrushqc'
+  },
+  LaserBrushOut:{
+    role:ROLES.LaserBrushOut,
+    route:'/laserbrushqc'
+  },
+  WrinkleIn:{
+    role:ROLES.WrinkleIn,
+    route:'/wrinklein'
+  },
+  WrinkleQC:{
+    role:ROLES.WrinkleQC,
+    route:'/wrinkleqc'
+  },
+  WrinkleOut:{
+    role:ROLES.WrinkleOut,
+    route:'/wrinkleoutput'
+  },
+  TagIn:{
+    role:ROLES.TagIn,
+    route:'tagin'
+  },
+  TagQC:{
+    role:ROLES.TagQC,
+    route:'/tagqc'
+  },
+  TagOut:{
+    role:ROLES.TagOut,
+    route:'/tagoutput'
+  },
+  TieIn:{
+    role:ROLES.TieIn,
+    route:'/tiein'
+  },
+  TieQC:{
+    role:ROLES.TieQC,
+    route:'/tieqc'
+  },
+  TieOut:{
+    role:ROLES.TieOut,
+    route:'/tieoutput'
+  }
+
 };
 
 // export default ROLES_ADD

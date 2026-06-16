@@ -5,9 +5,11 @@ import useAuth from "../hooks/useAuth";
 function Layout() {
   const location = useLocation();
   const {auth}=useAuth()
+
+  console.log('Auhtorized for',auth?.roles)
   return (
     <>
-      {location.pathname !== "/login" && <Navbar allowedRoles={auth?.roles} />}
+      {location.pathname !== "/login" && <Navbar />}
       <Outlet />
     </>
   );

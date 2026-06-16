@@ -1,1 +1,3 @@
-export const LOGIN_URL="http://127.0.0.1:8050/auth/jwt/create/"
+import { ip } from "./ip";
+
+export const LOGIN_URL=`${ip}/auth/jwt/create/`
