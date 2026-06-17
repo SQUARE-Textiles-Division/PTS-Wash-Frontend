@@ -1,12 +1,12 @@
 // ./components/Navbar.tsx
 import React, { useState, useEffect } from "react";
 import Typography from "@mui/material/Typography";
-import { Box, CssBaseline, AppBar, Toolbar, Drawer, List, ListItem, ListItemButton, ListItemText } from "@mui/material";
+import { Box, CssBaseline, AppBar, Toolbar, Drawer, List, ListItem, ListItemButton, ListItemText, MenuItem, Menu } from "@mui/material";
 import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
 import { tbCellColor } from "./Colors/Colors";
 import logo from '../assets/PTS Wash Logo.png'
 import { MenuText } from "../MenuText";
-import ROLES, { ROLES_ADD } from "../Roles";
+import ROLES, { DRY_ROLES, ROLES_ADD, WET_ROLES } from "../Roles";
 import useAuth from "../hooks/useAuth";
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { dryProcessRoles } from "../DryProcessRoles";
@@ -16,6 +16,8 @@ import { secondWashRoles } from "../2ndWashRoles";
 import { thirdWashRoles } from "../3rrdWashRoles";
 import { finalWashRoles } from "../FinalWashRoles";
 import RoleBasedHome from "./RoleBasedHome";
+import type { AuthState } from "../context/AuthProvider";
+import useLogOut from "../hooks/useLogOut";
 
 
 
@@ -27,20 +29,64 @@ type MenuItem = {
 };
 
 export default function Navbar() {
+  const navigate = useNavigate();
+  const logout = useLogOut()
+  const logOut = async ()=>{
+    await logout()
+    navigate('/login')
+  }
   const {auth}=useAuth()
+  const id = React.useId();
+  const buttonId = `${id}-button`;
+  const menuId = `${id}-menu`;
 
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 
-  
+  const open = Boolean(anchorEl);
 
+  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+const getDryRoute = () => {
+  const role = Object.keys(ROLES_ADD).find(r =>
+    auth?.roles?.includes(DRY_ROLES[r as keyof typeof DRY_ROLES])
+  ) as keyof typeof ROLES_ADD | undefined;
+
+  return role ? ROLES_ADD[role]?.route : null;
+};
+
+const getWetRoute = () => {
+  const role = Object.keys(ROLES_ADD).find(r =>
+    auth?.roles?.includes(WET_ROLES[r as keyof typeof WET_ROLES])
+  ) as keyof typeof ROLES_ADD | undefined;
+
+  return role ? ROLES_ADD[role]?.route : null;
+};
+
+const dryRoute = getDryRoute();
+const wetRoute=getWetRoute()
 const hasDryProcessRole = dryProcessRoles.some(role =>
   auth?.roles?.includes(role)
 );
 const hasWetProcessRole = wetProcessRoles.some(role =>
   auth?.roles?.includes(role)
 );
-const matchedRole = Object.keys(ROLES_ADD).find(role =>
-  auth?.roles?.includes(ROLES[role as keyof typeof ROLES])
+
+
+
+const isDryProcessUser = auth?.roles?.some((role:string)=>
+  dryProcessRoles.includes(role)
 );
+const isWetPocessUser = auth?.roles?.some((role:string)=>
+  wetProcessRoles.includes(role)
+);
+
+
 const hasFirstWashRole=firstWashRoles.some(role=>
   auth?.roles?.includes(role)
 )
@@ -58,7 +104,7 @@ const hasFinalWashRole=finalWashRoles.some(role=>
   // if (isLoading) return <p>Loading...</p>;
   // if (isLoading) return null; // or loader
   const location = useLocation();
-  const navigate = useNavigate();
+  
 
   const MenuItemRenderer = ({
   item,
@@ -528,26 +574,55 @@ const hasFinalWashRole=finalWashRoles.some(role=>
         
        
         
+        ...(auth?.roles?.includes(ROLES.ThirdConveyerIn) || auth?.roles?.includes(ROLES.ThirdConveyerOut) || auth?.roles?.includes(ROLES.ThirdOvenIn)
+            || auth?.roles?.includes(ROLES.ThirdOvenOut) || auth?.roles?.includes(ROLES.ThirdTumbleIn) || auth?.roles?.includes(ROLES.ThirdTumbleOut)
+            ?[
+              {
+                primary: "Dryer",
+                children: [
+                  ...(auth?.roles?.includes(ROLES.ThirdConveyerIn)
+                    ?[{ primary: "Dryer Conveyor In", to: "/thirdwash/dryerconveyorin" }]
+                    :[]
+                  ),
+                  ...(auth?.roles?.includes(ROLES.ThirdConveyerOut)
+                    ?[{ primary: "Dryer Conveyor Out", to: "/thirdwash/dryerconveyorout" }]
+                    :[]
+                  ),
+                  ...(auth?.roles?.includes(ROLES.ThirdOvenIn)
+                    ?[{ primary: "Dryer Oven In", to: "/thirdwash/dryerovenin" }]
+                    :[]
+                  ),
+                  ...(auth?.roles?.includes(ROLES.ThirdOvenOut)
+                    ?[{ primary: "Dryer Oven Out", to: "/thirdwash/dryerovenout" }]
+                    :[]
+                  ),
+                  ...(auth?.roles?.includes(ROLES.ThirdTumbleIn)
+                    ?[{ primary: "Dryer Tumble In", to: "/thirdwash/dryertumblein" }]
+                    :[]
+                  ),
+                  ...(auth?.roles?.includes(ROLES.ThirdTumbleOut)
+                    ?[{ primary: "Dryer Tumble Out", to: "/thirdwash/dryertumbleout" }]
+                    :[]
+                  )
+                ],
+              }
+            ]
+            :[]
+          ),
+        ...(auth?.roles?.includes(ROLES.ThirdWashQC)
+          ?[{primary: "QC",to:"/thirdwashqc"}]
+          :[]
+        ),
+        ...(auth?.roles?.includes(ROLES.ThirdWashRewashBatch)
+          ?[{
+              primary:"Rewash",
+              children:[
+                { primary: "Create Batch", to: "/thirdwash/rewashcreatebatch" },
+              ]
+            }]
+          :[]
+        )
         
-         {
-          primary: "Dryer",
-          children: [
-            { primary: "Dryer Conveyor In", to: "/thirdwash/dryerconveyorin" },
-            { primary: "Dryer Conveyor Out", to: "/thirdwash/dryerconveyorout" },
-            { primary: "Dryer Oven In", to: "/thirdwash/dryerovenin" },
-            { primary: "Dryer Oven Out", to: "/thirdwash/dryerovenout" },
-            { primary: "Dryer Tumble In", to: "/thirdwash/dryertumblein" },
-            { primary: "Dryer Tumble Out", to: "/thirdwash/dryertumbleout" },
-          
-          ],
-        },
-        {primary: "QC",to:"/thirdwashqc"},
-        {
-          primary:"Rewash",
-          children:[
-            { primary: "Create Batch", to: "/thirdwash/rewashcreatebatch" },
-          ]
-        }
       ]
     },
    ]:[]),
@@ -555,48 +630,109 @@ const hasFinalWashRole=finalWashRoles.some(role=>
    ...(hasFinalWashRole
     ?[
       {
-      primary:'Final Wash',
-      children:[
-        { primary: "Create Batch", to: "/finalwash/createbatch" },
-        { primary: "Load",
-          children: [
-            { primary: "Load Start", to: "/finalwash/loadstart" },
-            { primary: "Load Finish & Process Start", to: "/finalwash/loadfinish" },
-          ],
-        },
-        { primary: "Unload",
-          // to: "",
-          children: [
-            { primary: "Process Finish & Unload Start", to: "/finalwash/processfinish" },
-            { primary: "UnLoad Finish", to: "/finalwash/unloadfinish" },
-          ],
-        },
-        { primary: "Hydro",
-          // to: "",
-          children: [
-            { primary: "Hydro In", to: "/finalwash/hydroin" },
-            { primary: "Hydro Out", to: "/finalwash/hydroout" },
-          ],
-        },
-         {
-          primary: "Dryer",
-          children: [
-            { primary: "Dryer Conveyor In", to: "/finalwash/dryerconveyorin" },
-            { primary: "Dryer Conveyor Out", to: "/finalwash/dryerconveyorout" },
-            { primary: "Dryer Oven In", to: "/finalwash/dryerovenin" },
-            { primary: "Dryer Oven Out", to: "/finalwash/dryerovenout" },
-            { primary: "Dryer Tumble In", to: "/finalwash/dryertumblein" },
-            { primary: "Dryer Tumble Out", to: "/finalwash/dryertumbleout" },
+        primary:'Final Wash',
+        children:[
+          ...(auth?.roles?.includes(ROLES.FinalWashBatch)
+              ?[{ primary: "Create Batch", to: "/finalwash/createbatch" }]
+              :[]
+          ),
+          ...(auth?.roles?.incldues(ROLES.FinalLoadStart) || auth?.roles?.includes(ROLES.FinalLoadFinish)
+              ?[
+                { primary: "Load",
+                    children: [
+                      ...(auth?.roles?.includes(ROLES.FinalLoadStart)
+                        ?[{ primary: "Load Start", to: "/finalwash/loadstart" }]
+                        :[]
+                      ),
+                      ...(auth?.roles?.includes(ROLES.FinalLoadFinish)
+                          ?[ { primary: "Load Finish & Process Start", to: "/finalwash/loadfinish" }]
+                          :[]
+                      ),
+                    ],
+                }
+              ]
+              :[]
+          ),
           
-          ],
-        },
-        {primary: "QC",to:"/finalwashqc"},
-        {
-          primary:"Rewash",
-          children:[
-            { primary: "Create Batch", to: "/finalwash/rewashcreatebatch" },
+        ...(auth?.roles?.includes(ROLES.FinalProcessFinish) || auth?.roles?.includes(ROLES.FinalUnloadFinish)
+            ?[
+              { primary: "Unload",
+                // to: "",
+                children: [
+                  ...(auth?.roles?.includes(ROLES.FinalProcessFinish)
+                      ?[{ primary: "Process Finish & Unload Start", to: "/finalwash/processfinish" }]
+                      :[]
+                  ),
+                  ...(auth?.roles?.includes(ROLES.FinalUnloadFinish)
+                      ?[{ primary: "UnLoad Finish", to: "/finalwash/unloadfinish" }]
+                      :[]
+                  )
+                  
+                ],
+              }
+            ]
+            :[]
+        ),
+        ...(auth?.roles?.includes(ROLES.FinalHydroIn) || auth?.roles?.includes(ROLES.FinalHydroOut)
+            ?[
+              { primary: "Hydro",
+                // to: "",
+                children: [
+                  { primary: "Hydro In", to: "/finalwash/hydroin" },
+                  { primary: "Hydro Out", to: "/finalwash/hydroout" },
+                ],
+              }
+            ]
+            :[]
+        ),
+        ...(auth?.roles?.includes(ROLES.FinalConveyerIn) || auth?.roles?.includes(ROLES.FinalConveyerOut) || auth?.roles?.includes(ROLES.FinalOvenIn)
+          || auth?.roles?.includes(ROLES.FinalOvenOut) || auth?.roles?.includes(ROLES.FinalTumbleIn) || auth?.roles?.includes(ROLES.FinalTumbleOut)
+          ?[
+            {
+              primary: "Dryer",
+              children: [
+                ...(auth?.roles.includes(ROLES.FinalConveyerIn)
+                  ?[{ primary: "Dryer Conveyor In", to: "/finalwash/dryerconveyorin" }]
+                  :[]
+                ),
+                ...(auth?.roles?.includes(ROLES.FinalConveyerOut)
+                  ?[{ primary: "Dryer Conveyor Out", to: "/finalwash/dryerconveyorout" }]
+                  :[]
+                ),
+                ...(auth?.roles?.includes(ROLES.FinalOvenIn)
+                  ?[{ primary: "Dryer Oven In", to: "/finalwash/dryerovenin" }]
+                  :[]
+                ),
+                ...(auth?.roles?.includes(ROLES.FinalOvenOut)
+                  ?[{ primary: "Dryer Oven Out", to: "/finalwash/dryerovenout" }]
+                  :[]
+                ),
+                ...(auth?.roles?.includes(ROLES.FinalTumbleIn)
+                  ?[{ primary: "Dryer Tumble In", to: "/finalwash/dryertumblein" }]
+                  :[]
+                ),
+                 ...(auth?.roles?.includes(ROLES.FinalTumbleOut)
+                  ?[{ primary: "Dryer Tumble Out", to: "/finalwash/dryertumbleout" }]
+                  :[]
+                )
+              ],
+            },
           ]
-        }
+          :[]
+        ),
+        ...(auth?.roles?.includes(ROLES.FinalWashQC)
+            ?[{primary: "QC",to:"/finalwashqc"}]
+            :[]
+        ),
+         ...(auth?.roles?.includes(ROLES.FinalWashRewashBatch)
+            ?[ {
+                  primary:"Rewash",
+                  children:[
+                    { primary: "Create Batch", to: "/finalwash/rewashcreatebatch" },
+                  ]
+              }]
+            :[]
+        )
       ]
     }
     ]
@@ -754,11 +890,14 @@ const hasFinalWashRole=finalWashRoles.some(role=>
 
     // navigate(isDry ? "/planning" : "/batchdry");
     if(isDry){
-      if (matchedRole) {
-        window.open(
-          ROLES_ADD[matchedRole as keyof typeof ROLES_ADD].route,
-          "_blank"
-        );
+      // if (matchedRole) {
+      //   window.open(
+      //     ROLES_ADD[matchedRole as keyof typeof ROLES_ADD].route,
+      //     "_blank"
+      //   );
+      // }
+      if(isDryProcessUser && dryRoute){
+        window.open(dryRoute,"_blank")
       }
       // if(auth?.roles?.includes(ROLES.Production))
       //   window.open(ROLES_ADD.Production.route, "_blank")
@@ -807,11 +946,14 @@ const hasFinalWashRole=finalWashRoles.some(role=>
     }
     else{
       // window.open("/firstwash/createbatch", "_blank")
-      if (matchedRole) {
-        window.open(
-          ROLES_ADD[matchedRole as keyof typeof ROLES_ADD].route,
-          "_blank"
-        );
+      // if (isDryProcessUser) {
+      //   window.open(
+      //     ROLES_ADD[matchedRole as keyof typeof ROLES_ADD].route,
+      //     "_blank"
+      //   );
+      // }
+      if(isWetPocessUser && wetRoute){
+        window.open(wetRoute,"_blank")
       }
     }
   };
@@ -881,7 +1023,13 @@ const hasFinalWashRole=finalWashRoles.some(role=>
             >
               Wet Process
             </p>)}
+          <div>
            <p
+              id={buttonId}
+              aria-controls={open ? menuId : undefined}
+              aria-haspopup="true"
+              aria-expanded={open ? "true" : undefined}
+              onClick={handleClick}
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -889,11 +1037,34 @@ const hasFinalWashRole=finalWashRoles.some(role=>
                 textDecoration: "none",
                 color: "#485e68",
                 cursor: "pointer",
+                margin: 0,
               }}
             >
               <AccountCircleIcon />
               {auth.userId}
             </p>
+
+            <Menu
+              id={menuId}
+              anchorEl={anchorEl}
+              open={open}
+              onClose={handleClose}
+              slotProps={{
+                list: {
+                  "aria-labelledby": buttonId,
+                },
+              }}
+            >
+              <MenuItem
+                onClick={() => {
+                  handleClose();
+                  logOut(); // your logout function
+                }}
+              >
+                Logout
+              </MenuItem>
+            </Menu>
+          </div>
           </Box>
           {/* </Box> */}
         </Toolbar>

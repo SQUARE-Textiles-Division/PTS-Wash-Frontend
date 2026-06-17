@@ -32,7 +32,7 @@ const RequireAuth = ({ allowedRoles }: any) => {
   // ---------------------
     const userRoles = auth?.roles;
     console.log(userRoles)
-    const isAllowed = userRoles.some((role) =>
+    const isAllowed = userRoles.some((role:string) =>
       allowedRoles.includes(role)
     );
 

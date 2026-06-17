@@ -102,8 +102,110 @@ const ROLES={
 }
 
 
+export const DRY_ROLES=
+{
+  Production:'Production/IE',
+  WashReceive:'WashReceive',
+  MasterRouting:'MasterRouting',
 
 
+  WhiskerIn:'WhiskerInAuthority',
+  WhiskerQC:'WhikserQCAuthority',
+  WhiskerOut:'WhiskerOutAuthority',
+
+  BrushIn:'BrushInAuthority',
+  BrushQC:'BrushQCAuthority',
+  BrushOut:'BrushOutAuthority',
+
+  LaserBrushIn:'LaserBrushInAuthority',
+  LaserBrushQC:'LaserBrushQCAuthority',
+  LaserBrushOut:'LaserBrushOutAuthority',
+
+  LaserWhiskerIn:'LaserWhiskerInAuthority',
+  LaserWhiskerQC:'LaserWhiskerQCAuthority',
+  LaserWhiskerOut:'LaserWhiskerOutAuthority',
+
+  WrinkleIn:'WrinkleInAuthority',
+  WrinkleQC:'WrinkleQCAuthority',
+  WrinkleOut:'WrinkleOutAuthority',
+
+  TagIn:'TagInAuthority',
+  TagQC:'TagQCAuthority',
+  TagOut:'TagOutAuthority',
+
+  TieIn:'TieInAuthority',
+  TieQC:'TieQCAuthority',
+  TieOut:'TieOutAuthority',
+}
+
+
+export const WET_ROLES={
+    FirstHydroIn:'FirstWashHydroIn',
+  FirstHydroOut:'FirstWashHydroOut',
+  FirstLoadStart:'FirstWashLoadStart',
+  FirstLoadFinish:'FirstWashLoadFinish',
+  FirstProcessFinish:'FirstWashProcessFinish',
+  FirstUnloadFinish:'FirstWashUnloadFinish',
+  FirstTumbleIn:'FirstWashTumbleIn',
+  FirstTumbleOut:'FirstWashTumbleOut',
+  FirstConveyerIn:'FirstWashConveyerIn',
+  FirstConveyerOut:'FirstWashConveyerOut',
+  FirstOvenIn:'FirstWashOvenIn',
+  FirstOvenOut:'FirstWashOvenOut',
+  FirstWashQC:'FirstWashQC',
+  FirstWashBatch:'FirstWashBatch',
+  FirstWashRewashBatch:'FirstWashRewashBatch',
+  // Second Wash
+  SecondHydroIn: 'SecondWashHydroIn',
+  SecondHydroOut: 'SecondWashHydroOut',
+  SecondLoadStart: 'SecondWashLoadStart',
+  SecondLoadFinish: 'SecondWashLoadFinish',
+  SecondProcessFinish: 'SecondWashProcessFinish',
+  SecondUnloadFinish: 'SecondWashUnloadFinish',
+  SecondTumbleIn: 'SecondWashTumbleIn',
+  SecondTumbleOut: 'SecondWashTumbleOut',
+  SecondConveyerIn: 'SecondWashConveyerIn',
+  SecondConveyerOut: 'SecondWashConveyerOut',
+  SecondOvenIn: 'SecondWashOvenIn',
+  SecondOvenOut: 'SecondWashOvenOut',
+  SecondWashQC: 'SecondWashQC',
+  SecondWashBatch: 'SecondWashBatch',
+  SecondWashRewashBatch:'SecondWashRewashBatch',
+
+  // Third Wash
+  ThirdHydroIn: 'ThirdWashHydroIn',
+  ThirdHydroOut: 'ThirdWashHydroOut',
+  ThirdLoadStart: 'ThirdWashLoadStart',
+  ThirdLoadFinish: 'ThirdWashLoadFinish',
+  ThirdProcessFinish: 'ThirdWashProcessFinish',
+  ThirdUnloadFinish: 'ThirdWashUnloadFinish',
+  ThirdTumbleIn: 'ThirdWashTumbleIn',
+  ThirdTumbleOut: 'ThirdWashTumbleOut',
+  ThirdConveyerIn: 'ThirdWashConveyerIn',
+  ThirdConveyerOut: 'ThirdWashConveyerOut',
+  ThirdOvenIn: 'ThirdWashOvenIn',
+  ThirdOvenOut: 'ThirdWashOvenOut',
+  ThirdWashQC: 'ThirdWashQC',
+  ThirdWashBatch: 'ThirdWashBatch',
+  ThirdWashRewashBatch:'ThirdWashRewashBatch',
+
+  // Final Wash
+  FinalHydroIn: 'FinalWashHydroIn',
+  FinalHydroOut: 'FinalWashHydroOut',
+  FinalLoadStart: 'FinalWashLoadStart',
+  FinalLoadFinish: 'FinalWashLoadFinish',
+  FinalProcessFinish: 'FinalWashProcessFinish',
+  FinalUnloadFinish: 'FinalWashUnloadFinish',
+  FinalTumbleIn: 'FinalWashTumbleIn',
+  FinalTumbleOut: 'FinalWashTumbleOut',
+  FinalConveyerIn: 'FinalWashConveyerIn',
+  FinalConveyerOut: 'FinalWashConveyerOut',
+  FinalOvenIn: 'FinalWashOvenIn',
+  FinalOvenOut: 'FinalWashOvenOut',
+  FinalWashQC: 'FinalWashQC',
+  FinalWashBatch: 'FinalWashBatch',
+  FinalWashRewashBatch:'FinalWashRewashBatch',
+}
 export const ROLES_ADD = {
   // =====================
   // CORE

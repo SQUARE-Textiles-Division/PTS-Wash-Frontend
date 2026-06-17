@@ -1,4 +1,4 @@
-import axios, { axiosPrivate } from "../api/axios";
+import axios from "../api/axios";
 import type { AuthState } from "../context/AuthProvider";
 
 import useAuth from "./useAuth";
@@ -6,6 +6,7 @@ import useAuth from "./useAuth";
 
 const useRefreshToken=()=>{
     const {setAuth}=useAuth()
+
     // const prevRole=auth?.roles
     // console.log('Set PrevRole',prevRole)
     const refresh=async()=>{

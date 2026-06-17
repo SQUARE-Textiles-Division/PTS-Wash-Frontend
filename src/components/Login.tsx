@@ -65,22 +65,14 @@ function Login() {
     //         e.preventDefault();
     //     }}
     >
-        <div>
-           <img src={logo} style={{
-                height:'50%',
-                width:'50%',
-                objectFit:'contain',
-                // border:'none'
-                // display:'block'
-                // height:100,
-                // width:100
-           }}></img>
-        </div>
+        {/* <div>
+           
+        </div> */}
       <Card sx={{ width: 400 }}>
         <CardContent>
-          <Typography variant="h5" align="center" gutterBottom>
+          {/* <Typography variant="h5" align="center" gutterBottom>
             PTS Wash User Login
-          </Typography>
+          </Typography> */}
 
           <Box
             component="form"
@@ -89,6 +81,18 @@ function Login() {
             flexDirection="column"
             gap={2}
           >
+            <img src={logo} style={{
+                paddingTop:20,
+                height:'50%',
+                width:'50%',
+                objectFit:'contain',
+                marginLeft:'25%'
+                // left:'50%'
+                // border:'none'
+                // display:'block'
+                // height:100,
+                // width:100
+           }}></img>
             <TextField
               label="User ID"
               value={userId}
@@ -106,7 +110,7 @@ function Login() {
               fullWidth
               required
             />
-
+          
             <Button
               type="submit"
               onClick={handleLogin}
@@ -125,6 +129,9 @@ function Login() {
             >
               Login
             </Button>
+             <p style={{
+              fontSize:12
+             }}><i>Dev.. by Software Eng.. Team (ERP)</i></p>
           </Box>
         </CardContent>
       </Card>

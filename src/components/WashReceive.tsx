@@ -11,6 +11,7 @@ import { ip, ptsip } from "../ip";
 import success from '../assets/success.mp3'
 import type IndividualInfo from "../TypeAnnotations/IndividualInfo";
 import { useApiService } from "./genericApiService";
+import useAuth from "../hooks/useAuth";
 
 interface Props {
     items: IndividualInfo[];
@@ -28,6 +29,7 @@ export default function WashReceive({items, setItems}: Props){
         successAudio.currentTime = 0; // restart if already playing
         successAudio.play();
     };
+    const {setAuth}=useAuth()
     // const playSuccess = () => {
     // setAlarmTrigger(prev => prev + 1);
     // };
@@ -201,8 +203,17 @@ export default function WashReceive({items, setItems}: Props){
                 />
                 
                 
-                
-                
+                {/* <Button
+                    onClick={() =>
+                        setAuth(prev => ({
+                        ...prev,
+                        accessToken: "invalid_token"
+                        }))
+                    }
+                    >
+                    Force Expire Token
+                    </Button> */}
+                                    
 
                 
             <Modal open={showErrorPopup} onClose={() => setShowPopup(false)}>
