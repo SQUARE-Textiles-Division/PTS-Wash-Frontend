@@ -1,4 +1,4 @@
-import FirstWashQC from "./components/WetProcess/FirstWashQC"
+// import FirstWashQC from "./components/WetProcess/FirstWashQC"
 
 
 const ROLES={
@@ -284,6 +284,11 @@ export const ROLES_ADD = {
     role: ROLES.FirstWashBatch,
     route: '/firstwash/createbatch',
   },
+  FirstWashRewashBatch:{
+    role:ROLES.FirstWashRewashBatch,
+    route:'/firstwash/rewashcreatebatch'
+  },
+  
 
   // =====================
   // SECOND WASH
@@ -343,6 +348,10 @@ export const ROLES_ADD = {
   SecondWashBatch: {
     role: ROLES.SecondWashBatch,
     route: '/secondwash/createbatch',
+  },
+  SecondWashRewashBatch:{
+    role:ROLES.SecondWashRewashBatch,
+    route:'/secondwash/rewashcreatebatch'
   },
 
   // =====================
@@ -404,6 +413,10 @@ export const ROLES_ADD = {
     role: ROLES.ThirdWashBatch,
     route: '/thirdwash/createbatch',
   },
+  ThirdWashRewashBatch:{
+    role:ROLES.ThirdWashRewashBatch,
+    route:'/thirdwash/rewashcreatebatch'
+  },
 
   // =====================
   // FINAL WASH
@@ -463,6 +476,10 @@ export const ROLES_ADD = {
   FinalWashBatch: {
     role: ROLES.FinalWashBatch,
     route: '/finalwash/createbatch',
+  },
+  FinalWashRewashBatch:{
+    role:ROLES.FinalWashRewashBatch,
+    route:'/finalwash/rewashcreatebatch'
   },
 
   // =====================

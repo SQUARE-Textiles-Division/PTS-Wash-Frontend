@@ -1,7 +1,7 @@
 import { Box, Button, Checkbox, FormControl, InputLabel, MenuItem, Modal, Paper, Select, styled, Table, TableBody, TableCell, tableCellClasses, TableContainer, TableHead, TableRow, TextField, Typography, type SelectChangeEvent } from "@mui/material";
-import { useEffect, useRef, useState } from "react";
+import {  useRef, useState } from "react";
 // import { getData, patchData, postData } from "../genericApiService";
-import { washlog } from "../../endpoints";
+// import { washlog } from "../../endpoints";
 import { ip } from "../../ip";
 import { tbCellColor, tbRowColor } from "../Colors/Colors";
 import DoneAllIcon from '@mui/icons-material/DoneAll';
@@ -10,34 +10,31 @@ import React from "react";
 import {WetRejectReasons} from "../RejectionReasons/WetRejectReasons"
 // import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 // import type FirstWashRejection from "../../TypeAnnotations/WetWashRejection";
-import type BundleInfo from "../../TypeAnnotations/BundleInfo";
+// import type BundleInfo from "../../TypeAnnotations/BundleInfo";
 import NumberSpinner from "../NumberSpinner";
 // import type FetchFirstWash from "../../TypeAnnotations/WetProcessBatchMeta";
 // import type WetProcessBatchMeta from "../../TypeAnnotations/WetProcessBatchMeta";
 import type WetProcessBatch from "../../TypeAnnotations/WetProcessBatch";
-import type WetWashRejection from "../../TypeAnnotations/WetWashRejection";
+// import type WetWashRejection from "../../TypeAnnotations/WetWashRejection";
 import type IndividualInfo from "../../TypeAnnotations/IndividualInfo";
 
 
-import {
-//   Box,
-  Card,
-  CardContent,
-  Grid,
-//   Typography,
-} from "@mui/material";
+// import {
+// //   Box,
+//   Card,
+//   CardContent,
+//   Grid,
+// //   Typography,
+// } from "@mui/material";
 
-import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
-import ReplayOutlinedIcon from "@mui/icons-material/ReplayOutlined";
-import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
-import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
+
 import type WetProcessStage from "../../TypeAnnotations/WetProcessStage";
 import type CompletedQc from "../../TypeAnnotations/CompletedQc";
 import { StageDispMap } from "../../StageDispMap";
 import { useApiService } from "../genericApiService";
 // import NumberField from './components/NumberField';
 
-const StyledTableCell = styled(TableCell)(({ theme }) => ({
+const StyledTableCell = styled(TableCell)(({  }) => ({
   [`&.${tableCellClasses.head}`]: {
     // backgroundColor: theme.palette.common.black,
     // backgroundColor: '#485e68',
@@ -54,7 +51,7 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
   },
 }));
 
-const StyledTableRow = styled(TableRow)(({ theme }) => ({
+const StyledTableRow = styled(TableRow)(({  }) => ({
   '&:nth-of-type(odd)': {
     
     backgroundColor: tbRowColor
@@ -112,7 +109,7 @@ export default function FirstWashQC({stage}:WetProcessStage){
     const [batchComplete,setBatchComplete]=useState<boolean>(false)
     const [qcCompletePop,setQcCompletePop]=useState<boolean>(false)
     const individualBarcodeRef = React.useRef<HTMLInputElement>(null);
-    const [invbarcode,setinvbarcode]=React.useState<string>("");
+    // const [invbarcode,setinvbarcode]=React.useState<string>("");
     const batchqrcoderef=useRef<HTMLInputElement>(null);
     const [fetchedBatch,setfetchedBatch]=useState<FetchBatchMeta|null>(null)
     const [fetchedBatchDetails, setFetchedBatchDetails] = useState<FetchBatchDetails[]>([]);
@@ -132,20 +129,23 @@ export default function FirstWashQC({stage}:WetProcessStage){
     const [rejectDone,setRejectDone]=useState<boolean>(false)
     const [batchqr,setBatchQR]=useState<string>("")
     const [indivScanned,setIndivScanned]=useState<boolean>(false)
-    const [addOn,setAddOn]=useState<boolean>(false)
-    const [rewashQty, setRewashQty] = useState<number>(0);
-    const [updateDone,setUpdateDone]=useState<boolean>(false)
+    // const [addOn,setAddOn]=useState<boolean>(false)
+    // const [rewashQty, setRewashQty] = useState<number>(0);
+    // const [updateDone,setUpdateDone]=useState<boolean>(false)
     const [shade,setShade]=useState<string>("")
     const [diffPop,setDiffPop]=useState<boolean>(false)
-    const [activeId, setActiveId] = useState<number|null>(null);
+    // const [activeId, setActiveId] = useState<number|null>(null);
     const [selectedSources, setSelectedSources] = useState<{batch_source:number, rewash_quantity:number}[]>([]);
     const [filter, setFilter] = useState({
         MPO: "",
         Style: "",
         SO: "",
     });
+
     const [addRewashError,setAddRewashError]=useState<string>("")
     const [chosenQty, setChosenQty] = useState<Record<number, number|null>>({});
+
+    console.log(filter,deleteId,deletePop,rejectField,reasonDisplay)
     // useEffect(()=>{
     //     fetchData(batchqr)
     // },[rejectDone,updateDone])
@@ -203,61 +203,61 @@ export default function FirstWashQC({stage}:WetProcessStage){
 
 
 
-    const fetchRejectedBundle = () => {
-        let tempStr=invbarcode.slice(0, 12);
-        let rejectedBundle=`8220${tempStr}001`
+    // const fetchRejectedBundle = () => {
+    //     let tempStr=invbarcode.slice(0, 12);
+    //     let rejectedBundle=`8220${tempStr}001`
         
-        getData<BundleInfo[]>(
-            `productions/received-bundles/`,
-            ip,
-            {},
-            {},
-            (bundles: BundleInfo[]) => {
+    //     getData<BundleInfo[]>(
+    //         `productions/received-bundles/`,
+    //         ip,
+    //         {},
+    //         {},
+    //         (bundles: BundleInfo[]) => {
 
-                let tempRows: any[] = [];
-                let returnEarly=false
-                for (const obj of bundles) {
-                    if (obj.bundle_barcode == rejectedBundle) {
-                        if(obj.shade!=shade)
-                        {
-                            returnEarly=true
-                            setDiffPop(true)
-                            break
-                        }
+    //             let tempRows: any[] = [];
+    //             let returnEarly=false
+    //             for (const obj of bundles) {
+    //                 if (obj.bundle_barcode == rejectedBundle) {
+    //                     if(obj.shade!=shade)
+    //                     {
+    //                         returnEarly=true
+    //                         setDiffPop(true)
+    //                         break
+    //                     }
 
-                        tempRows.push({
-                            id: obj.id,
-                            individual_barcode: invbarcode,
-                            mpo: obj.mpo,
-                            color: obj.color,
-                            buyer: obj.buyer,
-                            shade: obj.shade,
-                            size: obj.size,
-                            style: obj.style,
-                            so: obj.so,
-                            rejected_at: stage,
-                            reason: reason,
-                            // saved:false
-                        });
-                    }
-                }
-                if(returnEarly)
-                        return
+    //                     tempRows.push({
+    //                         id: obj.id,
+    //                         individual_barcode: invbarcode,
+    //                         mpo: obj.mpo,
+    //                         color: obj.color,
+    //                         buyer: obj.buyer,
+    //                         shade: obj.shade,
+    //                         size: obj.size,
+    //                         style: obj.style,
+    //                         so: obj.so,
+    //                         rejected_at: stage,
+    //                         reason: reason,
+    //                         // saved:false
+    //                     });
+    //                 }
+    //             }
+    //             if(returnEarly)
+    //                     return
 
-                setRows(prevRows => [...tempRows, ...prevRows]);
-            }
-        );
-    };
+    //             setRows(prevRows => [...tempRows, ...prevRows]);
+    //         }
+    //     );
+    // };
 
     const fetchData=(batchcode:string)=>{
          if (!batchcode) {
             console.warn("No Barcode entered");
             return;
         }
-        let firstWash=false
-        let reWash=false
+        // let firstWash=false
+        // let reWash=false
         // First API call (washing scan) ---
-        const str=batchcode
+        // const str=batchcode
         setBatchQR(batchcode)
         // if(str.length==16 && str[0]=='R')
         //     reWash=true
@@ -788,7 +788,7 @@ export default function FirstWashQC({stage}:WetProcessStage){
                                             <Checkbox 
                                             checked={selectedSources.some(item => item.batch_source === batch.id)}
                                             disabled={isDisabled}
-                                            onChange={(e, checked) => handleRowSelect(batch, checked)}
+                                            onChange={(_, checked) => handleRowSelect(batch, checked)}
                                             slotProps={{ input: { 'aria-label': 'select-row' } }}
                                             sx={{
                                                 height:10
@@ -938,7 +938,7 @@ export default function FirstWashQC({stage}:WetProcessStage){
                                 }
                                 
                                 else if(error.response.data){
-                                    Object.entries(error.response.data).forEach(([key, value]) => {
+                                    Object.entries(error.response.data).forEach(([_, value]) => {
                                         if (Array.isArray(value)) {
                                             msg += value[0];
                                         } else {
@@ -1207,7 +1207,7 @@ export default function FirstWashQC({stage}:WetProcessStage){
                                             }
                                             
                                             else if(error.response.data){
-                                                Object.entries(error.response.data).forEach(([key, value]) => {
+                                                Object.entries(error.response.data).forEach(([_, value]) => {
                                                     if (Array.isArray(value)) {
                                                         msg += value[0];
                                                     } else {
@@ -1335,7 +1335,7 @@ export default function FirstWashQC({stage}:WetProcessStage){
                                             }
                                             
                                             else if(error.response.data){
-                                                Object.entries(error.response.data).forEach(([key, value]) => {
+                                                Object.entries(error.response.data).forEach(([_, value]) => {
                                                     if (Array.isArray(value)) {
                                                         msg += value[0];
                                                     } else {

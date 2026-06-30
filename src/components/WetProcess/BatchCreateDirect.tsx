@@ -1,13 +1,13 @@
 import {Box,TextField}   from "@mui/material";
 import { Modal, Typography, Button ,Paper} from "@mui/material";
-import type BundleInfo from "../../TypeAnnotations/BundleInfo";
-import type BatchBundle from "../../TypeAnnotations/BatchBundle";
+// import type BundleInfo from "../../TypeAnnotations/BundleInfo";
+// import type BatchBundle from "../../TypeAnnotations/BatchBundle";
 // import { getData, postData} from "../genericApiService";
 import { useEffect, useRef,useState } from "react";
 import DoneAllIcon from '@mui/icons-material/DoneAll';
 import alarmSound from "../../assets/alarm.mp3";
-import { ip, ptsip } from "../../ip";
-import type BatchBundles from "../../TypeAnnotations/BatchInstance";
+import { ip } from "../../ip";
+// import type BatchBundles from "../../TypeAnnotations/BatchInstance";
 import { styled } from '@mui/material/styles';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -20,8 +20,8 @@ import TableRow from '@mui/material/TableRow';
 import { tbCellColor,tbRowColor } from '../Colors/Colors';
 import { QRCodeCanvas } from "qrcode.react";
 import { useReactToPrint } from "react-to-print";
-import type FirstWashBatchDirectCreate from "../../TypeAnnotations/FirstWashBatchDirectCreate";
-import type FirstWashBatch from "../../TypeAnnotations/WetProcessBatch";
+// import type FirstWashBatchDirectCreate from "../../TypeAnnotations/FirstWashBatchDirectCreate";
+// import type FirstWashBatch from "../../TypeAnnotations/WetProcessBatch";
 import type WetProcessBatch from "../../TypeAnnotations/WetProcessBatch";
 import type IndividualInfo from "../../TypeAnnotations/IndividualInfo";
 import { useApiService } from "../genericApiService";
@@ -45,7 +45,7 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
   },
 }));
 
-const StyledTableRow = styled(TableRow)(({ theme }) => ({
+const StyledTableRow = styled(TableRow)(({  }) => ({
   '&:nth-of-type(odd)': {
     backgroundColor: tbRowColor
   },
@@ -71,7 +71,7 @@ export default function BatchCreateDirect(){
     const[showErrorPopup,setShowErrorPopup]=useState(false);
     const [alarm,setAlarm]=useState<boolean>(false);
     const [errorMessage,setErrorMessage]=useState<string>("");  
-    const barcodeRef=useRef<HTMLInputElement>(null);
+    // const barcodeRef=useRef<HTMLInputElement>(null);
     const individualBarcodeRef=useRef<HTMLInputElement>(null);
     const [itemId,setItemId]=useState<number[]>([]);
     // const [items, setItems] = useState<BundleInfo[]>([]);
@@ -312,6 +312,13 @@ export default function BatchCreateDirect(){
                         // width: 300,
                     }}
                 />
+                {items.length>0 &&(
+                    <p style={{
+                        position:'fixed',
+                        top:80,
+                        left:400
+                    }}><b>TOTAL - {items.length}</b></p>
+                )}
                  {showPopup && (
                         <div
                             style={{
@@ -426,6 +433,7 @@ export default function BatchCreateDirect(){
                                     };
                                     setQrData(qrPayload);
                                     setItems([]);
+                                    console.log(itemId)
                                     setItemId([]);
                                 },
                                 (error:any) => {

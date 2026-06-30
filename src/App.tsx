@@ -1,10 +1,10 @@
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+// import reactLogo from './assets/react.svg'
+// import viteLogo from '/vite.svg'
 import 'bootstrap/dist/css/bootstrap.css'
 import './App.css'
 // import '@fontsource/inter'
 
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import WashReceivePass from './components/WashReceivePass'
 // import Navbar from './components/Navbar'
 // import CreateBatch from './components/CreateBatch'
@@ -37,15 +37,15 @@ import DryerTumbleOut from './components/WetProcess/DryerTumbleOut'
 import FirstWashQC from './components/WetProcess/FirstWashQC'
 import Rewash from './components/WetProcess/Rewash'
 import { MasterRouting } from './components/MasterRouting'
-import { InputAdornment } from '@mui/material'
+// import { InputAdornment } from '@mui/material'
 import InProcessGen from './components/InProcess/InProcessGen'
 import OutProcessGen from './components/OutProcess/OutProcessGen'
 import QCGen from './components/QC/QCGen'
 import BatchCreateAggGen from './components/WetProcess/BatchCreateAggGen'
 import Login from './components/Login'
 import RequireAuth from './components/RequireAuth'
-import ROLES, { ROLES_ADD }  from './Roles'
-import useAuth from './hooks/useAuth'
+import ROLES from './Roles'
+// import useAuth from './hooks/useAuth'
 import Layout from './components/Layout'
 // import RoleBasedHome from './components/RoleBasedHome'
 import PersistLogin from './components/PersisiLogin'
@@ -53,7 +53,7 @@ import RoleBasedHome from './components/RoleBasedHome'
 
 
 function App() {
-  const {auth}=useAuth()
+//   const {auth}=useAuth()
   // const [count, setCount] = useState(0)
    
   return (

@@ -16,7 +16,7 @@ import Paper from '@mui/material/Paper';
 import type { SelectChangeEvent } from '@mui/material/Select';
 import { WhiskerRejectReasons } from "../RejectionReasons/WhiskerRejectReasons";
 import React, { useState } from "react";
-import type RejectionReason from "../../TypeAnnotations/RejectionReason";
+// import type RejectionReason from "../../TypeAnnotations/RejectionReason";
 // import { delData, getData, postData } from "../genericApiService";
 import { useApiService } from "../genericApiService";
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
@@ -26,25 +26,25 @@ import { ip } from "../../ip";
 // import type BatchBundle from "../../TypeAnnotations/BatchBundle";
 // import type BatchBundles from "../../TypeAnnotations/BatchInstance";
 import type IndividualInOut from "../../TypeAnnotations/IndividualInOut";
-import { data } from "react-router-dom";
+// import { data } from "react-router-dom";
 import type IndividualInfo from "../../TypeAnnotations/IndividualInfo";
 import success from "../../assets/success.mp3"
 import type ProcessName from "../../TypeAnnotations/ProcessIn";
 
-interface IndividualMeta{
-  id:number,
-  mpo:string,
-  individual_barcode:string,
-  marker:string,
-  shade:string,
-  color:string,
-  rejected_at:string,
-  size:string,
-  reason:string
+// interface IndividualMeta{
+//   id:number,
+//   mpo:string,
+//   individual_barcode:string,
+//   marker:string,
+//   shade:string,
+//   color:string,
+//   rejected_at:string,
+//   size:string,
+//   reason:string
 
-}
+// }
 
-const StyledTableCell = styled(TableCell)(({ theme }) => ({
+const StyledTableCell = styled(TableCell)(({  }) => ({
   [`&.${tableCellClasses.head}`]: {
     // backgroundColor: theme.palette.common.black,
     backgroundColor: tbCellColor,
@@ -69,7 +69,7 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
   },
 }));
 export default function QCGen({processName,processDisplay}:ProcessName) {
-  const {getData,postData,delData}=useApiService()
+  const {getData,postData}=useApiService()
    const successAudio = new Audio(success);
    const setAlarm = () => {
         successAudio.currentTime = 0; // restart if already playing
@@ -85,8 +85,8 @@ export default function QCGen({processName,processDisplay}:ProcessName) {
   const [invbarcode,setinvbarcode]=React.useState<string>("");
   const [reasonDisplay,setReasonDisplay]=React.useState<string>("");
   const [rejectError,setRejectError]=React.useState<string>("");
-  const [deletePop, setDeletePop] = React.useState<boolean>(false);
-  const [deleteId, setDeleteId] = React.useState<number>(0);
+  // const [deletePop, setDeletePop] = React.useState<boolean>(false);
+  // const [deleteId, setDeleteId] = React.useState<number>(0);
   const [deleteError,setDeleteError]=React.useState<string>("")
   const [delbarcode,setDelBarCode]=React.useState<string>("")
   // const [del]
@@ -184,7 +184,7 @@ export default function QCGen({processName,processDisplay}:ProcessName) {
                     }
                     
                     else if(error.response.data){
-                        Object.entries(error.response.data).forEach(([key, value]) => {
+                        Object.entries(error.response.data).forEach(([_, value]) => {
                             if (Array.isArray(value)) {
                                 msg += value[0];
                             } else {
@@ -230,7 +230,7 @@ export default function QCGen({processName,processDisplay}:ProcessName) {
 
       {/* Reject Reason Dropdown */}
       {rejectField && (
-        <Box sx={{  position:'fixed' ,gap:2, display:'flex', flexDirection:'row', alignItems:'flex-start',justifyContent:'center',top:80,left:600 }}>
+        <Box sx={{  position:'fixed' ,gap:2, display:'flex', flexDirection:'row', alignItems:'flex-start',justifyContent:'center',top:80,left:680 }}>
           {/* <Typography variant="h6" gutterBottom>
             Reject Reasons
           </Typography> */}
@@ -257,6 +257,7 @@ export default function QCGen({processName,processDisplay}:ProcessName) {
                   // Find the display name
                   const selectedItem = rejectReasons.find((item) => item.actual === selectedActual);
                   setReasonDisplay(selectedItem?.display || "");
+                  console.log(reasonDisplay)
                 }}
             >
               {rejectReasons.map((item) => (
@@ -277,6 +278,13 @@ export default function QCGen({processName,processDisplay}:ProcessName) {
           >
             Save
           </Button>
+           {rows.length>0 &&(
+                    <p style={{
+                        position:'fixed',
+                        top:80,
+                        left:550
+                    }}><b>TOTAL - {rows.length}</b></p>
+                )}
           {invbarcode &&
             (
                 <div
@@ -543,7 +551,7 @@ export default function QCGen({processName,processDisplay}:ProcessName) {
                         }
                         
                         else if(error.response.data){
-                            Object.entries(error.response.data).forEach(([key, value]) => {
+                            Object.entries(error.response.data).forEach(([_, value]) => {
                                 if (Array.isArray(value)) {
                                     errorMsg += value[0];
                                 } else {
@@ -617,7 +625,14 @@ export default function QCGen({processName,processDisplay}:ProcessName) {
               }}>
                 Yes
               </Button>
-              <Button sx={{ background: "red", color: "white" }} onClick={() => {setRejectPop(false);setReasonDisplay("");setReason("");}}>
+              <Button sx={{ background: "red", color: "white" }} onClick={() => {setRejectPop(false);setReasonDisplay("");setReason("");
+              setRows((prev) =>
+                prev.map((row) => ({
+                  ...row,
+                  reason: "",
+                }))
+              )}}
+              >
                 Exit
               </Button>
             </Box>
@@ -714,7 +729,7 @@ export default function QCGen({processName,processDisplay}:ProcessName) {
                 <Typography variant="h6">{deleteError}</Typography>
                 {/* <Typography>Already batches are allocated according to this plan */}
                 {/* </Typography> */}
-                <Button sx={{ mt: 2 }} onClick={() => {setDeleteError("");setDeletePop(false);setDeleteId(0);}}>Close</Button>
+                <Button sx={{ mt: 2 }} onClick={() => {setDeleteError("")}}>Close</Button>
                 </Box>
             </Box>
       </Modal>

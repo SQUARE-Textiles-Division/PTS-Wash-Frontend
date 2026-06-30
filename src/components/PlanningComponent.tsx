@@ -8,18 +8,29 @@ import {
   Stepper,
   TextField,
   Typography,
-  Modal
+  Modal,
+  FormControl,
+  InputLabel,
+  Select
 } from "@mui/material";
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
-import { useRef, useState, useMemo, useEffect } from "react";
+import { useRef, useState, useMemo } from "react";
 // import { getData,postData,patchData } from "./genericApiService";
-import { useApiService } from "./genericApiService";
+import { getDataPublic, useApiService } from "./genericApiService";
 import type Planning from '../TypeAnnotations/BatchInstance'
-import type RouteSteps from "../TypeAnnotations/BatchInstance";
+import type RouteSteps from "../TypeAnnotations/RouteSteps";
 import React from "react";
 import { ip, ptsip } from "../ip";
-
-
+// import Table from '@mui/material/Table';
+// import TableBody from '@mui/material/TableBody';
+// import TableCell, { tableCellClasses } from '@mui/material/TableCell';
+// import TableContainer from '@mui/material/TableContainer';
+// import TableHead from '@mui/material/TableHead';
+// import TableRow from '@mui/material/TableRow';
+// import Paper from '@mui/material/Paper';
+import type { Color } from "./MasterRouting";
+// import { styled } from '@mui/material/styles';
+// import { tbCellColor, tbRowColor } from "./Colors/Colors";
 // const ALL_STAGES = [
 //   "Whisker",
 //   "Laser Whisker",
@@ -29,6 +40,33 @@ import { ip, ptsip } from "../ip";
 //   "Tag",
 //   "Tie"
 // ];
+
+  // const StyledTableCell = styled(TableCell)(({  }) => ({
+  // [`&.${tableCellClasses.head}`]: {
+  //     // backgroundColor: theme.palette.common.black,
+  //     // backgroundColor: '#485e68',
+  //     backgroundColor: tbCellColor,
+  //     color: "white",
+  //     lineHeight: 0.2 ,             // reduce text height
+  //     // fontSize: 14,
+        
+  // },
+  // [`&.${tableCellClasses.body}`]: {
+  //       lineHeight: 0.1,   
+  //     fontSize: 14,
+  //     padding: "0px", 
+  // },
+  // }));
+
+  // const StyledTableRow = styled(TableRow)(({  }) => ({
+  // '&:nth-of-type(odd)': {
+  //     backgroundColor: tbRowColor
+  // },
+  // // hide last border
+  // '&:last-child td, &:last-child th': {
+  //     border: 0,
+  // },
+  // }));
 
 const ALL_STAGES = [
   "whisker",
@@ -40,12 +78,25 @@ const ALL_STAGES = [
   "tie"
 ]
 
+// type Mpocolortype={
+//   mpo:string,
+//   buyer:string,
+//   color:string,
+//   style:string
+// }
+// type MpoColorDetails={
+//   'data_found':boolean,
+//   'details':Mpocolortype[]
+// }
 export default function PlanningComponent() {
+  const [colors,setColors]=useState<string[]>([])
   const {getData,postData,patchData}=useApiService()
+  const [selectedColor,setSelectedColor]=useState<string>("")
   const [saved,setSaved]=useState(false)
   const [alarm,setAlarm]=useState(false)
   const mpoRef = useRef<HTMLInputElement>(null);
   const [mpoNo,setMpoNo]=useState<string>('')
+  // const [color,setColor]=useState<string>('')
   const [buyer,setBuyer]=useState<string>('')
   const [style,setStyle]=useState<string>('')
   const [mpoExists, setMpoExists] = useState<boolean | null>(null);
@@ -57,6 +108,14 @@ export default function PlanningComponent() {
   const [activeStep, setActiveStep] = React.useState(0);
   const [deleteMsg,setDeleteMsg]=useState(false)
   const [deleteStage,setDeleteStage]=useState<string>('')
+  // const [mpoColorList,setMpoColorList]=useState<Mpocolortype[]>([])
+  //  const [filters, setFilterss] = useState({
+  //             buyer: "",
+  //             color: "",
+  //             mpo:"",
+  //             style:"",
+  //             so:""
+  //         });
 
   /* ------------------ DERIVED AVAILABLE STAGES ------------------ */
   // stages available to ADD
@@ -81,6 +140,37 @@ export default function PlanningComponent() {
 //   }
 // }, [selectedStages]);
   /* ------------------ MPO CHECK ------------------ */
+// useEffect(()=>{
+//   fetchMpoColor()
+// },[])
+
+
+//  const fetchMpoColor=()=>{
+//     getDataPublic<MpoColorDetails>(
+//       `pp/mpo-color/`,
+//       ptsip,
+//       {},
+//       {},
+//       (res:MpoColorDetails)=>{
+//         if(!res.data_found)
+//           return
+//         let details=[]
+//         for(const obj of res['details']){
+//             details.push({
+//               'mpo':obj.mpo,
+//               'color':obj.color,
+//               'style':obj.style,
+//               'buyer':obj.buyer
+//             })
+//         }
+//         console.log(details)
+//         setMpoColorList(details)
+//       },
+//       (err:any)=>{
+//         console.log(err)
+//       }
+//     )
+//  }
  const fetchMpo = (mpo: string) => {
   if (!mpo) {
     setMpoExists(null);
@@ -94,7 +184,7 @@ export default function PlanningComponent() {
   setAlreadyInPlan(0);
   setSelectedStages([]);
 
-  getData<{ data_found: boolean ,buyer:string,style:string}>(
+  getDataPublic<{ data_found: boolean ,buyer:string,style:string}>(
     `pp/${mpo}`,
     ptsip,
     {},
@@ -102,6 +192,8 @@ export default function PlanningComponent() {
     (res) => {
       if (!res.data_found) {
         setMpoExists(false);
+        setSelectedColor("")
+        setAlreadyInPlan(0)
         return;
       }
 
@@ -110,43 +202,39 @@ export default function PlanningComponent() {
       setMpoNo(mpo);
       setBuyer(res.buyer)
       setStyle(res.style)
+      
+      getDataPublic<Color>(
+        `washing/get_mpocolorAssociated/`,
+          ptsip,
+          {},
+          {mpo:mpo},
+          (colorRes:Color)=>{
+            // const resStyle = res.style.split("-")[0];
+            setSelectedColor("")
+            console.log('Colors Fetched',colorRes)
+            let temp=[]
+            for(const obj of colorRes.colors){
+                console.log('Color  ',obj)
+                temp.push(obj)
+            }
+            setColors(temp)
+          
+      
 
-      // 🔥 SECOND REQUEST (chained safely)
-      getData<Planning>(
-        `productions/plannings`,
-        ip,
-        {},
-        { search: mpo },
-        (planning:any) => {
-          if (!planning) return;
-
-          setAlreadyInPlan(planning[0].id);
-          console.log(planning[0].id)
-          const routes=planning[0].route_steps
-          const newStages: string[] = [];
-          const routeData=routes.sort((a:RouteSteps, b:RouteSteps) => a.sequence - b.sequence);
-          for (let i = 0; i < routeData.length; i++) {
-            const stage = routeData[i].stage  
-            newStages.push(`${stage}`);
-            // newStages.push(`${stage} CLOSE`);
-          }
-
-          setSelectedStages(newStages);
+          // 🔥 SECOND REQUEST (chained safely)
+         
         },
-        (error:any) => {
-          console.error("Planning fetch error:", error);
+        (error) => {
+          console.error("MPO check error:", error);
+          setMpoExists(false);
         }
-      );
-    },
-    (error) => {
-      console.error("MPO check error:", error);
-      setMpoExists(false);
-    }
-  );
+    );
+  })
 };
 
   /* ------------------ ADD STAGE ------------------ */
   const handleAddStage = (stage: string) => {
+    console.log(activeStep)
     setSelectedStages((prev) => [...prev, stage]);
     setAddAnchorEl(null);
     setActiveStep(prev => {
@@ -234,27 +322,93 @@ const handleReplaceStage = (newStage: string) => {
           },
         }}
       />
+      {mpoExists&&(
 
+         <FormControl style={{
+                    position:'fixed',
+                    top:80,
+                    width:'150px'
+        }}>
+                    <InputLabel id="demo-simple-select-label">Color</InputLabel>
+                    <Select
+                    labelId="demo-simple-select-label"
+                    id="demo-simple-select"
+                    // value={selectedColor}
+                    // value={age}
+                    label="Color"
+                    onChange={(e) => {
+                      setSelectedColor(e.target.value as string)
+                      // setAlreadyInPlan(0)
+                       getData<Planning[]>(
+                        `dry-process/plannings`,
+                        ip,
+                        {},
+                        { mpo: mpoNo,color:e.target.value },
+                        (planning:any) => {
+                          console.log('Planned ',planning )
+                          if (planning.length==0){
+                            setSelectedStages([])
+                            // setSelectedColor(e.target.value as string)
+                            return;
+                          } 
+
+                          // setSelectedColor("")
+                          setAlreadyInPlan(planning[0].id);
+                          // setSelectedColor(planning.color)
+                          // console.log(planning[0].id)
+                          const routes=planning[0].route_steps
+                          const newStages: string[] = [];
+                          const routeData=routes.sort((a:RouteSteps, b:RouteSteps) => a.sequence - b.sequence);
+                          for (let i = 0; i < routeData.length; i++) {
+                            const stage = routeData[i].stage  
+                            newStages.push(`${stage}`);
+                            // newStages.push(`${stage} CLOSE`);
+                          }
+
+                          setSelectedStages(newStages);
+                        },
+                        (error:any) => {
+                          console.error("Planning fetch error:", error);
+                        }
+                      );
+
+                    }}
+                    >
+                    
+                    {colors.map((color) => (
+                        <MenuItem key={color} value={color}>{color}</MenuItem>
+                    ))}
+                    </Select>
+        </FormControl>
+
+
+
+      )}
+        
       {mpoExists === false && (
         <Typography sx={{position:'fixed',top:120,left:300}} color="error">❌ MPO does not exist</Typography>
       )}
-      {mpoExists === true && (
+      {mpoExists &&(
+        <Typography color="green" sx={{position:'fixed',
+            top:170,left:400}}>✅ MPO exists</Typography>
+      )}
+
+      {mpoExists && (alreadyInPlan !== 0 || selectedColor!="")&& (
         <>
            <Typography sx={{
             fontWeight:'bold',
             position:'fixed',
             textAlign:'center',
-            top:120,
+            top:150,
             left:300
-           }}>MPO - {mpoNo},    Buyer - {buyer},     Style - {style} </Typography>
-          <Typography color="green" sx={{position:'fixed',
-            top:150,left:400}}>✅ MPO exists</Typography>
+           }}>MPO - {mpoNo},    Buyer - {buyer},  Color - {selectedColor},   Style - {style} </Typography>
+          
         </>
        
       )}
-
+   
       {/* MAIN CONTENT */}
-      {mpoExists && (
+      {mpoExists && selectedColor!="" &&(
         <>
           {/* ADD BUTTON */}
       <Button
@@ -352,15 +506,17 @@ const handleReplaceStage = (newStage: string) => {
         <Button variant="contained"
             onClick={()=>
                 postData<Planning>(
-                    `productions/plannings/`,
+                    `dry-process/plannings/`,
                     ip,
                     {
                         mpo:mpoNo,
+                        color:selectedColor,
                         stages:selectedStages
                     },
                     (result)=>{
                         console.log(result)
                         setAlreadyInPlan(result.id)
+                        setSelectedColor(result.color)
                         setSaved(true)
                     },
                     (error:any)=>{
@@ -369,7 +525,7 @@ const handleReplaceStage = (newStage: string) => {
 
                             patchData<Planning>(
                               // 'prod'
-                              `productions/plannings/${alreadyInPlan}/`,
+                              `dry-process/plannings/${alreadyInPlan}/`,
                               ip,
                               {stages:selectedStages},
                               (success:any)=>{
@@ -377,6 +533,7 @@ const handleReplaceStage = (newStage: string) => {
                                   
                               },
                               (error:any)=>{
+                                console.log(error)
                                 setAlarm(true)
                               }
                             )
@@ -391,7 +548,12 @@ const handleReplaceStage = (newStage: string) => {
                 )
             }
             // disabled={availableStagesToAdd.length === 0}
-            sx={{ width: 100,mt:10 ,background: "#485e68"}}>
+            sx={{ width: 100,
+                position:'fixed',
+                top:80,
+                left:1000,
+            
+                background: "#485e68"}}>
             Save
         </Button>
       )}
@@ -402,10 +564,11 @@ const handleReplaceStage = (newStage: string) => {
                 // console.log(alreadyInPlan)
                 // console.log(alreadyInPlan),
                 patchData<Planning>(
-                    `productions/plannings/${alreadyInPlan}/`,
+                    `dry-process/plannings/${alreadyInPlan}/`,
                     ip,
                     {
                         mpo:mpoNo,
+                        color:selectedColor,
                         stages:selectedStages
                     },
                     (result)=>{
@@ -414,7 +577,7 @@ const handleReplaceStage = (newStage: string) => {
                     },
                     (error:any)=>{
                         
-                      
+                         console.log(error)
                           setAlarm(true)
                         
                         //     patchData()
@@ -424,12 +587,14 @@ const handleReplaceStage = (newStage: string) => {
                 )
             }
             // disabled={availableStagesToAdd.length === 0}
-            sx={{ width: 100,mt:10
-             ,background: "#485e68"}}>
+            sx={{ width: 100,position:'fixed',
+                top:80,
+                left:1000,
+             background: "#485e68"}}>
             Save
         </Button>
       )}
-
+      
       <Modal open={deleteMsg} onClose={() => setDeleteMsg(false)}>
             <Box
               sx={{

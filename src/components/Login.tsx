@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState,useContext } from "react";
-import { useNavigate,useLocation,Link, replace } from "react-router-dom";
+import {  useRef, useState } from "react";
+import { useNavigate,useLocation } from "react-router-dom";
 import logo from '../assets/PTS Wash Logo.png'
 import useAuth from "../hooks/useAuth";
 import { LOGIN_URL } from "../LoginUrl";
@@ -8,13 +8,15 @@ import {
   Button,
   Card,
   CardContent,
+  Modal,
   TextField,
   Typography,
 } from "@mui/material";
 import axios from "axios";
-import ROLES from "../Roles";
+// import ROLES from "../Roles";
 
 function Login() {
+  const [errorLog,setErrorLog]=useState("")
   const {setAuth}=useAuth()
   const navigate = useNavigate();
   const location=useLocation()
@@ -48,8 +50,26 @@ function Login() {
         console.log(roles)
         navigate(from,{replace:true})
     }
-    catch(error){
-        console.log(error)
+    catch(error:any){
+         let msg=""
+            if (error instanceof Error && error.message === "Network Error") {
+                console.log("Network Error");
+                msg="Network Error"
+                        
+            }
+            
+            else if(error.response.data){
+                Object.entries(error.response.data).forEach(([_, value]) => {
+                    if (Array.isArray(value)) {
+                        msg += value[0];
+                    } else {
+                        msg += value;
+                    }
+                });
+                
+            }
+            
+          setErrorLog(msg)
     }
   };
 
@@ -135,6 +155,36 @@ function Login() {
           </Box>
         </CardContent>
       </Card>
+      <Modal open={errorLog!=''} onClose={() => setErrorLog('')}>
+                <Box
+                    sx={{
+                    position: "fixed", // ← changed from absolute
+                    top: 0,
+                    left: 0,
+                    width: "100vw",
+                    height: "100vh",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    // bgcolor: "rgba(0,0,0,0.5)", // dark overlay
+                    }}
+                >
+                    <Box
+                    sx={{
+                        bgcolor: "white", // light red background for error
+                        p: 4,
+                        borderRadius: 2,
+                        color: "red", // red text for error
+                        width: 400,
+                    }}
+                    >
+                    <Typography variant="h6">{errorLog}</Typography>
+                    {/* <Typography>Already batches are allocated according to this plan */}
+                    {/* </Typography> */}
+                    <Button sx={{ mt: 2 }} onClick={() => setErrorLog('')}>Close</Button>
+                    </Box>
+                </Box>
+            </Modal>
     </Box>
   );
 }

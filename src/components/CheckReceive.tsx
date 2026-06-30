@@ -1,5 +1,5 @@
 import {Box,TextField}   from "@mui/material";
-import { Modal, Typography, Button ,Paper} from "@mui/material";
+import { Modal, Typography, Button } from "@mui/material";
 import type BundleInfo from "../TypeAnnotations/BundleInfo";
 import type BatchBundle from "../TypeAnnotations/BatchBundle";
 // import { getData, postData} from "./genericApiService";
@@ -16,13 +16,13 @@ interface Props {
     qrData: any | null;
     setQrData: React.Dispatch<React.SetStateAction<any | null>>;
 }
-export default function CheckReceive({items, setItems,qrData,setQrData}: Props){
+export default function CheckReceive({items, setItems,setQrData}: Props){
     const {getData,postData}=useApiService()
 
     const audioRef = useRef<HTMLAudioElement | null>(null);
 
     // const [qrData, setQrData] = useState<any | null>(null);
-    const printRef = useRef<HTMLDivElement>(null);
+    // const printRef = useRef<HTMLDivElement>(null);
     const [barcode,setBarcode]=useState<string>("")
     const [planningError,setPlanningError]=useState<string>("")
     const [invalideBundleError,setInvalideBundleError]=useState<string>("")

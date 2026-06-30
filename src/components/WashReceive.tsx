@@ -3,15 +3,15 @@ import { Modal, Typography, Button } from "@mui/material";
 import type BundleInfo from "../TypeAnnotations/BundleInfo";
 // import { getData,postData} from "./genericApiService";
 // import { axiosPrivate } from "../api/axios";
-import { useEffect, useRef,useState } from "react";
+import {  useRef,useState } from "react";
 import DoneAllIcon from '@mui/icons-material/DoneAll';
-import ReceivedBundles from "./ReceivedBundles";
-import { red } from "@mui/material/colors";
+// import ReceivedBundles from "./ReceivedBundles";
+// import { red } from "@mui/material/colors";
 import { ip, ptsip } from "../ip";
 import success from '../assets/success.mp3'
 import type IndividualInfo from "../TypeAnnotations/IndividualInfo";
 import { useApiService } from "./genericApiService";
-import useAuth from "../hooks/useAuth";
+// import useAuth from "../hooks/useAuth";
 
 interface Props {
     items: IndividualInfo[];
@@ -24,12 +24,12 @@ export default function WashReceive({items, setItems}: Props){
     // const audioRef = useRef<HTMLAudioElement | null>(null);
     // const [successAlarm,setSuccessAlarm]=useState<boolean>(false)
     const successAudio = new Audio(success);
-    const [alarmTrigger, setAlarmTrigger] = useState(0);
+    // const [alarmTrigger, setAlarmTrigger] = useState(0);
     const setAlarm = () => {
         successAudio.currentTime = 0; // restart if already playing
         successAudio.play();
     };
-    const {setAuth}=useAuth()
+    // const {setAuth}=useAuth()
     // const playSuccess = () => {
     // setAlarmTrigger(prev => prev + 1);
     // };
@@ -39,8 +39,8 @@ export default function WashReceive({items, setItems}: Props){
     const[showErrorPopup,setShowErrorPopup]=useState(false);
     const [networkError,setNetworkError]=useState("")
     const barcodeRef=useRef<HTMLInputElement>(null);
-    const [data,setData]=useState<BundleInfo|null>(null);
-    const [secondData,setSecondData]=useState<any>(null);
+    // const [data,setData]=useState<BundleInfo|null>(null);
+    // const [secondData,setSecondData]=useState<any>(null);
     // const[item,setItemss]=useState<BundleInfo[]>([...items]);
    
     const fetchData = (barcode: string) => {
@@ -147,6 +147,13 @@ export default function WashReceive({items, setItems}: Props){
                 width:250
                 }}
             >
+                {items.length>0 &&(
+                    <p style={{
+                        position:'fixed',
+                        top:80,
+                        left:400
+                    }}><b>TOTAL - {items.length}</b></p>
+                )}
                 {showPopup && (
                     // setSuccessAlarm(null)
                         <div

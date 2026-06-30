@@ -6,10 +6,10 @@ export  interface AuthState {
   roles: string[];
 }
 
-interface AuthContextType {
-  auth: AuthState | null;
-  setAuth: React.Dispatch<React.SetStateAction<AuthState | null>>;
-}
+// interface AuthContextType {
+//   auth: AuthState | null;
+//   setAuth: React.Dispatch<React.SetStateAction<AuthState | null>>;
+// }
 
 
 export const AuthContext = createContext<any>({});
@@ -17,12 +17,12 @@ export const AuthContext = createContext<any>({});
 export const AuthProvider=({children}:{ children: React.ReactNode })=>{
     
      const [auth, setAuth] = useState<any>({});
-     const [isLoading, setIsLoading] = useState(true);
+    //  const [isLoading, setIsLoading] = useState(true);
      useEffect(() => {
         console.log("AUTH CHANGED:", auth);
     }, [auth]);
     return(
-        <AuthContext.Provider value={{auth,setAuth,isLoading}}>
+        <AuthContext.Provider value={{auth,setAuth}}>
             {children}
         </AuthContext.Provider>
 

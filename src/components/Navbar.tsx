@@ -1,6 +1,6 @@
 // ./components/Navbar.tsx
 import React, { useState, useEffect } from "react";
-import Typography from "@mui/material/Typography";
+// import Typography from "@mui/material/Typography";
 import { Box, CssBaseline, AppBar, Toolbar, Drawer, List, ListItem, ListItemButton, ListItemText, MenuItem, Menu } from "@mui/material";
 import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
 import { tbCellColor } from "./Colors/Colors";
@@ -15,8 +15,8 @@ import { firstWashRoles } from "../1stWashRoles";
 import { secondWashRoles } from "../2ndWashRoles";
 import { thirdWashRoles } from "../3rrdWashRoles";
 import { finalWashRoles } from "../FinalWashRoles";
-import RoleBasedHome from "./RoleBasedHome";
-import type { AuthState } from "../context/AuthProvider";
+// import RoleBasedHome from "./RoleBasedHome";
+// import type { AuthState } from "../context/AuthProvider";
 import useLogOut from "../hooks/useLogOut";
 
 
@@ -113,7 +113,7 @@ const hasFinalWashRole=finalWashRoles.some(role=>
   item: MenuItem & { children?: MenuItem[] };
   level?: number;
 }) => {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const location = useLocation();
 
   const isActive = location.pathname === item.to;
@@ -782,6 +782,7 @@ const hasFinalWashRole=finalWashRoles.some(role=>
       location.pathname.startsWith("/tieqc") ||
       location.pathname.startsWith("/tieoutput")
     ) {
+      console.log(dryProcess)
       setDryProcess(true);
       setItemContent(DryProcessItemContent);
     } 
@@ -1023,7 +1024,11 @@ const hasFinalWashRole=finalWashRoles.some(role=>
             >
               Wet Process
             </p>)}
-          <div>
+          <div style={{
+            // position:'fixed'
+            marginTop:-15,
+            marginLeft:10
+          }}>
            <p
               id={buttonId}
               aria-controls={open ? menuId : undefined}

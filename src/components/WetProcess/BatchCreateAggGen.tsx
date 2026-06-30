@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react"
-import type BatchInstance from "../../TypeAnnotations/BatchInstance"
+// import type BatchInstance from "../../TypeAnnotations/BatchInstance"
 import { QRCodeCanvas } from "qrcode.react";
 // import { Typography ,Paper,Box,Button} from "@mui/material";
 import { useRef } from "react";
 import { useReactToPrint } from "react-to-print";
-import type BatchStage from "../../TypeAnnotations/BatchStage"
+// import type BatchStage from "../../TypeAnnotations/BatchStage"
 // import { getData, getDataAsync, postData } from "../genericApiService"
 import { styled } from '@mui/material/styles';
 import Table from '@mui/material/Table';
@@ -18,19 +18,19 @@ import { tbCellColor,tbRowColor } from '../Colors/Colors'
 import NumberSpinner from "../NumberSpinner";
 import Checkbox from '@mui/material/Checkbox';
 import { ip } from "../../ip";
-import { Box, Button, fabClasses, Modal, TextField, Typography } from "@mui/material";
-import type RejectionReason from "../../TypeAnnotations/RejectionReason";
-import type FirstWashBatch from "../../TypeAnnotations/WetProcessBatch";
+import { Box, Button, Modal, TextField, Typography } from "@mui/material";
+// import type RejectionReason from "../../TypeAnnotations/RejectionReason";
+// import type FirstWashBatch from "../../TypeAnnotations/WetProcessBatch";
 // import type FirstWashBatchCreate from "../../TypeAnnotations/FirstWashBatchCreate";
-import InputLabel from '@mui/material/InputLabel';
-import MenuItem from '@mui/material/MenuItem';
-import FormControl from '@mui/material/FormControl';
-import Select from '@mui/material/Select';
-import type FetchFirstWash from "../../TypeAnnotations/WetProcessBatchMeta";
-import type RewashBatchCreate from "../../TypeAnnotations/RewashBatchCreate";
-import type RewashBatchCreateResult from "../../TypeAnnotations/RewashBatchCreateResult";
+// import InputLabel from '@mui/material/InputLabel';
+// import MenuItem from '@mui/material/MenuItem';
+// import FormControl from '@mui/material/FormControl';
+// import Select from '@mui/material/Select';
+// import type FetchFirstWash from "../../TypeAnnotations/WetProcessBatchMeta";
+// import type RewashBatchCreate from "../../TypeAnnotations/RewashBatchCreate";
+// import type RewashBatchCreateResult from "../../TypeAnnotations/RewashBatchCreateResult";
 import type BatchSourceEntry from "../../TypeAnnotations/SourceBatch";
-import type WetProcessBatchMeta from "../../TypeAnnotations/WetProcessBatchMeta";
+// import type WetProcessBatchMeta from "../../TypeAnnotations/WetProcessBatchMeta";
 import type WetProcessBatch from "../../TypeAnnotations/WetProcessBatch";
 import type WetProcessStage from "../../TypeAnnotations/WetProcessStage";
 import { useApiService } from "../genericApiService";
@@ -57,7 +57,7 @@ import { useApiService } from "../genericApiService";
         shade:string,
         quantity:number
     }
-    const StyledTableCell = styled(TableCell)(({ theme }) => ({
+    const StyledTableCell = styled(TableCell)(({  }) => ({
     [`&.${tableCellClasses.head}`]: {
         // backgroundColor: theme.palette.common.black,
         // backgroundColor: '#485e68',
@@ -74,7 +74,7 @@ import { useApiService } from "../genericApiService";
     },
     }));
 
-    const StyledTableRow = styled(TableRow)(({ theme }) => ({
+    const StyledTableRow = styled(TableRow)(({  }) => ({
     '&:nth-of-type(odd)': {
         backgroundColor: tbRowColor
     },
@@ -91,8 +91,8 @@ import { useApiService } from "../genericApiService";
         const [qrData, setQrData] = useState<any | null>(null);
         const printRef = useRef<HTMLDivElement>(null);
         const [errorLog,setErrorLog]=useState<string>('')
-        const [shadeList,setShadeList]=useState<string[]>([])
-        const [shade,setShade]=useState<string>("")
+        // const [shadeList,setShadeList]=useState<string[]>([])
+        // const [shade,setShade]=useState<string>("")
         const [filter, setFilter] = useState({
             buyer: "",
             color: "",
@@ -126,7 +126,7 @@ import { useApiService } from "../genericApiService";
                     {},
                     {stage:stage},
                     (result:WetProcessBatch[])=>{
-                        let shadeSet = new Set<string>();
+                        // let shadeSet = new Set<string>();
                         // let rewashList=[]
                         const mpoMetaMap = new Map();
                         const mpoQtyMap= new Map();
@@ -194,7 +194,7 @@ import { useApiService } from "../genericApiService";
                         console.log('Error fetching batches:', error.response.data)
                         console.log(error.response.data)
                         let msg=""
-                        Object.entries(error.response.data).forEach(([key, value]:any) => {
+                        Object.entries(error.response.data).forEach(([_, value]:any) => {
                             msg+=value[0]
                         });
                         setErrorLog(msg)
@@ -478,7 +478,7 @@ import { useApiService } from "../genericApiService";
                 }
                 
                 else if(error.response.data){
-                    Object.entries(error.response.data).forEach(([key, value]) => {
+                    Object.entries(error.response.data).forEach(([_, value]) => {
                         if (Array.isArray(value)) {
                             msg += value[0];
                         } else {
@@ -940,7 +940,7 @@ import { useApiService } from "../genericApiService";
                         <StyledTableCell align="center">
                             <Checkbox 
                             checked={selectedRows.some(item => item.mpo==row.mpo &&  item.color==row.color && item.shade==row.shade)}
-                            onChange={(e, checked) => handleRowSelect(row, checked)}
+                            onChange={(_, checked) => handleRowSelect(row, checked)}
                             slotProps={{ input: { 'aria-label': 'select-row' } }}
                             sx={{
                                 height:10

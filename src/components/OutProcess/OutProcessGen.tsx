@@ -1,19 +1,19 @@
-import * as React from 'react';
+// import * as React from 'react';
 import {Box,Modal,TextField}   from "@mui/material";
-import Stepper from '@mui/material/Stepper';
-import Step from '@mui/material/Step';
-import StepLabel from '@mui/material/StepLabel';
-import { useState,useRef,useEffect } from 'react';
+// import Stepper from '@mui/material/Stepper';
+// import Step from '@mui/material/Step';
+// import StepLabel from '@mui/material/StepLabel';
+import { useState,useRef } from 'react';
 // import Button from '@mui/material/Button';
 import DoneAllIcon from '@mui/icons-material/DoneAll';
 import {  Typography, Button} from "@mui/material";
 // import { getData, postData } from '../genericApiService';
 import { useApiService } from '../genericApiService';
-import type BundleInfo from '../../TypeAnnotations/BundleInfo';
-import type BatchStage from '../../TypeAnnotations/BatchStage';
-import type BatchInstance from '../../TypeAnnotations/BatchInstance';
-import type RouteSteps from '../../TypeAnnotations/BatchInstance';
-import type Rejection from '../../TypeAnnotations/Rejection';
+// import type BundleInfo from '../../TypeAnnotations/BundleInfo';
+// import type BatchStage from '../../TypeAnnotations/BatchStage';
+// import type BatchInstance from '../../TypeAnnotations/BatchInstance';
+// import type RouteSteps from '../../TypeAnnotations/RouteSteps';
+// import type Rejection from '../../TypeAnnotations/Rejection';
 import { styled } from '@mui/material/styles';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -24,15 +24,15 @@ import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import { tbCellColor, tbRowColor } from '../Colors/Colors';
 import { ip } from '../../ip';
-import type BatchStageHistory from '../../TypeAnnotations/BatchStageHistory';
-import type RejectionReason from '../../TypeAnnotations/RejectionReason';
+// import type BatchStageHistory from '../../TypeAnnotations/BatchStageHistory';
+// import type RejectionReason from '../../TypeAnnotations/RejectionReason';
 import type IndividualInOut from '../../TypeAnnotations/IndividualInOut';
 import type IndividualInfo from '../../TypeAnnotations/IndividualInfo';
 import success from '../../assets/success.mp3';
 import type ProcessName from '../../TypeAnnotations/ProcessIn';
 // import { postData } from './genericApiService';
 // import Typography from '@mui/material/Typography';
-const StyledTableCell = styled(TableCell)(({ theme }) => ({
+const StyledTableCell = styled(TableCell)(({  }) => ({
   [`&.${tableCellClasses.head}`]: {
     // backgroundColor: theme.palette.common.black,
     // backgroundColor: '#485e68',
@@ -49,7 +49,7 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
   },
 }));
 
-const StyledTableRow = styled(TableRow)(({ theme }) => ({
+const StyledTableRow = styled(TableRow)(({  }) => ({
   // height: '5px', 
   '&:nth-of-type(odd)': {
     backgroundColor: tbRowColor
@@ -66,174 +66,175 @@ export default function OutProcessGen({processName,processDisplay}:ProcessName) 
       successAudio.currentTime = 0; // restart if already playing
       successAudio.play();
   };
-  const [stages,setStages]=useState<string[]>([])
-  const [activeStep, setActiveStep] = React.useState(0); // step that is currently clickable
-  const [completed, setCompleted] = React.useState<boolean[]>(stages.map(() => false)); 
+  // const [stages,setStages]=useState<string[]>([])
+  // const [activeStep, setActiveStep] = React.useState(0); // step that is currently clickable
+  // const [completed, setCompleted] = React.useState<boolean[]>(stages.map(() => false)); 
   const [errorLog,setErrorLog]=useState<string>('')
-  const [rejCnt,setRejCnt]=useState<number>(-1)
-  const [batchNum,setBatchNum]=useState<number>()
-  const [scanned,setScanned]=useState<any>()
-  const [finalrejcnt,setFinalRejCnt]=useState<number>(0)
-  const [currentStage, setCurrentStage] = useState("");
+  // const [rejCnt,setRejCnt]=useState<number>(-1)
+  // const [batchNum,setBatchNum]=useState<number>()
+  // const [scanned,setScanned]=useState<any>()
+  // const [finalrejcnt,setFinalRejCnt]=useState<number>(0)
+  // const [currentStage, setCurrentStage] = useState("");
   const [scannedIndividual,setScannedIndividual]=useState<any[]>([])
   const [individualBarCode,setIndividualBarCode]=useState<string>("")
- useEffect(() => {
-    if (stages.length > 0) {
-      // setCompleted(stages.map(() => false));
-      // setActiveStep(0);
-      markCompletedUntil(currentStage, stages);
-    }
-  }, [stages,currentStage]);
-  const normalizeStage = (s: string) =>
-  s.trim().toUpperCase().replace(/\s+/g, " ");
+//  useEffect(() => {
+//     if (stages.length > 0) {
+//       // setCompleted(stages.map(() => false));
+//       // setActiveStep(0);
+//       markCompletedUntil(currentStage, stages);
+//     }
+//   }, [stages,currentStage]);
+  // const normalizeStage = (s: string) =>
+  // s.trim().toUpperCase().replace(/\s+/g, " ");
 
-  const markCompletedUntil = (currStage: string, stageList: string[]) => {
-    const normalized = normalizeStage(currStage);
+  // const markCompletedUntil = (currStage: string, stageList: string[]) => {
+  //   console.log(completed,activeStep)
+  //   const normalized = normalizeStage(currStage);
 
-    const stageIndex = stageList.findIndex(
-      stage => normalizeStage(stage) === normalized
-    );
+  //   const stageIndex = stageList.findIndex(
+  //     stage => normalizeStage(stage) === normalized
+  //   );
 
-    if (stageIndex === -1) return;
+  //   if (stageIndex === -1) return;
 
-    setCompleted(stageList.map((_, idx) => idx <= stageIndex));
-    setActiveStep(
-      stageIndex < stageList.length ? stageIndex + 1 : stageIndex
-    );
-  };
+  //   setCompleted(stageList.map((_, idx) => idx <= stageIndex));
+  //   setActiveStep(
+  //     stageIndex < stageList.length ? stageIndex + 1 : stageIndex
+  //   );
+  // };
 
-  let batchIdNum=0
-  const batchQRCoderef=useRef<HTMLInputElement>(null);
+  // let batchIdNum=0
+  // const batchQRCoderef=useRef<HTMLInputElement>(null);
   const individualQRCodeRef=useRef<HTMLInputElement>(null);
-  const fetchPlan=(batchQRCode:string)=>{
-      if (!batchQRCode) {
-          console.warn("No BatchQRCode entered");
-          return;
-      }
-        const str = batchQRCode
-        const index = str.indexOf("B");      // find position of ":"
-        let batchId = str.substring(index + 1);
-        batchIdNum = parseInt(batchId, 10);
-        setBatchNum(batchIdNum)
+  // const fetchPlan=(batchQRCode:string)=>{
+  //     if (!batchQRCode) {
+  //         console.warn("No BatchQRCode entered");
+  //         return;
+  //     }
+  //       const str = batchQRCode
+  //       const index = str.indexOf("B");      // find position of ":"
+  //       let batchId = str.substring(index + 1);
+  //       batchIdNum = parseInt(batchId, 10);
+  //       setBatchNum(batchIdNum)
         
-      getData<BatchInstance>(
-              `productions/batches/${batchIdNum}/`,
-              ip,
-              {},
-              {},
-              (result1:BatchInstance) => {
-                  const routes=result1.planning.route_steps
-                  const newStages: string[] = [];
-                  const routeData=routes.sort((a:RouteSteps, b:RouteSteps) => a.sequence - b.sequence);
-                  for (let i = 0; i < routeData.length; i++) {
-                    const stage = routeData[i].stage.toUpperCase();
-                    newStages.push(`${stage} IN`);
-                    newStages.push(`${stage} CLOSED`);
-                  }
-                  console.log(batchIdNum)
-                  setStages(newStages);
-                                    const proRes=result1
-                  const showRes={
-                    // "BatchQRCode":batchQRCode
-                    BatchQRCode:batchQRCode,
-                    MPO:proRes.mpo,
-                    Buyer:proRes.batch_bundles[0].received.buyer,
-                    Style:proRes.batch_bundles[0].received.style,
-                    Size:proRes.size,
-                    Color:proRes.color,
-                    Total_Quantity:proRes.total_quantity,
-                    Shades:""
+  //     getData<BatchInstance>(
+  //             `productions/batches/${batchIdNum}/`,
+  //             ip,
+  //             {},
+  //             {},
+  //             (result1:BatchInstance) => {
+  //                 const routes=result1.planning.route_steps
+  //                 const newStages: string[] = [];
+  //                 const routeData=routes.sort((a:RouteSteps, b:RouteSteps) => a.sequence - b.sequence);
+  //                 for (let i = 0; i < routeData.length; i++) {
+  //                   const stage = routeData[i].stage.toUpperCase();
+  //                   newStages.push(`${stage} IN`);
+  //                   newStages.push(`${stage} CLOSED`);
+  //                 }
+  //                 console.log(batchIdNum)
+  //                 setStages(newStages);
+  //                                   const proRes=result1
+  //                 const showRes={
+  //                   // "BatchQRCode":batchQRCode
+  //                   BatchQRCode:batchQRCode,
+  //                   MPO:proRes.mpo,
+  //                   Buyer:proRes.batch_bundles[0].received.buyer,
+  //                   Style:proRes.batch_bundles[0].received.style,
+  //                   Size:proRes.size,
+  //                   Color:proRes.color,
+  //                   Total_Quantity:proRes.total_quantity,
+  //                   Shades:""
 
-                  }
-                  let shadeStr=""
-                  let shadeStrSet=new Set();
-                  for(let i=0;i<proRes.batch_bundles.length;i++){
-                      const obj=proRes.batch_bundles[i]
-                      if(!shadeStrSet.has(obj.received.shade)){
-                        shadeStr+=obj.received.shade
-                        shadeStrSet.add(obj.received.shade)
-                      }
+  //                 }
+  //                 let shadeStr=""
+  //                 let shadeStrSet=new Set();
+  //                 for(let i=0;i<proRes.batch_bundles.length;i++){
+  //                     const obj=proRes.batch_bundles[i]
+  //                     if(!shadeStrSet.has(obj.received.shade)){
+  //                       shadeStr+=obj.received.shade
+  //                       shadeStrSet.add(obj.received.shade)
+  //                     }
                          
-                  }
-                  let tempStr=""
-                  for(let i=0;i<shadeStr.length;i++){
-                    tempStr+=shadeStr[i]
-                    if(i!=shadeStr.length-1){
-                        tempStr+=','
-                      }
-                  }
-                  showRes.Shades=tempStr
-                  setScanned(showRes)
-                  const payload={
-                      batch:batchIdNum,
-                      current_stage:"Brush",
-                      current_status:"in"
-                    }
-                  getData<BatchStage>(
-                              `productions/batch-stages/${batchIdNum}/`,
-                              ip,
-                              {},
-                              {},
-                              (subresult: BatchStage) => {
-                                const currStage = `${subresult.current_stage} ${subresult.current_status}`;
-                                setCurrentStage(currStage);
-                                markCompletedUntil(currStage, newStages);
+  //                 }
+  //                 let tempStr=""
+  //                 for(let i=0;i<shadeStr.length;i++){
+  //                   tempStr+=shadeStr[i]
+  //                   if(i!=shadeStr.length-1){
+  //                       tempStr+=','
+  //                     }
+  //                 }
+  //                 showRes.Shades=tempStr
+  //                 setScanned(showRes)
+  //                 const payload={
+  //                     batch:batchIdNum,
+  //                     current_stage:"Brush",
+  //                     current_status:"in"
+  //                   }
+  //                 getData<BatchStage>(
+  //                             `productions/batch-stages/${batchIdNum}/`,
+  //                             ip,
+  //                             {},
+  //                             {},
+  //                             (subresult: BatchStage) => {
+  //                               const currStage = `${subresult.current_stage} ${subresult.current_status}`;
+  //                               setCurrentStage(currStage);
+  //                               markCompletedUntil(currStage, newStages);
                                 
-                              },
-                              (error:any)=>{
-                                console.log('Get Error ',error.response.data)
-                                setErrorLog(error.response.data.detail)
-                              }
-                );   
-        },
-        (error:any) => {
-              console.error("Error in second API:", error.response.data[0]);
-          }
-      );
-      const stageClosedMap = new Map();
+  //                             },
+  //                             (error:any)=>{
+  //                               console.log('Get Error ',error.response.data)
+  //                               setErrorLog(error.response.data.detail)
+  //                             }
+  //               );   
+  //       },
+  //       (error:any) => {
+  //             console.error("Error in second API:", error.response.data[0]);
+  //         }
+  //     );
+  //     const stageClosedMap = new Map();
       
-      getData<BatchStageHistory[]>(
-            `productions/batch-stage-history/`,
-            ip,
-            {},
-            {batch:batchIdNum},
-            (stageRes:BatchStageHistory[])=>{
-                for(const obj of stageRes){
-                  if(obj.closed_by!=null){
-                    stageClosedMap.set(obj.stage,true)
-                  }
-                }
-                 getData<RejectionReason[]>(
-                    `productions/rejections/`,
-                    ip,
-                    {},
-                    {},
-                    (res:RejectionReason[])=>{
-                      let temp=0
-                      for(const obj of res){
-                        if(obj.batch==batchIdNum && stageClosedMap.has(obj.stage))
-                            temp++;
-                      }
-                      console.log('total_rej',temp)
-                      setFinalRejCnt(temp)
-                    }
-                  )
-            }
-      )
+  //     getData<BatchStageHistory[]>(
+  //           `productions/batch-stage-history/`,
+  //           ip,
+  //           {},
+  //           {batch:batchIdNum},
+  //           (stageRes:BatchStageHistory[])=>{
+  //               for(const obj of stageRes){
+  //                 if(obj.closed_by!=null){
+  //                   stageClosedMap.set(obj.stage,true)
+  //                 }
+  //               }
+  //                getData<RejectionReason[]>(
+  //                   `productions/rejections/`,
+  //                   ip,
+  //                   {},
+  //                   {},
+  //                   (res:RejectionReason[])=>{
+  //                     let temp=0
+  //                     for(const obj of res){
+  //                       if(obj.batch==batchIdNum && stageClosedMap.has(obj.stage))
+  //                           temp++;
+  //                     }
+  //                     console.log('total_rej',temp)
+  //                     setFinalRejCnt(temp)
+  //                   }
+  //                 )
+  //           }
+  //     )
      
-  }
+  // }
   
 
-  const handleComplete = (index: number) => {
+  // const handleComplete = (index: number) => {
 
-      const newCompleted = [...completed];
-      newCompleted[index] = true;
-      setCompleted(newCompleted);
+  //     const newCompleted = [...completed];
+  //     newCompleted[index] = true;
+  //     setCompleted(newCompleted);
 
-      if (index < stages.length - 1) {
-        setActiveStep(index + 1);
-      }
-  };
+  //     if (index < stages.length - 1) {
+  //       setActiveStep(index + 1);
+  //     }
+  // };
 
   const Process = (individualQRCode:string) => {
         if (!individualQRCode) {
@@ -295,7 +296,7 @@ export default function OutProcessGen({processName,processDisplay}:ProcessName) 
             }
             
             else if(error.response.data){
-                Object.entries(error.response.data).forEach(([key, value]) => {
+                Object.entries(error.response.data).forEach(([_, value]) => {
                     if (Array.isArray(value)) {
                         msg += value[0];
                     } else {
@@ -351,7 +352,13 @@ export default function OutProcessGen({processName,processDisplay}:ProcessName) 
           }}
         />
 
-
+        {scannedIndividual.length>0 &&(
+                    <p style={{
+                        position:'fixed',
+                        top:80,
+                        left:600
+                    }}><b>TOTAL - {scannedIndividual.length}</b></p>
+                )}
       {individualBarCode!="" && (
                       // setSuccessAlarm(null)
                           <div
@@ -372,7 +379,7 @@ export default function OutProcessGen({processName,processDisplay}:ProcessName) 
                       )
                   }
         {/* Stepper */}
-        {stages.length>0 &&(
+        {/* {stages.length>0 &&(
             <Stepper activeStep={activeStep} orientation="horizontal"
               sx={{
                     maxWidth: 900,
@@ -416,7 +423,7 @@ export default function OutProcessGen({processName,processDisplay}:ProcessName) 
                       <b>{label}</b>
                       
                     </Typography>
-                    {label.includes('CLOSE')&&!stepProps.disabled&&(
+                    {/* {label.includes('CLOSE')&&!stepProps.disabled&&(
                       <Button sx={{
                         background:'blue',
                         color:'white'
@@ -449,14 +456,14 @@ export default function OutProcessGen({processName,processDisplay}:ProcessName) 
                       >
                         CLOSE
                     </Button>
-                    )}
-                     
+                    )} */}
+{/*                      
                   </StepLabel>
                 </Step>
               );
             })}
-          </Stepper>
-        ) }
+          </Stepper> */}
+        {/* ) } */} 
 
         
         <Modal open={errorLog!=''} onClose={() => setErrorLog('')}>
@@ -485,13 +492,11 @@ export default function OutProcessGen({processName,processDisplay}:ProcessName) 
                 <Typography variant="h6">{errorLog}</Typography>
                 {/* <Typography>Already batches are allocated according to this plan */}
                 {/* </Typography> */}
-                <Button sx={{ mt: 2 }} onClick={() => {setErrorLog('')
-                  setRejCnt(-1)}
-                }>Close</Button>
+                <Button sx={{ mt: 2 }} onClick={() => setErrorLog('')}>Close</Button>
               </Box>
           </Box>
       </Modal>
-      <Modal open={rejCnt!=-1} onClose={()=>setRejCnt(-1)}>
+      {/* <Modal open={rejCnt!=-1} onClose={()=>setRejCnt(-1)}>
           <Box
               sx={{
                 position: "fixed",
@@ -539,6 +544,7 @@ export default function OutProcessGen({processName,processDisplay}:ProcessName) 
                             current_status: "closed",
                           },
                           (closeRes: BatchStage) => {
+                            // 
                             console.log(closeRes)
                              const currStage = `${closeRes.current_stage} ${closeRes.current_status}`;
                               markCompletedUntil(currStage, stages);
@@ -559,13 +565,13 @@ export default function OutProcessGen({processName,processDisplay}:ProcessName) 
                 </div>
                 </Box>
           </Box>
-        </Modal>
+        </Modal> */}
         {/* Finished message */}
-        {completed.length>0 && completed.every(Boolean) && (
+        {/* {completed.length>0 && completed.every(Boolean) && (
           <Typography sx={{ mt: 2, mb: 1, color: 'green' }}>
             ✅ All steps completed - you're finished
           </Typography>
-        )}
+        )} */}
                 {/* {scanned!=null&&( */}
               <TableContainer
                   component={Paper}

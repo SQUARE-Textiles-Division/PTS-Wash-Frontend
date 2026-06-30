@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { getData } from "./components/genericApiService";
+import { getDataPublic } from "./components/genericApiService";
 import { ip } from "./ip";
 
 const MachineContext = createContext<number[]>([]);
@@ -18,7 +18,7 @@ export const MachineProvider = ({ children }: MachineProviderProps) => {
   useEffect(() => {
     // ✅ Wrap API in try/catch
     try {
-      getData<Machine[]>(
+      getDataPublic<Machine[]>(
         `wet-process/machines`,
         ip,
         {},

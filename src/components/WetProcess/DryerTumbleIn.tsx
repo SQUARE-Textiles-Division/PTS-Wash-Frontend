@@ -1,27 +1,27 @@
-import {Box,FormControl,InputLabel,MenuItem,Paper,Select,Table,TableBody,TableContainer,TableHead,TableRow,TextField}   from "@mui/material";
+import {Box,FormControl,Paper,Table,TableBody,TableContainer,TableHead,TableRow,TextField}   from "@mui/material";
 import { Modal, Typography, Button } from "@mui/material";
 
 // import { getData,postData} from "../genericApiService";
-import { useEffect, useRef,useState } from "react";
-import DoneAllIcon from '@mui/icons-material/DoneAll';
+import {  useRef,useState } from "react";
+// import DoneAllIcon from '@mui/icons-material/DoneAll';
 // import ReceivedBundles from "./ReceivedBundles";
 import TableCell, { tableCellClasses } from '@mui/material/TableCell';
-import { red } from "@mui/material/colors";
+// import { red } from "@mui/material/colors";
 import { ip } from "../../ip";
 import { styled } from '@mui/material/styles';
 import { tbCellColor, tbRowColor } from "../Colors/Colors";
-import type { Machine } from "../../TypeAnnotations/Machine";
+// import type { Machine } from "../../TypeAnnotations/Machine";
 import type { ProcessFirstWash } from "../../TypeAnnotations/ProcessFirstWash";
-import { all } from "axios";
+// import { all } from "axios";
 import NumberSpinner from "../NumberSpinner";
-import type StageEndpoint from "../../TypeAnnotations/StageEndpoint";
+// import type StageEndpoint from "../../TypeAnnotations/StageEndpoint";
 import type WetProcessBatch from "../../TypeAnnotations/WetProcessBatch";
 import { StageDispMap } from "../../StageDispMap";
-import { StageMap } from "../../StageMap";
+// import { StageMap } from "../../StageMap";
 import type WetProcessStage from "../../TypeAnnotations/WetProcessStage";
 import { useApiService } from "../genericApiService";
 
-const StyledTableCell = styled(TableCell)(({ theme }) => ({
+const StyledTableCell = styled(TableCell)(({  }) => ({
   [`&.${tableCellClasses.head}`]: {
     // backgroundColor: theme.palette.common.black,
     // backgroundColor: '#485e68',
@@ -33,7 +33,7 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
   },
 }));
 
-const StyledTableRow = styled(TableRow)(({ theme }) => ({
+const StyledTableRow = styled(TableRow)(({  }) => ({
   '&:nth-of-type(odd)': {
     backgroundColor: tbRowColor
   },
@@ -59,12 +59,12 @@ export default function DryerTumbleIn({stage}:WetProcessStage){
     const [hourError,setHourError]=useState(false)
     const [minError,setMinError]=useState(false)
     const [hourminError,setHourMinError]=useState(false)
-    const[showErrorPopup,setShowErrorPopup]=useState(false);
+    // const[showErrorPopup,setShowErrorPopup]=useState(false);
     const batchqrcoderef=useRef<HTMLInputElement>(null);
-    const [machine,setMachine]=useState(0);
+    // const [machine,setMachine]=useState(0);
     const [hour,setHour]=useState(0);
     const [min,setMin]=useState(0);
-    const [machines, setMachines] = useState<number[]>([]);
+    // const [machines, setMachines] = useState<number[]>([]);
     const [batchdetails,setBatchDetails]=useState<any[]>([])
     const [batchNumber,setBatchNumber]=useState(0)
     const [totQty,setTotQty]=useState(0)
@@ -89,7 +89,7 @@ export default function DryerTumbleIn({stage}:WetProcessStage){
     for(let i=1;i<=60;i++){
         mins.push(i);
     }
-    const fetchData = (batchcode: string,machine:number) => {
+    const fetchData = (batchcode: string) => {
         if (!batchcode) {
             console.warn("No Barcode entered");
             return;
@@ -231,7 +231,7 @@ export default function DryerTumbleIn({stage}:WetProcessStage){
                         }
                         
                         else if(error.response.data){
-                            Object.entries(error.response.data).forEach(([key, value]) => {
+                            Object.entries(error.response.data).forEach(([_, value]) => {
                                 if (Array.isArray(value)) {
                                     msg += value[0];
                                 } else {
@@ -428,10 +428,11 @@ export default function DryerTumbleIn({stage}:WetProcessStage){
                     // }
                     const batchcode = batchqrcoderef.current?.value.trim() || "";
                     if(batchcode.length>=15){
-                        fetchData(batchcode,machine);
+                        fetchData(batchcode);
                         batchqrcoderef.current!.value = "";
                     }
                     else{
+                        console.log(showPopup)
                         setShowPopup(false);
                     }
                 }}

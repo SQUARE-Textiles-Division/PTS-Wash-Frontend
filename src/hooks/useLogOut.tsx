@@ -1,21 +1,35 @@
-import axios from "../api/axios";
+// import axios from "../api/axios";
+import useAxiosPrivate from "./useAxiosPrivate";
 import useAuth from "./useAuth";
+// import useRefreshToken from "./useRefreshToken";
 
 
 const useLogOut=()=>{
-    const {auth,setAuth}=useAuth()
+    const {setAuth}=useAuth()
+    const axiosPrivate=useAxiosPrivate()
     // const accessToken=auth.accessToken
+    // if(auth?.accessToken){
+    //     accessToken=auth?.accessToken
+    // }
+    // else{
+    //     const refresh=useRefreshToken()
+    //     const newAccessToken=async ()=>{
+    //         await refresh()
+    //     }
+    //     accessToken=newAccessToken
+    // }
     const logout= async ()=>{
         
         try{
-            const response= await axios.post('/auth/jwt/logout/ ',
+            await axiosPrivate.post('/auth/jwt/logout/ ',
             {},
             {
                 withCredentials:true,
-                 headers: {
-                    Authorization: `JWT ${auth?.accessToken}`,
-                },
+                //  headers: {
+                //     Authorization: `JWT ${accessToken}`,
+                // },
             })
+            // console.log(auth)
             setAuth({})
         }
         catch (err){

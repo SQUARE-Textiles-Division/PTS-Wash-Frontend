@@ -1,4 +1,4 @@
-import type BatchInstance from "./BatchInstance";
+// import type BatchInstance from "./BatchInstance";
 
 export default interface RejectionReason{
     id:number,

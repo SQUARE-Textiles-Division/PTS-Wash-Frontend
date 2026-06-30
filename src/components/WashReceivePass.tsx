@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import type BundleInfo from "../TypeAnnotations/BundleInfo";
+import { useState } from "react";
+// import type BundleInfo from "../TypeAnnotations/BundleInfo";
 import WashReceive from "./WashReceive";
 import ReceivedBundles from "./ReceivedBundles";
 import type IndividualInfo from "../TypeAnnotations/IndividualInfo";

@@ -58,7 +58,7 @@ export default function ProcessRouteBuilder({buyer,style,color,routes,setRoutes}
    const [isSubAddDialogOpen, setIsSubAddDialogOpen] = React.useState(false)
   const [selectedMainType, setSelectedMainType] = React.useState<ProcessType | ''>('')
   const [seletectedSubAddMainIndex,setSelectedSubAddMainIndex]=React.useState<number>(-1)
-  const [seletectedSubAddSubIndex,setSelectedSubAddSubIndex]=React.useState<number>(-1)
+  // const [seletectedSubAddSubIndex,setSelectedSubAddSubIndex]=React.useState<number>(-1)
   const [selectedSubType, setSelectedSubType] = React.useState<SubProcessType | ''>('')
 
   // Dialog State for Editing Main Step
@@ -137,14 +137,14 @@ export default function ProcessRouteBuilder({buyer,style,color,routes,setRoutes}
       return
     }
     
-    let mainfound=false
+    // let mainfound=false
     let subfound=false
     const mainMap=new Map<string,number>()
     let cnt=0
     // const subfound=new Map<string,number>()
     for(const route of routes){
         if(route.type==selectedMainType){
-          mainfound=true
+          // mainfound=true
           // break
           ++cnt
           mainMap.set(selectedMainType,cnt)
@@ -178,10 +178,10 @@ export default function ProcessRouteBuilder({buyer,style,color,routes,setRoutes}
     // else if(mainfound && !subfound){
 
     // }
-    let wetIndex=-1
+    // let wetIndex=-1
     for(let i=routes.length-1;i>=0;i--){
       if(routes[i].type=='Wet Process' ){
-          wetIndex=i
+          // wetIndex=i
           break
       }
     }
@@ -275,11 +275,11 @@ export default function ProcessRouteBuilder({buyer,style,color,routes,setRoutes}
     setRoutes((prev) => prev.filter((_, i) => i !== index))
   }
 
-  const handleOpenEditMain = (step: ProcessNode) => {
+  // const handleOpenEditMain = (step: ProcessNode) => {
     
-    setEditStepId(step.id)
-    setEditMainType(step.type)
-  }
+  //   setEditStepId(step.id)
+  //   setEditMainType(step.type)
+  // }
 
   const handleSaveEditMain = () => {
     setRoutes((prev) => 

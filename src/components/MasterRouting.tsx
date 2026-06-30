@@ -1,16 +1,16 @@
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useState } from "react"
 // import { getData, postData } from "./genericApiService"
 import { useApiService } from "./genericApiService";
-import { Box, Button, FormControl, InputLabel, Menu, MenuItem, Modal, Select, Step, StepLabel, Stepper, Typography } from "@mui/material"
-import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
+import { Box, Button, FormControl, InputLabel, MenuItem, Modal, Select, Typography } from "@mui/material"
+// import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import ProcessRouteBuilder, { type ProcessNode, type ProcessType, type SubProcessType } from "./MasterRoutingStyling";
 import type MasterRoute from "../TypeAnnotations/MasterRoute";
 import { ip, ptsip } from "../ip";
 
-const ALL_STAGES = [
-  "Dry Process",
-  "Wet Process",
-];
+// const ALL_STAGES = [
+//   "Dry Process",
+//   "Wet Process",
+// ];
 
 
 interface Buyer{
@@ -23,7 +23,7 @@ interface Style{
     }[]
     
 }
-interface Color{
+export interface Color{
     colors:string
 }
 
@@ -32,13 +32,13 @@ export function MasterRouting(){
     const [errorMsg,setErrorMsg]=useState<string>("")
     const [saved,setSaved]=useState(false)
     const [routes, setRoutes] = useState<ProcessNode[]>([])
-    const [addAnchorEl, setAddAnchorEl] = useState<HTMLElement | null>(null);
-    const [editAnchorEl, setEditAnchorEl] = useState<HTMLElement | null>(null);
-    const [stageBeingEdited, setStageBeingEdited] = useState<string | null>(null);
-    const [alreadyInPlan,setAlreadyInPlan]=useState<number>(0);
-    const [activeStep, setActiveStep] = useState(0);
-    const [deleteMsg,setDeleteMsg]=useState(false)
-      const [deleteStage,setDeleteStage]=useState<string>('')
+    // const [addAnchorEl, setAddAnchorEl] = useState<HTMLElement | null>(null);
+    // const [editAnchorEl, setEditAnchorEl] = useState<HTMLElement | null>(null);
+    // const [stageBeingEdited, setStageBeingEdited] = useState<string | null>(null);
+    // const [alreadyInPlan,setAlreadyInPlan]=useState<number>(0);
+    // const [activeStep, setActiveStep] = useState(0);
+    // const [deleteMsg,setDeleteMsg]=useState(false)
+    //   const [deleteStage,setDeleteStage]=useState<string>('')
    
     const [buyers,setBuyers]=useState<string[]>([])
     const [colors,setColors]=useState<string[]>([])
@@ -49,11 +49,11 @@ export function MasterRouting(){
     const [selectedBuyer,setSelectedBuyer]=useState<string>("")
     const [selectedStyle,setSelectedStyle]=useState<string>("")
     const [selectedColor,setSelectedColor]=useState<string>("")
-    const wetProcessOptions = ["First Wash", "Second Wash", "Acid Wash"];
-    const [subAddAnchorEl, setSubAddAnchorEl] = useState<null | HTMLElement>(null);
-    const [parentStage, setParentStage] = useState<string>("");
-    const [subEditAnchorEl, setSubEditAnchorEl] = useState<null | HTMLElement>(null);
-    const [editParentStage, setEditParentStage] = useState<string>("");
+    // const wetProcessOptions = ["First Wash", "Second Wash", "Acid Wash"];
+    // const [subAddAnchorEl, setSubAddAnchorEl] = useState<null | HTMLElement>(null);
+    // const [parentStage, setParentStage] = useState<string>("");
+    // const [subEditAnchorEl, setSubEditAnchorEl] = useState<null | HTMLElement>(null);
+    // const [editParentStage, setEditParentStage] = useState<string>("");
     const generateId = () => Math.random().toString(36).substr(2, 9)
     useEffect(() => {
         if (routes?.length > 0) {
@@ -142,6 +142,7 @@ export function MasterRouting(){
                 setRoutes(newRoutes)  
             },
             (error:any)=>{
+                console.log(error)
                 setRoutes([])
             }
          )
@@ -489,7 +490,7 @@ export function MasterRouting(){
                     //     </Menu> */}
                     
                  
-                <Modal open={deleteMsg} onClose={() => setDeleteMsg(false)}>
+                {/* <Modal open={deleteMsg} onClose={() => setDeleteMsg(false)}>
                         <Box
                             sx={{
                             position: "fixed",
@@ -519,7 +520,7 @@ export function MasterRouting(){
                                 </Typography>
                             {/* <Typography>Already batches are allocated according to this plan */}
                             {/* </Typography> */}
-                            <div style={{
+                            {/* <div style={{
                             display:'flex',
                             justifyContent:'space-between'
                             }}>
@@ -530,7 +531,7 @@ export function MasterRouting(){
                             
                             </Box>
                         </Box>
-                </Modal>
+                </Modal> */} 
                 <Modal open={saved} onClose={() => setSaved(false)}>
                           <Box
                               sx={{

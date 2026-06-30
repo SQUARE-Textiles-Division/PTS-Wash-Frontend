@@ -19,9 +19,32 @@ export interface SuccessCallback<T> {
 export interface ErrorCallback {
     (error: AxiosError): void;
 }
+export  const getDataPublic = <T = any>(
+    endpoint: string,
+    hostAddress: string,
+    data: Object = {},
+    params?: QueryParams,
+    onSuccess?: SuccessCallback<T>,
+    onError?: ErrorCallback
+    ): void => {
+        axios
+            .get<T>(`${hostAddress}/${endpoint}`, {
+            data,
+            params, 
+            })
+            .then((response: AxiosResponse<T>) => {
+            if (onSuccess) onSuccess(response.data);
+            })
+            .catch((error: AxiosError) => {
+            console.error(`Error fetching ${endpoint}:`, error);
+            if (onError) onError(error);
+            });
+    };
 export const useApiService = () => {
     const axiosPrivate = useAxiosPrivate();
 
+
+   
     const getData = <T = any>(
     endpoint: string,
     hostAddress: string,

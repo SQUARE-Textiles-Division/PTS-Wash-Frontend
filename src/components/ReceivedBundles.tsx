@@ -6,9 +6,9 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import type { TableRowProps } from '@mui/material/TableRow';
-import { useVirtualizer } from "@tanstack/react-virtual";
+// import { useVirtualizer } from "@tanstack/react-virtual";
 import Paper from '@mui/material/Paper';
-import type BundleInfo from '../TypeAnnotations/BundleInfo';
+// import type BundleInfo from '../TypeAnnotations/BundleInfo';
 import { tbCellColor,tbRowColor } from './Colors/Colors';
 import React from 'react';
 import type IndividualInfo from '../TypeAnnotations/IndividualInfo';
@@ -18,7 +18,7 @@ interface Props {
 }
 
 
-const StyledTableCell = styled(TableCell)(({ theme }) => ({
+const StyledTableCell = styled(TableCell)(({  }) => ({
   [`&.${tableCellClasses.head}`]: {
     // backgroundColor: theme.palette.common.black,
     // backgroundColor: '#485e68',
@@ -35,7 +35,7 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
   },
 }));
 
-const StyledTableRow = styled(TableRow)<TableRowProps>(({ theme }) => ({
+const StyledTableRow = styled(TableRow)<TableRowProps>(({  }) => ({
   // height: '5px', 
   '&:nth-of-type(odd)': {
     backgroundColor: tbRowColor
@@ -74,15 +74,15 @@ export default function ReceivedBundles({ rows }: Props) {
 
   const parentRef = React.useRef<HTMLDivElement | null>(null);
 
-  // 🔥 Virtualizer
-  const rowVirtualizer = useVirtualizer({
-    count: rows.length,
-    getScrollElement: () => parentRef.current,
-    estimateSize: () => 3, // row height
-    overscan: 20
-  });
+  // // 🔥 Virtualizer
+  // const rowVirtualizer = useVirtualizer({
+  //   count: rows.length,
+  //   getScrollElement: () => parentRef.current,
+  //   estimateSize: () => 3, // row height
+  //   overscan: 20
+  // });
 
-  const virtualRows = rowVirtualizer.getVirtualItems();
+  // const virtualRows = rowVirtualizer.getVirtualItems();
   return (
       <TableContainer
         component={Paper}
