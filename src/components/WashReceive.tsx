@@ -10,7 +10,7 @@ import DoneAllIcon from '@mui/icons-material/DoneAll';
 import { ip, ptsip } from "../ip";
 import success from '../assets/success.mp3'
 import type IndividualInfo from "../TypeAnnotations/IndividualInfo";
-import { useApiService } from "./genericApiService";
+import { getDataPublic, useApiService } from "./genericApiService";
 // import useAuth from "../hooks/useAuth";
 
 interface Props {
@@ -19,7 +19,6 @@ interface Props {
 }
 
 export default function WashReceive({items, setItems}: Props){
-    const {getData}=useApiService()
     const {postData}=useApiService()
     // const audioRef = useRef<HTMLAudioElement | null>(null);
     // const [successAlarm,setSuccessAlarm]=useState<boolean>(false)
@@ -35,6 +34,7 @@ export default function WashReceive({items, setItems}: Props){
     // };
     const [showPopup, setShowPopup] = useState(false);
     const [sewingError,setSewingError]=useState(false);
+    const [sewingErrMsg,setSewingErrMsg]=useState("")
     const [saveBarcode,setSaveBarcode]=useState("")
     const[showErrorPopup,setShowErrorPopup]=useState(false);
     const [networkError,setNetworkError]=useState("")
@@ -50,11 +50,11 @@ export default function WashReceive({items, setItems}: Props){
         }
         
 
-        let bundleBarcode = `8220`+barcode.slice(0,12)+`001`;
+        // let bundleBarcode = `8220`+barcode.slice(0,12)+`001`;
         let individualBarcode = barcode
-        barcode = bundleBarcode;
+        barcode = individualBarcode;
         // --- First API call (washing scan) ---
-        getData<BundleInfo>(
+        getDataPublic<BundleInfo>(
             `washing/${barcode}/`,
             ptsip,
             {}, // body, if needed
@@ -120,8 +120,18 @@ export default function WashReceive({items, setItems}: Props){
                 }
                             
                 else{
-                    setSewingError(true)
-                }       
+                        let msg=""
+                        Object.entries(error.response.data).forEach(([_, value]) => {
+                            if (Array.isArray(value)) {
+                                msg += value[0];
+                            } else {
+                                msg += value;
+                            }
+                        });
+                        
+                        setSewingErrMsg(msg)
+                        setSewingError(true)
+                }            
                 
                 console.error("Error in first API:", error);
             }
@@ -288,10 +298,9 @@ export default function WashReceive({items, setItems}: Props){
                             width: 400,
                         }}
                         >
-                        <Typography variant="h6">Sewing Not Completed/Invalid Barcode!!!</Typography>
-                        <Typography>You can not receive this piece before sewing is completed.
-                        </Typography>
-                        <Button sx={{ mt: 2 }} onClick={() => setSewingError(false)}>Close</Button>
+                        <Typography variant="h6">{sewingErrMsg}</Typography>
+                       
+                        <Button sx={{ mt: 2 }} onClick={() => {setSewingError(false);setSewingErrMsg("")}}>Close</Button>
                         </Box>
                     </Box>
                 </Modal>
