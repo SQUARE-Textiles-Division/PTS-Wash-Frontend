@@ -863,6 +863,9 @@ const hasFinalWashRole=finalWashRoles.some(role=>
           ...(auth?.roles?.includes(ROLES.WashReceive)
         ?[{ primary: "Wash Receive", to: "/washreceive" }]
         :[]),
+        ...(auth?.roles?.includes(ROLES.WashReport1)
+        ?[{ primary: "Wash Report 1", to: "/washreport1" }]
+        :[]),
         
         
       ]); // <-- nothing by default

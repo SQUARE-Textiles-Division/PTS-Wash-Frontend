@@ -1,9 +1,12 @@
 // import FirstWashQC from "./components/WetProcess/FirstWashQC"
 
+// import RoleBasedHome from "./components/RoleBasedHome";
+
 
 const ROLES={
   Production:'Production/IE',
   WashReceive:'WashReceive',
+  WashReport1:"WashReport1",
   MasterRouting:'MasterRouting',
 
   BrushIn:'BrushInAuthority',
@@ -214,7 +217,10 @@ export const ROLES_ADD = {
     role: ROLES.Production,
     route: '/planning',
   },
-
+  WashReport1:{
+    role:ROLES.WashReport1,
+    route:'/washreport1'
+  },
   WashReceive: {
     role: ROLES.WashReceive,
     route: '/washreceive',

@@ -1,6 +1,7 @@
 export const NavLinks={
     '/planning':"Dry Process -> Planning",
     '/washreceive':"Wash Receive",
+    '/washreport1':"Wash Report 1",
     '/qceditdel':"Dry Process -> QC Update",
     '/whiskerin':"Dry Process -> Whisker In",
     '/whiskerqc':"Dry Process -> Whisker QC",

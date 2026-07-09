@@ -50,6 +50,7 @@ import Layout from './components/Layout'
 // import RoleBasedHome from './components/RoleBasedHome'
 import PersistLogin from './components/PersisiLogin'
 import RoleBasedHome from './components/RoleBasedHome'
+import WashReport1 from './components/WashReport1'
 
 
 function App() {
@@ -71,6 +72,9 @@ function App() {
               </Route>
               <Route element={ <RequireAuth allowedRoles={[ROLES.WashReceive]}/>}>
                 <Route path="/washreceive" element={<WashReceivePass />} />
+              </Route>
+               <Route element={ <RequireAuth allowedRoles={[ROLES.WashReport1]}/>}>
+                <Route path="/washreport1" element={<WashReport1 />} />
               </Route>
               <Route element={ <RequireAuth allowedRoles={[ROLES.MasterRouting]}/>}>
                 <Route path='/masterroute' element={<MasterRouting/>}/>

@@ -1,6 +1,8 @@
+import type IndividualInfo from "./IndividualInfo";
+
 export default interface IndividualInOut {
     id: number;
-    garment_unit: string;
+    garment_unit: IndividualInfo;
     stage: string;
     action: string;
     rejection_reason: string;
