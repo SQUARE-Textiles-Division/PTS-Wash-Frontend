@@ -1,4 +1,11 @@
 export const DryProcess=[
+    //Wash Receive
+    {
+        'Display':'WASH RECEIVE',
+        'stage':'',
+        'action':''
+    },
+    
     //IN PROCESS
    {
         'Display':'WHISKER IN',

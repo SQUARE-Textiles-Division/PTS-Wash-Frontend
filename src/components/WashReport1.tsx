@@ -11,14 +11,29 @@ import dayjs from 'dayjs';
 import { DryProcess } from "../DryProcessActions";
 import type IndividualInOut from "../TypeAnnotations/IndividualInOut";
 import { ip } from "../ip";
+import type IndividualInfo from "../TypeAnnotations/IndividualInfo";
 
+interface Row{
+    mpo:string,
+    marker:string,
+    individual_barcode:string,
+    buyer:string,
+    style:string,
+    so:string,
+    size:string,
+    shade:string,
+    color:string,
+}
 
 interface Params {
+  mpo?:string,
   garment_unit__mpo?: string;
   stage?: string;
   action?: string;
   scanned_at__gte?:string,
   scanned_at__lte?:string,
+  received_at__gte?:string,
+  received_at__lte?:string
 }
 const StyledTableCell = styled(TableCell)(({  }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -199,61 +214,97 @@ export default function WashReport1(){
                 onClick={()=>{
                     // setRows([])
                     const param_obj: Params = {};
-                    if(mpo!=""){
-                        param_obj.garment_unit__mpo=mpo
-                    }
                     if(tracking){
-                        param_obj.action=tracking.action
-                        param_obj.stage=tracking.stage
-                    }
-                    if(date){
-                        param_obj.scanned_at__gte=`${date}T00:00`
-                        param_obj.scanned_at__lte=`${date}T23:59`
-                    }
-                    // console.log(date,' Mpo ',mpo,'Tracking ',tracking)
-                    // console.log(date)
-                    getData<IndividualInOut[]>(
-                       `dry-process/tracking-histories/`,
-                        ip,
-                        {},
-                        param_obj,
-                        (reportRes:IndividualInOut[])=>{
-                            console.log(reportRes)
-                            let resObj=[{
-                                mpo:"",
-                                marker:"",
-                                individual_barcode:"",
-                                buyer:"",
-                                style:"",
-                                so:"",
-                                size:"",
-                                shade:"",
-                                color:"",
-                            }]
-                            if(reportRes.length==0){
-                                setRows([])
-                                return
+                            
+                            if(tracking.stage!=''){
+                                param_obj.action=tracking.action
+                                param_obj.stage=tracking.stage
+                                if(mpo!=""){
+                                    param_obj.garment_unit__mpo=mpo
+                                }
+                                if(date){
+                                    param_obj.scanned_at__gte=`${date}T00:00`
+                                    param_obj.scanned_at__lte=`${date}T23:59`
+                                }
+                                getData<IndividualInOut[]>(
+                                    `dry-process/tracking-histories/`,
+                                        ip,
+                                        {},
+                                        param_obj,
+                                        (reportRes:IndividualInOut[])=>{
+                                            console.log(reportRes)
+                                            let resObj:Row[]=[]
+                                            if(reportRes.length==0){
+                                                setRows([])
+                                                return
+                                            }
+                                            for(const obj of reportRes){
+                                                const garment=obj.garment_unit
+                                                resObj.push({
+                                                mpo: garment.mpo,
+                                                marker: garment.marker,
+                                                individual_barcode: garment.individual_barcode,
+                                                buyer: garment.buyer,
+                                                style: garment.style,
+                                                so: garment.so,
+                                                size: garment.size,
+                                                shade: garment.shade,
+                                                color: garment.color,
+                                                });
+                                            }
+                                            console.log('Response len ',resObj.length)
+                                            setRows(resObj)
+                                        },
+                                        (error:any)=>{
+                                            console.log(error)
+                                        }
+                                    )
                             }
-                            for(const obj of reportRes){
-                                const garment=obj.garment_unit
-                                resObj.push({
-                                mpo: garment.mpo,
-                                marker: garment.marker,
-                                individual_barcode: garment.individual_barcode,
-                                buyer: garment.buyer,
-                                style: garment.style,
-                                so: garment.so,
-                                size: garment.size,
-                                shade: garment.shade,
-                                color: garment.color,
-                                });
+                            else{
+                                // param_obj.status=tracking.status
+                                if(mpo!=""){
+                                    param_obj.mpo=mpo
+                                }
+                                if(date){
+                                    param_obj.received_at__gte=`${date}T00:00`
+                                    param_obj.received_at__lte=`${date}T23:59`
+                                }
+                                getData<IndividualInfo[]>(
+                                    `common/garment-units/`,
+                                        ip,
+                                        {},
+                                        param_obj,
+                                        (reportRes:IndividualInfo[])=>{
+                                            console.log(reportRes)
+                                            let resObj:Row[]=[]
+                                            if(reportRes.length==0){
+                                                setRows([])
+                                                return
+                                            }
+                                            for(const obj of reportRes){
+                                                const garment=obj
+                                                resObj.push({
+                                                mpo: garment.mpo,
+                                                marker: garment.marker,
+                                                individual_barcode: garment.individual_barcode,
+                                                buyer: garment.buyer,
+                                                style: garment.style,
+                                                so: garment.so,
+                                                size: garment.size,
+                                                shade: garment.shade,
+                                                color: garment.color,
+                                                });
+                                            }
+                                            console.log('Response len ',resObj.length)
+                                            setRows(resObj)
+                                        },
+                                        (error:any)=>{
+                                            console.log(error)
+                                        }
+                                    )
                             }
-                            setRows(resObj)
-                        },
-                        (error:any)=>{
-                            console.log(error)
+                            
                         }
-                    )
                 }}
                         
                 >Get Report</Button>
